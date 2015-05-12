@@ -10,7 +10,9 @@ from umd import system
 
 
 class InfoModel(object):
-    def __init__(self, pkgtool):
+    def __init__(self, pkgtool, cfgtool):
+        self.cfgtool = cfgtool
+
         pkgtool.install(pkgs=["glue-validator"])
         if system.distro_version == "redhat5":
             pkgtool.install(pkgs="openldap-clients")
@@ -86,6 +88,10 @@ class InfoModel(object):
         qc_step = QCStep("QC_INFO_1",
                          "GlueSchema 1.3 Support",
                          os.path.join(CFG["log_path"], "qc_info_1"))
+
+        if not self.cfgtool.has_run:
+            self.cfgtool.run(qc_step)
+
         self._run_validator(qc_step, "glue1")
 
     def qc_info_2(self):
@@ -93,6 +99,10 @@ class InfoModel(object):
         qc_step = QCStep("QC_INFO_2",
                          "GlueSchema 2.0 Support",
                          os.path.join(CFG["log_path"], "qc_info_2"))
+
+        if not self.cfgtool.has_run:
+            self.cfgtool.run(qc_step)
+
         self._run_validator(qc_step, "glue2")
 
     def qc_info_3(self):
@@ -100,6 +110,10 @@ class InfoModel(object):
         qc_step = QCStep("QC_INFO_3",
                          "Middleware Version Information",
                          os.path.join(CFG["log_path"], "qc_info_3"))
+
+        if not self.cfgtool.has_run:
+            self.cfgtool.run(qc_step)
+
         r, msg = self._run_version_check(qc_step)
         if r:
             qc_step.print_result("OK", msg)

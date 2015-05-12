@@ -77,7 +77,8 @@ class Deploy(Task):
                  self.exceptions).run(*args, **kwargs)
 
     def _infomodel(self, *args, **kwargs):
-        InfoModel(self.pkgtool).run(*args, **kwargs)
+        InfoModel(self.pkgtool,
+                  self.cfgtool).run(*args, **kwargs)
 
     def _validate(self, *args, **kwargs):
         Validate().run(self.qc_specific_id, *args, **kwargs)
