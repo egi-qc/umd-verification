@@ -1,33 +1,33 @@
 argus:
     qc_func_1:
         - test: "bin/certs/check-cert"
-            description: "Check whether the certificate is up-to-date."
-            user: "umd"
-            args: "/etc/grid-security/hostcert.pem"
+          description: "Check whether the certificate is up-to-date."
+          user: "umd"
+          args: "/etc/grid-security/hostcert.pem"
     qc_func_2:
         - test: "bin/argus/testsuites.sh"
-            description: "Argus certification tests."
+          description: "Argus certification tests."
 
 cream:
     qc_func_1:
         - test: "bin/cream/"
-            description: "CREAM rele"
+          description: "CREAM rele"
         - test: "bin/certs/check-cert"
-            description: "Check whether the certificate is up-to-date."
-            user: "umd"
-            args: "/etc/grid-security/hostcert.pem"
+          description: "Check whether the certificate is up-to-date."
+          user: "umd"
+          args: "/etc/grid-security/hostcert.pem"
 
 storm:
     qc_func_1:
         - test: "bin/user_creds"
-            description: "Create myproxy for ops.vo.ibergrid.eu VO."
-            user: "umd"
+          description: "Create myproxy for ops.vo.ibergrid.eu VO."
+          user: "umd"
         - test: "bin/storm"
-            description: "SRM client probes."
-            user: "umd"
+          description: "SRM client probes."
+          user: "umd"
 
 ui:
     qc_func_1: 
         - test: "bin/user_creds"
-            description: "Create myproxy for ops.vo.ibergrid.eu VO."
-            user: "umd"
+          description: "Create myproxy for ops.vo.ibergrid.eu VO."
+          user: "umd"
