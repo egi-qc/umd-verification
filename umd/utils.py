@@ -11,6 +11,7 @@ from fabric.context_managers import lcd
 from umd import exception
 from umd import system
 from umd.api import info
+from umd.api import fail
 
 
 def to_list(obj):
@@ -32,25 +33,28 @@ def to_file(r, logfile):
         with open(fname, 'a') as f:
             f.write(msg)
             f.flush()
+
     l = []
-    if isinstance(r, str):  # exception
+    if r.stdout:
         _fname = '.'.join([logfile, "stdout"])
-        _write(_fname, r)
+        _write(_fname, r.stdout)
         l.append(_fname)
-    else:
-        if r.stdout:
-            _fname = '.'.join([logfile, "stdout"])
-            _write(_fname, r.stdout)
-            l.append(_fname)
-        if r.stderr:
-            _fname = '.'.join([logfile, "stderr"])
-            _write(_fname, r.stderr)
-            l.append(_fname)
+    if r.stderr:
+        _fname = '.'.join([logfile, "stderr"])
+        _write(_fname, r.stderr)
+        l.append(_fname)
 
     return l
 
 
-def runcmd(cmd, chdir=None, fail_check=True, logfile=None):
+def format_error_msg(logs, cmd=None):
+    msg = "See more information in logs (%s)." % ','.join(logs)
+    if cmd:
+        msg = ' '.join(["Error while executing command '%s'.", msg])
+    return msg
+
+
+def runcmd(cmd, chdir=None, fail_check=True, logfile=None, stderr_to_stdout=False):
     """Runs a generic command.
             cmd: command to execute.
             chdir: local directory to run the command from.
@@ -58,6 +62,9 @@ def runcmd(cmd, chdir=None, fail_check=True, logfile=None):
                 interrupted in case of failure.
             logfile: file to log the command execution.
     """
+    if stderr_to_stdout:
+        cmd = ' '.join([cmd, "2>&1"])
+
     if chdir:
         with lcd(chdir):
             with settings(warn_only=True):
@@ -70,17 +77,15 @@ def runcmd(cmd, chdir=None, fail_check=True, logfile=None):
     if logfile:
         logs = to_file(r, logfile)
 
-    if fail_check:
-        if r.failed:
-            msg = "Error while executing command '%s'."
-            if logs:
-                msg = ' '.join([msg, "See more information in logs (%s)."
-                                     % ','.join(logs)])
-            abort(red(msg % cmd))
-            # raise exception.ExecuteCommandException(("Error found while "
-            #                                          "executing command: "
-            #                                          "'%s' (Reason: %s)"
-            #                                          % (cmd, r.stderr)))
+    if r.failed:
+        msg = format_error_msg(logs, cmd)
+        if fail_check:
+            abort(fail(msg % cmd))
+        else:
+            fail(msg % cmd)
+
+    if logs:
+        return r, logs
     return r
 
 

@@ -78,7 +78,7 @@ class Validate(object):
 
             cmd = "./%s" % " ".join([f, args])
             if user:
-                cmd = ' '.join(["su %s -c" % user, cmd])
+                cmd = "su %s -c \"%s\"" % (user, cmd)
 
             cmd_failed = False
             if not self._is_executable(f):
@@ -87,12 +87,11 @@ class Validate(object):
             else:
                 self._handle_user(qc_step, user)
                 with shell_env(**self.qc_envvars):
-                    r = qc_step.runcmd(cmd, fail_check=False)
+                    r = qc_step.runcmd(cmd, fail_check=False, stderr_to_stdout=True)
                     if r.failed:
                         failed_checks.append(cmd)
                     else:
-                        info("Command '%s' ended OK with result: %s"
-                             % (cmd, result))
+                        info("Command '%s' ran successfully" % cmd)
 
         return failed_checks
 

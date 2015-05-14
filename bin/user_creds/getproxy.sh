@@ -1,4 +1,10 @@
-#!/bin/sh -e
+#!/bin/sh -eu
+
+## Requirements:
+##      A myproxy already stored in MYPROXY_SERVER with user and passphrase credentials. E.g.:
+##
+##              echo $MYPROXY_PASSWD | myproxy-init -S -l $MYPROXY_USER -s $MYPROXY_SERVER -m $VO
+##
 
 # ops.vo.ibergrid.eu configuration
 mkdir -p ~/.voms

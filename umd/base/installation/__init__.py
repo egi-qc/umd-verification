@@ -1,4 +1,3 @@
-
 import os.path
 import shutil
 
@@ -17,21 +16,33 @@ class Install(object):
                                   qc_step,
                                   repository_url,
                                   download_dir="/tmp/repofiles"):
-        r = qc_step.runcmd("wget -P %s -r -l1 --no-parent -A.repo %s"
+        """Downloads the repofiles found in the given URL.
+
+           Note: repofiles can be found (typo?) without the ".repo" extension.
+        """
+        qc_step.runcmd("rm -rf %s/*" % download_dir, fail_check=False)
+        r = qc_step.runcmd("wget -P %s -r -l1 --no-parent -R*.html* %s"
                            % (download_dir,
                               os.path.join(repository_url, "repofiles")))
         if r.failed:
             qc_step.print_result("FAIL",
                                  "Error retrieving verification repofile.",
                                  do_abort=True)
+
         repofiles = []
         for path in os.walk(download_dir):
-            if path[-1]:
-                repofiles = [os.path.join(path[0], f) for f in path[-1]]
+            if os.path.basename(path[0]) == "repofiles":
+                if path[-1]:
+                    repofiles.extend([os.path.join(path[0], f)
+                                      for f in path[-1]])
         if repofiles:
             repopath = self.pkgtool.get_path()
             for f in repofiles:
-                shutil.copy2(f, repopath)
+                repofile = os.path.basename(f)
+                if not repofile.endswith(".repo"):
+                    repofile = '.'.join([repofile, "repo"])
+                shutil.copy2(f, os.path.join(repopath, repofile))
+                info("Verification repository '%s' enabled." % repofile)
 
     def run(self,
             installation_type,
@@ -55,7 +66,8 @@ class Install(object):
                              "Binary Distribution",
                              "/tmp/qc_inst_1")
 
-        r = qc_step.runcmd(self.pkgtool.remove("epel-release* umd-release*"))
+        r = qc_step.runcmd(self.pkgtool.remove(["epel-release*",
+                                                "umd-release*"]))
         if r.failed:
             info("Could not delete [epel/umd]-release packages.")
 
@@ -88,12 +100,7 @@ class Install(object):
         if installation_type == "update":
             # 1) Install base (production) version
             r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
-            if r.failed:
-                qc_step.print_result("FAIL",
-                                     "Error while installing '%s' packages"
-                                     % self.metapkg,
-                                     do_abort=True)
-            else:
+            if not r.failed:
                 info("UMD product/s '%s' installation finished."
                      % self.metapkg)
 
@@ -104,12 +111,7 @@ class Install(object):
 
             # 3) Update
             r = qc_step.runcmd(self.pkgtool.update())
-            if r.failed:
-                qc_step.print_result("FAIL",
-                                     ("Error updating from verification "
-                                      "repository."),
-                                     do_abort=True)
-            else:
+            if not r.failed:
                 qc_step.print_result("OK",
                                      msg="System successfully updated.")
         elif installation_type == "install":
@@ -121,12 +123,7 @@ class Install(object):
             # 2) Install verification version
             r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
             # NOTE(orviz): missing WARNING case
-            if r.failed:
-                qc_step.print_result("FAIL",
-                                     ("There was a failure installing "
-                                      "metapackage '%s'." % self.metapkg),
-                                     do_abort=True)
-            else:
+            if not r.failed:
                 qc_step.print_result("OK",
                                      ("Metapackage '%s' installed "
                                       "successfully.." % self.metapkg))
