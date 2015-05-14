@@ -1,6 +1,7 @@
 import os.path
 
 from umd.api import runcmd
+from umd.base import utils as butils
 from umd import exception
 from umd import system
 
@@ -43,6 +44,7 @@ class PkgTool(object):
     def _exec(self, action, pkgs=None):
         try:
             if pkgs:
+                pkgs = butils.to_list(pkgs)
                 return self.PKGTOOL[system.distname](action, pkgs)
             else:
                 return self.PKGTOOL[system.distname](action)
