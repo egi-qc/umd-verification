@@ -10,7 +10,7 @@ def info(msg):
 
 def fail(msg):
     """Prints info/debug logs."""
-    abort("[%s] %s" % (red("FAIL"), msg))
+    puts("[%s] %s" % (red("FAIL"), msg))
 
 
 def ok(msg):

@@ -1,4 +1,6 @@
 import tempfile
+
+from fabric.api import abort
 from fabric.api import env
 from fabric.api import local
 from fabric.context_managers import lcd
@@ -52,8 +54,8 @@ class YaimConfig(object):
                     local("/opt/glite/yaim/bin/yaim -c -s %s -n %s"
                           % (f.name, " -n ".join(self.nodetype)))
                 except exception.ConfigException:
-                    fail(("YAIM execution failed. Check the logs at "
-                          "'/opt/glite/yaim/log/yaimlog'."))
+                    abort(fail(("YAIM execution failed. Check the logs at "
+                                "'/opt/glite/yaim/log/yaimlog'.")))
                 info("YAIM configuration ran successfully.")
                 env.abort_exception = abort_exception_default
 
