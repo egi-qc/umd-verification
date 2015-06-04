@@ -81,8 +81,7 @@ class Validate(object):
 
             cmd_failed = False
             if not self._is_executable(f):
-                result = ("Could not run check '%s': file is not "
-                          "executable" % f)
+                info("Could not run check '%s': file is not executable" % f)
                 cmd_failed = True
             else:
                 self._handle_user(qc_step, user)
