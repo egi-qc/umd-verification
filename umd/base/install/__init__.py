@@ -36,7 +36,7 @@ class Install(object):
             installation_type,
             epel_release_url,
             umd_release_url,
-            repository_url=None,
+            repository_url=[],
             **kwargs):
         """Runs UMD installation.
 
@@ -45,8 +45,7 @@ class Install(object):
                                    update ('update')
                 epel_release_url: EPEL release (URL).
                 umd_release_url : UMD release (URL).
-                repository_url: base repository URL
-                                (with the verification stuff).
+                repository_url: verification repository URL (multiple allowed).
         """
         if installation_type == "update":
             qc_step = QCStep("QC_UPGRADE_1", "Upgrade", "/tmp/qc_upgrade_1")
@@ -98,9 +97,9 @@ class Install(object):
                      % self.metapkg)
 
             # 2) Enable verification repository
-            if repository_url:
-                info("Verification repository provided.")
-                self._enable_verification_repo(qc_step, repository_url)
+            for url in repository_url:
+                self._enable_verification_repo(qc_step, url)
+                info("Verification repository '%s' enabled." % url)
 
             # 3) Update
             r = self.pkgtool.update()
@@ -114,9 +113,9 @@ class Install(object):
                                      msg="System successfully updated.")
         elif installation_type == "install":
             # 1) Enable verification repository
-            if repository_url:
-                info("Verification repository provided.")
-                self._enable_verification_repo(qc_step, repository_url)
+            for url in repository_url:
+                self._enable_verification_repo(qc_step, url)
+                info("Verification repository '%s' enabled." % url)
 
             # 2) Install verification version
             r = self.pkgtool.install(self.metapkg)

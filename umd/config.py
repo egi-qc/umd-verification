@@ -15,7 +15,14 @@ class ConfigDict(dict):
 
     def update(self, d):
         for k, v in d.items():
-            self.__setitem__(k, v)
+            if k.startswith("repository_url"):
+                l = self.__getitem__("repository_url")
+                if l:
+                    self.__setitem__("repository_url", l.append(v))
+                else:
+                    self.__setitem__("repository_url", [v])
+            else:
+                self.__setitem__(k, v)
 
 
 DEFAULTS = load_defaults()
