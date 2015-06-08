@@ -1,6 +1,5 @@
 import os.path
 
-from umd.base.installation import utils as inst_utils
 from umd.base.security import utils as sec_utils
 from umd.base.utils import QCStep
 from umd.config import CFG
@@ -8,7 +7,6 @@ from umd.config import CFG
 
 class Security(object):
     def __init__(self, cfgtool, need_cert, ca, exceptions):
-        self.pkgtool = inst_utils.PkgTool()
         self.cfgtool = cfgtool
         self.need_cert = need_cert
         self.ca = ca
