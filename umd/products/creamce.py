@@ -1,4 +1,5 @@
 from umd.api import info
+from umd.api import install
 from umd.base import Deploy
 
 
@@ -13,7 +14,7 @@ class CreamCEStandalone(Deploy):
     def pre_config(self):
         info("PRE-config actions.")
 
-        self.pkgtool.install(pkgs="sudo")
+        install(pkgs="sudo")
 
         info("<sudo> package installed.")
         info("END of PRE-config actions.")
@@ -26,7 +27,7 @@ class CreamCEGridengine(Deploy):
     def pre_config(self):
         info("PRE-config actions.")
 
-        self.pkgtool.install(pkgs=["sudo", "gridengine", "gridengine-qmaster"])
+        install(pkgs=["sudo", "gridengine", "gridengine-qmaster"])
 
         info(("<sudo>, <gridengine> and <gridengine-qmaster> packages "
               "installed."))
