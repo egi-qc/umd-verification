@@ -7,6 +7,8 @@ from fabric.api import settings
 from fabric.colors import red
 from fabric.context_managers import lcd
 
+from umd.base.install import utils as inst_utils
+
 
 def to_file(r, logfile):
     """Writes Fabric capture result to the given file."""
@@ -83,3 +85,8 @@ def runcmd(cmd, chdir=None, fail_check=True, logfile=None):
             #                                          "'%s' (Reason: %s)"
             #                                          % (cmd, r.stderr)))
     return r
+
+def install(pkgs):
+    """Shortcut for package installations."""
+    pkgtool = inst_utils.PkgTool()
+    return runcmd(pkgtool.install(pkgs))
