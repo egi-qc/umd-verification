@@ -5,11 +5,12 @@ import shutil
 from umd.api import info
 from umd import exception
 from umd.base.utils import QCStep
+from umd.utils import PkgTool
 
 
 class Install(object):
-    def __init__(self, pkgtool, metapkg):
-        self.pkgtool = pkgtool
+    def __init__(self, metapkg):
+        self.pkgtool = PkgTool()
         self.metapkg = metapkg
 
     def _enable_verification_repo(self,
@@ -55,7 +56,7 @@ class Install(object):
                              "Binary Distribution",
                              "/tmp/qc_inst_1")
 
-        r = self.pkgtool.remove(pkgs=["epel-release*", "umd-release*"])
+        r = qc_step.runcmd(self.pkgtool.remove("epel-release* umd-release*"))
         if r.failed:
             info("Could not delete [epel/umd]-release packages.")
 
@@ -71,7 +72,7 @@ class Install(object):
             if qc_step.runcmd("wget %s -O %s" % (pkg_url, pkg_loc)):
                 info("%s release RPM fetched from %s." % (pkg_id, pkg_url))
 
-            r = self.pkgtool.install(pkgs=[pkg_loc])
+            r = qc_step.runcmd(self.pkgtool.install(pkg_loc))
             if r.failed:
                 qc_step.print_result("FAIL",
                                      "Error while installing %s release."
@@ -79,7 +80,7 @@ class Install(object):
             else:
                 info("%s release package installed." % pkg_id)
 
-        r = self.pkgtool.install(pkgs=["yum-priorities"])
+        r = qc_step.runcmd(self.pkgtool.install("yum-priorities"))
         if r.failed:
             info("Error while installing 'yum-priorities'.")
         else:
@@ -87,7 +88,7 @@ class Install(object):
 
         if installation_type == "update":
             # 1) Install base (production) version
-            r = self.pkgtool.install(pkgs=[self.metapkg])
+            r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
             if r.failed:
                 qc_step.print_result("FAIL",
                                      "Error while installing '%s' packages"
@@ -103,7 +104,7 @@ class Install(object):
                 self._enable_verification_repo(qc_step, repository_url)
 
             # 3) Update
-            r = self.pkgtool.update()
+            r = qc_step.runcmd(self.pkgtool.update())
             if r.failed:
                 qc_step.print_result("FAIL",
                                      ("Error updating from verification "
@@ -119,7 +120,7 @@ class Install(object):
                 self._enable_verification_repo(qc_step, repository_url)
 
             # 2) Install verification version
-            r = self.pkgtool.install(self.metapkg)
+            r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
             # NOTE(orviz): missing WARNING case
             if r.failed:
                 qc_step.print_result("FAIL",
