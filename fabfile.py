@@ -9,8 +9,8 @@ from umd.products.storm import *
 output.status = False
 output.stdout = False
 output.warnings = False
-output.running = False
-output.user = False
+output.running = True
+output.user = True
 output.stderr = False
 output.aborts = False
 output.debug = False

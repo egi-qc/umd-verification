@@ -1,9 +1,9 @@
 from fabric.tasks import Task
 
+from umd.utils import install
 from umd.base.configure import YaimConfig
 from umd.base.infomodel import InfoModel
-from umd.base.install import Install
-from umd.base.install import utils as inst_utils
+from umd.base.installation import Install
 from umd.base.security import Security
 from umd.base import utils
 from umd.base.validate import Validate
@@ -43,7 +43,6 @@ class Deploy(Task):
         self.siteinfo = siteinfo
         self.qc_specific_id = qc_specific_id
         self.exceptions = exceptions
-        self.pkgtool = None
         self.cfgtool = None
         self.ca = None
 
@@ -66,18 +65,16 @@ class Deploy(Task):
         pass
 
     def _install(self, *args, **kwargs):
-        Install(self.pkgtool,
-                self.metapkg).run(*args, **kwargs)
+        Install(self.metapkg).run(*args, **kwargs)
 
     def _security(self, *args, **kwargs):
-        Security(self.pkgtool,
-                 self.cfgtool,
+        Security(self.cfgtool,
                  self.need_cert,
                  self.ca,
                  self.exceptions).run(*args, **kwargs)
 
     def _infomodel(self, *args, **kwargs):
-        InfoModel(self.pkgtool).run(*args, **kwargs)
+        InfoModel().run(*args, **kwargs)
 
     def _validate(self, *args, **kwargs):
         Validate().run(self.qc_specific_id, *args, **kwargs)
@@ -114,9 +111,6 @@ class Deploy(Task):
         # Update configuration
         CFG.update(kwargs)
 
-        # Packaging tool
-        self.pkgtool = inst_utils.PkgTool()
-
         # Configuration tool
         if self.nodetype and self.siteinfo:
             self.cfgtool = YaimConfig(self.nodetype,
@@ -129,9 +123,7 @@ class Deploy(Task):
 
         # Certification Authority
         if self.need_cert:
-            self.pkgtool.install(
-                pkgs=["ca-policy-egi-core"],
-                repofile=CFG["igtf_repo"])
+            install("ca-policy-egi-core", repofile=CFG["igtf_repo"])
             self.ca = utils.OwnCA(
                 domain_comp_country="es",
                 domain_comp="UMDverification",

@@ -1,8 +1,9 @@
 import pwd
 
 from umd.api import info
-from umd.api import runcmd
 from umd.base import Deploy
+from umd.utils import install
+from umd.utils import runcmd
 
 
 class StormDeploy(Deploy):
@@ -43,7 +44,7 @@ class StormDeploy(Deploy):
     def pre_config(self):
         info("PRE-config actions.")
 
-        self.pkgtool.install(pkgs=["ntp"])
+        install("ntp")
         info("<ntp> installed.")
 
         runcmd("mount -o remount,acl,user_xattr /")
@@ -54,7 +55,7 @@ class StormDeploy(Deploy):
     def pre_validate(self):
         info("PRE-validate actions.")
 
-        self.pkgtool.install(pkgs=self.pre_validate_pkgs)
+        install(self.pre_validate_pkgs)
         info("<%s> installed." % ", ".join(self.pre_validate_pkgs))
 
         info("END of PRE-validate actions.")
