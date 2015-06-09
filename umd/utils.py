@@ -3,6 +3,8 @@ import os.path
 from fabric.api import abort
 from fabric.api import local
 from fabric.api import settings
+from fabric.colors import blue
+from fabric.colors import green
 from fabric.colors import red
 from fabric.context_managers import lcd
 
@@ -132,3 +134,48 @@ def install(pkgs, repofile=None):
     """Shortcut for package installations."""
     pkgtool = PkgTool()
     return runcmd(pkgtool.install(pkgs, repofile))
+
+
+def show_exec_banner(cfgdict, qc_envvars):
+        """Displays execution banner."""
+        cfg = cfgdict.copy()
+
+        print(u'\n\u250C %s ' % green(" UMD verification app") + u'\u2500'*49 + u'\u2510')
+        print(u'\u2502' + u' '*72 + u'\u2502')
+        print(u'\u2502%s %s' % ("Quality criteria:".rjust(25), blue("http://egi-qc.github.io"))+ u' '*23 + u'\u2502')
+        print(u'\u2502%s %s' % ("Codebase:".rjust(25), blue("https://github.com/egi-qc/umd-verification")) + u' '*4 + u'\u2502')
+        print(u'\u2502' + u' '*72 + u'\u2502')
+        print(u'\u2502' + u' '*7+ u'\u2500'*65 + u'\u2518')
+
+        print(u'\u2502' + u' '*72)
+        if "repository_url" in cfg.keys():
+            print(u'\u2502 Verification repositories used:')
+            repos = to_list(cfg.pop("repository_url"))
+            for repo in repos:
+                print(u'\u2502\t%s' % blue(repo))
+
+        print(u'\u2502')
+        print(u'\u2502 Repository basic configuration:')
+        basic_repo = ["epel_release", "umd_release", "igtf_repo"]
+        for k in basic_repo:
+            v = cfg.pop(k)
+            leftjust = len(max(basic_repo, key=len))+5
+            print(u'\u2502\t%s %s' % (k.ljust(leftjust), blue(v)))
+
+        print(u'\u2502')
+        print(u'\u2502 Path locations:')
+        for k in ["log_path", "yaim_path"]:
+            v = cfg.pop(k)
+            leftjust = len(max(basic_repo, key=len))+5
+            print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
+
+        if qc_envvars:
+            print(u'\u2502')
+            print(u'\u2502 Local environment variables passed:')
+            leftjust = len(max(qc_envvars, key=len))+5
+            for k, v in qc_envvars.items():
+                cfg.pop("qcenv_%s" % k)
+                print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
+
+        print(u'\u2502')
+        print(u'\u2514' + u'\u2500'*72)

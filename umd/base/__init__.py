@@ -1,6 +1,5 @@
 from fabric.tasks import Task
 
-from umd.utils import install
 from umd.base.configure import YaimConfig
 from umd.base.infomodel import InfoModel
 from umd.base.installation import Install
@@ -9,6 +8,8 @@ from umd.base import utils
 from umd.base.validate import Validate
 from umd.config import CFG
 from umd import exception
+from umd.utils import install
+from umd.utils import show_exec_banner
 
 
 class Deploy(Task):
@@ -108,8 +109,10 @@ class Deploy(Task):
             qcenv_*
                 Pass environment variables needed by the QC specific checks.
         """
-        # Update configuration
+        # Update & show configuration
         CFG.update(kwargs)
+        qc_envvars = self._get_qc_envvars(kwargs)
+        show_exec_banner(CFG, qc_envvars)
 
         # Configuration tool
         if self.nodetype and self.siteinfo:
@@ -145,7 +148,6 @@ class Deploy(Task):
         self._infomodel()
 
         # QC_FUNC
-        qc_envvars = self._get_qc_envvars(kwargs)
         self.pre_validate()
         self._validate(qc_envvars)
         self.post_validate()
