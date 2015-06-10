@@ -118,8 +118,8 @@ class Deploy(Task):
                                       CFG["yaim_path"],
                                       pre_config=self.pre_config,
                                       post_config=self.post_config)
-        else:
-            raise exception.ConfigException("Configuration not implemented.")
+        #else:
+        #    raise exception.ConfigException("Configuration not implemented.")
 
         # Certification Authority
         if self.need_cert:
