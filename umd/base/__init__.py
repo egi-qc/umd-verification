@@ -19,6 +19,7 @@ class Deploy(Task):
                  doc=None,
                  metapkg=[],
                  need_cert=False,
+                 has_infomodel=True,
                  nodetype=[],
                  siteinfo=[],
                  qc_specific_id=None,
@@ -28,6 +29,8 @@ class Deploy(Task):
                 doc: docstring that will appear when typing `fab -l`.
                 metapkg: list of UMD metapackages to install.
                 need_cert: whether installation type requires a signed cert.
+                has_infomodel: whether the product publishes information
+                               about itself.
                 nodetype: list of YAIM nodetypes to be configured.
                 siteinfo: list of site-info files to be used.
                 qc_specific_id: ID that match the list of QC-specific checks
@@ -40,6 +43,7 @@ class Deploy(Task):
             self.__doc__ = doc
         self.metapkg = metapkg
         self.need_cert = need_cert
+        self.has_infomodel = has_infomodel
         self.nodetype = nodetype
         self.siteinfo = siteinfo
         self.qc_specific_id = qc_specific_id
@@ -75,7 +79,8 @@ class Deploy(Task):
                  self.exceptions).run(*args, **kwargs)
 
     def _infomodel(self, *args, **kwargs):
-        InfoModel().run(*args, **kwargs)
+        InfoModel(self.cfgtool,
+                  self.has_infomodel).run(*args, **kwargs)
 
     def _validate(self, *args, **kwargs):
         Validate().run(self.qc_specific_id, *args, **kwargs)

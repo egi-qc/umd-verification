@@ -10,7 +10,37 @@ from umd.utils import to_file
 from umd.utils import install
 
 
+def bdii_support(f):
+    def _support(self, *args, **kwargs):
+        if f.func_name == "qc_info_1":
+            qc_step = QCStep("QC_INFO_1",
+                             "GlueSchema 1.3 Support",
+                             os.path.join(CFG["log_path"], "qc_info_1"))
+        elif f.func_name == "qc_info_2":
+            qc_step = QCStep("QC_INFO_2",
+                             "GlueSchema 2.0 Support",
+                             os.path.join(CFG["log_path"], "qc_info_2"))
+        elif f.func_name == "qc_info_3":
+            qc_step = QCStep("QC_INFO_3",
+                             "Middleware Version Information",
+                             os.path.join(CFG["log_path"], "qc_info_3"))
+
+        if self.has_infomodel:
+            if not self.cfgtool.has_run:
+                self.cfgtool.run(qc_step)
+            return f(*args, **kwargs)
+
+        qc_step.print_result("NA", ("Product does not publish information "
+                                    "through BDII."))
+
+    return _support
+
+
 class InfoModel(object):
+    def __init__(self, cfgtool, has_infomodel):
+        self.cfgtool = cfgtool
+        self.has_infomodel = has_infomodel
+
     def __init__(self):
         # NOTE(orviz): within a QCStep?
         install("glue-validator")
@@ -18,37 +48,41 @@ class InfoModel(object):
             install("openldap-clients")
 
     def _run_validator(self, qc_step, glue_version):
-        if glue_version == "glue1":
-            cmd = ("glue-validator -H localhost -p 2170 -b o=grid "
-                   "-g glue1 -s general -v 3")
-            version = "1.3"
-        elif glue_version == "glue2":
-            cmd = ("glue-validator -H localhost -p 2170 -b o=glue "
-                   "-g glue2 -s general -v 3")
-            version = "2.0"
+        if self.has_infomodel:
+            if glue_version == "glue1":
+                cmd = ("glue-validator -H localhost -p 2170 -b o=grid "
+                       "-g glue1 -s general -v 3")
+                version = "1.3"
+            elif glue_version == "glue2":
+                cmd = ("glue-validator -H localhost -p 2170 -b o=glue "
+                       "-g glue2 -s general -v 3")
+                version = "2.0"
 
-        r = qc_step.runcmd(cmd, fail_check=False)
-        summary = info_utils.get_gluevalidator_summary(r)
-        if summary:
-            if summary["errors"] != '0':
-                qc_step.print_result("FAIL",
-                                     ("Found %s errors while validating "
-                                      "GlueSchema v%s support"
-                                      % (summary["errors"]), version),
-                                     do_abort=True)
-            elif summary["warnings"] != '0':
-                qc_step.print_result("WARNING",
-                                     ("Found %s warnings while validating "
-                                      "GlueSchema v%s support"
-                                      % (summary["warnings"], version)))
+            r = qc_step.runcmd(cmd, fail_check=False)
+            summary = info_utils.get_gluevalidator_summary(r)
+            if summary:
+                if summary["errors"] != '0':
+                    qc_step.print_result("FAIL",
+                                         ("Found %s errors while validating "
+                                          "GlueSchema v%s support"
+                                          % (summary["errors"]), version),
+                                         do_abort=True)
+                elif summary["warnings"] != '0':
+                    qc_step.print_result("WARNING",
+                                         ("Found %s warnings while validating "
+                                          "GlueSchema v%s support"
+                                          % (summary["warnings"], version)))
+                else:
+                    qc_step.print_result("OK",
+                                         ("Found no errors or warnings while "
+                                          "validating GlueSchema v%s support"
+                                          % version))
             else:
-                qc_step.print_result("OK",
-                                     ("Found no errors or warnings while "
-                                      "validating GlueSchema v%s support"
-                                      % version))
+                raise exception.InfoModelException(("Cannot parse glue-validator "
+                                                    "output: %s" % r))
         else:
-            raise exception.InfoModelException(("Cannot parse glue-validator "
-                                                "output: %s" % r))
+            qc_step.print_result("NA", ("Product does not publish information "
+                                        "through BDII."))
 
     def _run_version_check(self, qc_step):
         conn = ldap.initialize("ldap://localhost:2170")
@@ -83,25 +117,19 @@ class InfoModel(object):
         finally:
             conn.unbind_s()
 
-    def qc_info_1(self):
+    @bdii_support
+    def qc_info_1(self, qc_step):
         """GlueSchema 1.3 Support."""
-        qc_step = QCStep("QC_INFO_1",
-                         "GlueSchema 1.3 Support",
-                         os.path.join(CFG["log_path"], "qc_info_1"))
         self._run_validator(qc_step, "glue1")
 
-    def qc_info_2(self):
+    @bdii_support
+    def qc_info_2(self, qc_step):
         """GlueSchema 2.0 Support."""
-        qc_step = QCStep("QC_INFO_2",
-                         "GlueSchema 2.0 Support",
-                         os.path.join(CFG["log_path"], "qc_info_2"))
         self._run_validator(qc_step, "glue2")
 
-    def qc_info_3(self):
+    @bdii_support
+    def qc_info_3(self, qc_step):
         """Middleware Version Information."""
-        qc_step = QCStep("QC_INFO_3",
-                         "Middleware Version Information",
-                         os.path.join(CFG["log_path"], "qc_info_3"))
         r, msg = self._run_version_check(qc_step)
         if r:
             qc_step.print_result("OK", msg)

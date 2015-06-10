@@ -26,7 +26,6 @@ storm:
           description: "SRM client probes."
           user: "umd"
 
-
 glexec:
     qc_func_1:
         - test: "bin/user_creds"

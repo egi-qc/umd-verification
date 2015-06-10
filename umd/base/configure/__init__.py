@@ -21,6 +21,7 @@ class YaimConfig(object):
         self.config_path = config_path
         self.pre_config = pre_config
         self.post_config = post_config
+        self.has_run = False
 
     def run(self, qc_step):
         self.pre_config()
@@ -57,3 +58,4 @@ class YaimConfig(object):
                 env.abort_exception = abort_exception_default
 
         self.post_config()
+        self.has_run = True
