@@ -1,13 +1,13 @@
 import ldap
 import os.path
 
-from umd.api import to_file
 from umd.base.infomodel import utils as info_utils
 from umd.base.utils import QCStep
 from umd.config import CFG
 from umd import exception
 from umd import system
-
+from umd.utils import to_file
+from umd.utils import install
 
 
 def bdii_support(f):
@@ -37,13 +37,15 @@ def bdii_support(f):
 
 
 class InfoModel(object):
-    def __init__(self, pkgtool, cfgtool, has_infomodel):
+    def __init__(self, cfgtool, has_infomodel):
         self.cfgtool = cfgtool
         self.has_infomodel = has_infomodel
 
-        pkgtool.install(pkgs=["glue-validator"])
+    def __init__(self):
+        # NOTE(orviz): within a QCStep?
+        install("glue-validator")
         if system.distro_version == "redhat5":
-            pkgtool.install(pkgs="openldap-clients")
+            install("openldap-clients")
 
     def _run_validator(self, qc_step, glue_version):
         if self.has_infomodel:

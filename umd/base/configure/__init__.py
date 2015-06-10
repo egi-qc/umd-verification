@@ -5,8 +5,8 @@ from fabric.context_managers import lcd
 
 from umd.api import fail
 from umd.api import info
-from umd.base import utils as butils
 from umd import exception
+from umd.utils import to_list
 
 
 class YaimConfig(object):
@@ -26,8 +26,8 @@ class YaimConfig(object):
     def run(self, qc_step):
         self.pre_config()
 
-        self.nodetype = butils.to_list(self.nodetype)
-        self.siteinfo = butils.to_list(self.siteinfo)
+        self.nodetype = to_list(self.nodetype)
+        self.siteinfo = to_list(self.siteinfo)
 
         if not self.nodetype or not self.siteinfo:
             raise exception.ConfigException(("Could not run YAIM: Bad "

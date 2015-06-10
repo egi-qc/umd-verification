@@ -2,13 +2,14 @@ from fabric.tasks import Task
 
 from umd.base.configure import YaimConfig
 from umd.base.infomodel import InfoModel
-from umd.base.install import Install
-from umd.base.install import utils as inst_utils
+from umd.base.installation import Install
 from umd.base.security import Security
 from umd.base import utils
 from umd.base.validate import Validate
 from umd.config import CFG
 from umd import exception
+from umd.utils import install
+from umd.utils import show_exec_banner
 
 
 class Deploy(Task):
@@ -47,7 +48,6 @@ class Deploy(Task):
         self.siteinfo = siteinfo
         self.qc_specific_id = qc_specific_id
         self.exceptions = exceptions
-        self.pkgtool = None
         self.cfgtool = None
         self.ca = None
 
@@ -70,19 +70,16 @@ class Deploy(Task):
         pass
 
     def _install(self, *args, **kwargs):
-        Install(self.pkgtool,
-                self.metapkg).run(*args, **kwargs)
+        Install(self.metapkg).run(*args, **kwargs)
 
     def _security(self, *args, **kwargs):
-        Security(self.pkgtool,
-                 self.cfgtool,
+        Security(self.cfgtool,
                  self.need_cert,
                  self.ca,
                  self.exceptions).run(*args, **kwargs)
 
     def _infomodel(self, *args, **kwargs):
-        InfoModel(self.pkgtool,
-                  self.cfgtool,
+        InfoModel(self.cfgtool,
                   self.has_infomodel).run(*args, **kwargs)
 
     def _validate(self, *args, **kwargs):
@@ -117,11 +114,10 @@ class Deploy(Task):
             qcenv_*
                 Pass environment variables needed by the QC specific checks.
         """
-        # Update configuration
+        # Update & show configuration
         CFG.update(kwargs)
-
-        # Packaging tool
-        self.pkgtool = inst_utils.PkgTool()
+        qc_envvars = self._get_qc_envvars(kwargs)
+        show_exec_banner(CFG, qc_envvars)
 
         # Configuration tool
         if self.nodetype and self.siteinfo:
@@ -130,14 +126,12 @@ class Deploy(Task):
                                       CFG["yaim_path"],
                                       pre_config=self.pre_config,
                                       post_config=self.post_config)
-        else:
-            raise exception.ConfigException("Configuration not implemented.")
+        #else:
+        #    raise exception.ConfigException("Configuration not implemented.")
 
         # Certification Authority
         if self.need_cert:
-            self.pkgtool.install(
-                pkgs=["ca-policy-egi-core"],
-                repofile=CFG["igtf_repo"])
+            install("ca-policy-egi-core", repofile=CFG["igtf_repo"])
             self.ca = utils.OwnCA(
                 domain_comp_country="es",
                 domain_comp="UMDverification",
@@ -159,7 +153,6 @@ class Deploy(Task):
         self._infomodel()
 
         # QC_FUNC
-        qc_envvars = self._get_qc_envvars(kwargs)
         self.pre_validate()
         self._validate(qc_envvars)
         self.post_validate()

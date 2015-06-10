@@ -1,5 +1,6 @@
 from umd.api import info
 from umd.base import Deploy
+from umd.utils import install
 
 
 exceptions = {
@@ -13,7 +14,7 @@ class CreamCEStandalone(Deploy):
     def pre_config(self):
         info("PRE-config actions.")
 
-        self.pkgtool.install(pkgs="sudo")
+        install("sudo")
 
         info("<sudo> package installed.")
         info("END of PRE-config actions.")
@@ -26,7 +27,7 @@ class CreamCEGridengine(Deploy):
     def pre_config(self):
         info("PRE-config actions.")
 
-        self.pkgtool.install(pkgs=["sudo", "gridengine", "gridengine-qmaster"])
+        install(["sudo", "gridengine", "gridengine-qmaster"])
 
         info(("<sudo>, <gridengine> and <gridengine-qmaster> packages "
               "installed."))

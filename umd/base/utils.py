@@ -9,18 +9,8 @@ from fabric.colors import yellow
 from fabric.context_managers import lcd
 
 from umd.api import info
-from umd.api import runcmd
-from umd import exception
 from umd import system
-
-
-def to_list(obj):
-    if not isinstance(obj, (str, list)):
-        raise exception.ConfigException("obj variable type '%s' not supported."
-                                        % type(obj))
-    elif isinstance(obj, str):
-        return [obj]
-    return obj
+from umd.utils import runcmd
 
 
 class QCStep(object):

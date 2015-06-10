@@ -6,8 +6,7 @@ from umd.config import CFG
 
 
 class Security(object):
-    def __init__(self, pkgtool, cfgtool, need_cert, ca, exceptions):
-        self.pkgtool = pkgtool
+    def __init__(self, cfgtool, need_cert, ca, exceptions):
         self.cfgtool = cfgtool
         self.need_cert = need_cert
         self.ca = ca
@@ -27,11 +26,13 @@ class Security(object):
             r = self.cfgtool.run(qc_step)
             if r and r.failed:
                 qc_step.print_result("FAIL",
-                                     "YAIM configuration failed with SHA-2 certs.",
+                                     "YAIM configuration failed with SHA-2 "
+                                     "certs.",
                                      do_abort=True)
             else:
                 qc_step.print_result("OK",
-                                     "Product services can manage SHA-2 certs.")
+                                     "Product services can manage SHA-2 "
+                                     "certs.")
         else:
             qc_step.print_result("NA", "Product does not need certificates.")
 

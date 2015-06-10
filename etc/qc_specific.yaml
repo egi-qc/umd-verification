@@ -26,8 +26,14 @@ storm:
           description: "SRM client probes."
           user: "umd"
 
-ui:
-    qc_func_1: 
+glexec:
+    qc_func_1:
         - test: "bin/user_creds"
           description: "Create myproxy for ops.vo.ibergrid.eu VO."
+          user: "umd"
+        - test: "bin/glexec/test-basic.sh"
+          description: "Testing basic functionality."
+          user: "umd"
+        - test: "bin/glexec/test-transfer.sh"
+          description: "Testing transfer of a specific proxy file."
           user: "umd"
