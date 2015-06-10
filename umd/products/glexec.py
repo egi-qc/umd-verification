@@ -1,26 +1,38 @@
+import grp
+import pwd
+
 from umd.api import info
 from umd.base import Deploy
 from umd.utils import install
 from umd.utils import runcmd
 
 
-class GlexecDeploy(Deploy):
-    def _config(self):
+class GLExecWNDeploy(Deploy):
+    def post_install(self):
+        s_groups = [t[0] for t in grp.getgrall()]
+        s_users = [t[0] for t in pwd.getpwall()]
+
         info("Configuration actions.")
 
-        runcmd("groupadd -g 23200 iberops")
+        if "iberops" not in s_groups:
+            runcmd("groupadd -g 23200 iberops")
         for i in xrange(5):
-            runcmd("useradd -m -u 2320%s -g 23200 iberops00%s" % (i, i))
+            user = "iberops00%s" % i
+            if user not in s_users:
+                runcmd("useradd -m -u 2320%s -g 23200 %s" % (i, user))
         info("Group 'iberops' and user accounts created.")
 
-        runcmd("groupadd -g 23210 iberopses")
+        if "iberopses" not in s_groups:
+            runcmd("groupadd -g 23210 iberopses")
         for i in xrange(5):
-            runcmd("useradd -m -u 2321%s -g 23210 iberopses00%s" % (i, i))
+            user = "iberopses00%s" % i
+            if user not in s_users:
+                runcmd("useradd -m -u 2321%s -g 23210 %s" % (i, user))
         info("Group 'iberopses' and user accounts created.")
 
         runcmd("cp /etc/glexec.conf /etc/glexec.conf.0")
         info("Backup /etc/glexec.conf file.")
-        runcmd(("sed -i 's/.*user_white_list.*/user_white_list = umd/g'"
+        runcmd(("sed -i 's/.*user_white_list.*/user_white_list = umd/g' "
                 "/etc/glexec.conf"))
         info("User 'umd' white-listed in /etc/glexec.conf")
 
@@ -56,14 +68,15 @@ verify_proxy -> pepc
         install(["myproxy", "voms-clients", "ca-policy-egi-core"])
 
 
-glexec = GlexecDeploy(
-    name="glexec",
-    doc="GLEXEC deployment.",
+glexec = GLExecWNDeploy(
+    name="glexec-wn",
+    doc="GLExec WN deployment.",
     metapkg=["glexec",
              "lcmaps-plugins-c-pep",
              "lcmaps-plugins-c-pep-debuginfo",
              "mkgltempdir",
              "lcmaps-plugins-verify-proxy"],
     need_cert=False,
-    qc_specific_id="glexec"
+    has_infomodel=False,
+    qc_specific_id="glexec-wn"
 )

@@ -26,8 +26,9 @@ def bdii_support(f):
                              os.path.join(CFG["log_path"], "qc_info_3"))
 
         if self.has_infomodel:
-            if not self.cfgtool.has_run:
-                self.cfgtool.run(qc_step)
+            if self.cfgtool:
+                if not self.cfgtool.has_run:
+                    self.cfgtool.run(qc_step)
             return f(*args, **kwargs)
 
         qc_step.print_result("NA", ("Product does not publish information "
