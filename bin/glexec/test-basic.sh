@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/bin/bash -eu
 
-export GLEXEC_CLIENT_CERT=$X509_USER_PROXY
+TESTPROXY=`voms-proxy-info -path`
 
-/opt/glite/sbin/glexec /usr/bin/id -a ; echo $?
+export GLEXEC_CLIENT_CERT=$TESTPROXY
+export X509_USER_PROXY=$TESTPROXY
+
+/usr/sbin/glexec /usr/bin/id -a
 
