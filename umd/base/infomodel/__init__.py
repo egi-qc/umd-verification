@@ -41,7 +41,6 @@ class InfoModel(object):
         self.cfgtool = cfgtool
         self.has_infomodel = has_infomodel
 
-    def __init__(self):
         # NOTE(orviz): within a QCStep?
         install("glue-validator")
         if system.distro_version == "redhat5":
