@@ -4,6 +4,7 @@ import os
 import pwd
 import yaml
 
+from fabric.api import abort
 from fabric.api import shell_env
 
 from umd.api import fail
@@ -18,7 +19,7 @@ QC_SPECIFIC_FILE = "etc/qc_specific.yaml"
 
 class Validate(object):
     def __init__(self):
-        self.qc_envvars = None
+        self.qc_envvars = {}
 
     def _is_executable(self, f):
         """File executable check."""
@@ -77,7 +78,7 @@ class Validate(object):
 
             cmd = "./%s" % " ".join([f, args])
             if user:
-                cmd = ' '.join(["su %s -c" % user, cmd])
+                cmd = "su %s -c \"%s\"" % (user, cmd)
 
             cmd_failed = False
             if not self._is_executable(f):
@@ -86,16 +87,12 @@ class Validate(object):
             else:
                 self._handle_user(qc_step, user)
                 with shell_env(**self.qc_envvars):
-                    r = qc_step.runcmd(cmd)
-                    cmd_failed = r.failed
-                    result = r
+                    r = qc_step.runcmd(cmd, fail_check=False, stderr_to_stdout=True)
+                    if r.failed:
+                        failed_checks.append(cmd)
+                    else:
+                        info("Command '%s' ran successfully" % cmd)
 
-            if cmd_failed:
-                fail("Command '%s' failed: %s" % (cmd, result))
-                failed_checks.append(cmd)
-            else:
-                ok("Command '%s' ended OK with result: %s"
-                   % (cmd, result))
         return failed_checks
 
     def qc_func_1(self, config):
@@ -106,16 +103,12 @@ class Validate(object):
 
         if config:
             failed_checks = self._run_checks(qc_step, config)
-            if failed_checks:
-                qc_step.print_result("FAIL",
-                                     "Commands failed: %s" % failed_checks,
-                                     do_abort=False)
-            else:
+            if not failed_checks:
                 qc_step.print_result("OK",
                                      ("Basic functionality probes ran "
                                       "successfully."))
         else:
-            qc_step.print_result("OK",
+            qc_step.print_result("NA",
                                  "No definition found for QC_FUNC_1.")
 
     def qc_func_2(self, config):
@@ -126,18 +119,14 @@ class Validate(object):
 
         if config:
             failed_checks = self._run_checks(qc_step, config)
-            if failed_checks:
-                qc_step.print_result("FAIL",
-                                     "Commands failed: %s" % failed_checks,
-                                     do_abort=False)
-            else:
+            if not failed_checks:
                 qc_step.print_result("OK",
                                      "Fix/features probes ran successfully.")
         else:
-            qc_step.print_result("OK",
+            qc_step.print_result("NA",
                                  "No definition found for QC_FUNC_2.")
 
-    def run(self, qc_specific_id, qc_envvars=None):
+    def run(self, qc_specific_id, qc_envvars={}):
         if qc_specific_id:
             try:
                 with open(QC_SPECIFIC_FILE) as f:

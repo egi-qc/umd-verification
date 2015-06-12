@@ -10,6 +10,7 @@ from fabric.context_managers import lcd
 
 from umd.api import info
 from umd import system
+from umd.utils import format_error_msg
 from umd.utils import runcmd
 
 
@@ -19,6 +20,7 @@ class QCStep(object):
         self.id = id
         self.description = description
         self.logfile = logfile
+        self.logs = []
 
         self._print_header()
         self._remove_last_logfile()
@@ -42,20 +44,22 @@ class QCStep(object):
             "OK": green,
             "WARNING": yellow,
         }
+
         msg = "[%s] %s." % (level_color[level](level), msg)
         if do_abort:
-            msg = " ".join([msg, ("Check the logs (%s.[stdout|stderr]) for "
-                                  "further information." % self.logfile)])
+            msg = ' '.join([msg, format_error_msg(self.logs)])
             abort(msg)
         else:
             print(msg)
 
-    def runcmd(self, cmd, chdir=None, fail_check=True, log_to_file=True):
+    def runcmd(self, cmd, chdir=None, fail_check=True, log_to_file=True, stderr_to_stdout=False):
         logfile = None
         if log_to_file:
             logfile = self.logfile
 
-        r = runcmd(cmd, chdir=chdir, fail_check=fail_check, logfile=logfile)
+        r = runcmd(cmd, chdir=chdir, fail_check=fail_check, logfile=logfile, stderr_to_stdout=stderr_to_stdout)
+        if len(r) == 2:
+            r, self.logs = r
 
         return r
 
