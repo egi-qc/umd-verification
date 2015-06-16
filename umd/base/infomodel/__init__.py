@@ -29,7 +29,7 @@ def bdii_support(f):
             if self.cfgtool:
                 if not self.cfgtool.has_run:
                     self.cfgtool.run(qc_step)
-            return f(*args, **kwargs)
+            return f(self, qc_step, *args, **kwargs)
 
         qc_step.print_result("NA", ("Product does not publish information "
                                     "through BDII."))
@@ -48,7 +48,7 @@ class InfoModel(object):
             install("openldap-clients")
 
     def _run_validator(self, qc_step, glue_version):
-        if self.has_infomodel:
+        #if self.has_infomodel:
             if glue_version == "glue1":
                 cmd = ("glue-validator -H localhost -p 2170 -b o=grid "
                        "-g glue1 -s general -v 3")
@@ -78,11 +78,12 @@ class InfoModel(object):
                                           "validating GlueSchema v%s support"
                                           % version))
             else:
-                raise exception.InfoModelException(("Cannot parse glue-validator "
-                                                    "output: %s" % r))
-        else:
-            qc_step.print_result("NA", ("Product does not publish information "
-                                        "through BDII."))
+                raise exception.InfoModelException(("Cannot parse "
+                                                    "glue-validator output: %s"
+                                                    % r))
+        #else:
+        #    qc_step.print_result("NA", ("Product does not publish "
+        #                                "information through BDII."))
 
     def _run_version_check(self, qc_step):
         conn = ldap.initialize("ldap://localhost:2170")

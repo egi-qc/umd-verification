@@ -52,12 +52,21 @@ class QCStep(object):
         else:
             print(msg)
 
-    def runcmd(self, cmd, chdir=None, fail_check=True, log_to_file=True, stderr_to_stdout=False):
+    def runcmd(self,
+               cmd,
+               chdir=None,
+               fail_check=True,
+               log_to_file=True,
+               stderr_to_stdout=False):
         logfile = None
         if log_to_file:
             logfile = self.logfile
 
-        r = runcmd(cmd, chdir=chdir, fail_check=fail_check, logfile=logfile, stderr_to_stdout=stderr_to_stdout)
+        r = runcmd(cmd,
+                   chdir=chdir,
+                   fail_check=fail_check,
+                   logfile=logfile,
+                   stderr_to_stdout=stderr_to_stdout)
         if len(r) == 2:
             r, self.logs = r
 

@@ -5,6 +5,7 @@ from umd.base import utils as butils
 from umd import exception
 from umd import system
 
+
 def yum(action, pkgs=None):
     if pkgs:
         r = runcmd("yum -y %s %s" % (action, " ".join(pkgs)))
