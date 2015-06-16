@@ -87,7 +87,9 @@ class Validate(object):
             else:
                 self._handle_user(qc_step, user)
                 with shell_env(**self.qc_envvars):
-                    r = qc_step.runcmd(cmd, fail_check=False, stderr_to_stdout=True)
+                    r = qc_step.runcmd(cmd,
+                                       fail_check=False,
+                                       stderr_to_stdout=True)
                     if r.failed:
                         failed_checks.append(cmd)
                     else:

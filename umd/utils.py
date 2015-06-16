@@ -35,15 +35,20 @@ def to_file(r, logfile):
             f.flush()
 
     l = []
-    if r.stdout:
-        _fname = '.'.join([logfile, "stdout"])
-        _write(_fname, r.stdout)
-        l.append(_fname)
-    if r.stderr:
-        _fname = '.'.join([logfile, "stderr"])
-        _write(_fname, r.stderr)
-        l.append(_fname)
-
+    try:
+        if r.stdout:
+            _fname = '.'.join([logfile, "stdout"])
+            _write(_fname, r.stdout)
+            l.append(_fname)
+        if r.stderr:
+            _fname = '.'.join([logfile, "stderr"])
+            _write(_fname, r.stderr)
+            l.append(_fname)
+    except AttributeError:
+        if isinstance(r, str):
+            _fname = '.'.join([logfile, "stdout"])
+            _write(_fname, r)
+            l.append(_fname)
     return l
 
 
@@ -54,13 +59,20 @@ def format_error_msg(logs, cmd=None):
     return msg
 
 
-def runcmd(cmd, chdir=None, fail_check=True, logfile=None, stderr_to_stdout=False):
+def runcmd(cmd,
+           chdir=None,
+           fail_check=True,
+           stop_on_error=False,
+           logfile=None,
+           stderr_to_stdout=False):
     """Runs a generic command.
             cmd: command to execute.
             chdir: local directory to run the command from.
             fail_check: boolean that indicates if the workflow must be
                 interrupted in case of failure.
+            stop_on_error: whether abort or not in case of failure.
             logfile: file to log the command execution.
+            stderr_to_stdout: redirect standard error to standard output.
     """
     if stderr_to_stdout:
         cmd = ' '.join([cmd, "2>&1"])
@@ -77,9 +89,9 @@ def runcmd(cmd, chdir=None, fail_check=True, logfile=None, stderr_to_stdout=Fals
     if logfile:
         logs = to_file(r, logfile)
 
-    if r.failed:
+    if fail_check and r.failed:
         msg = format_error_msg(logs, cmd)
-        if fail_check:
+        if stop_on_error:
             abort(fail(msg % cmd))
         else:
             fail(msg % cmd)
@@ -145,14 +157,19 @@ def show_exec_banner(cfgdict, qc_envvars):
         """Displays execution banner."""
         cfg = cfgdict.copy()
 
-        print(u'\n\u250C %s ' % green(" UMD verification app") + u'\u2500'*49 + u'\u2510')
-        print(u'\u2502' + u' '*72 + u'\u2502')
-        print(u'\u2502%s %s' % ("Quality criteria:".rjust(25), blue("http://egi-qc.github.io"))+ u' '*23 + u'\u2502')
-        print(u'\u2502%s %s' % ("Codebase:".rjust(25), blue("https://github.com/egi-qc/umd-verification")) + u' '*4 + u'\u2502')
-        print(u'\u2502' + u' '*72 + u'\u2502')
-        print(u'\u2502' + u' '*7+ u'\u2500'*65 + u'\u2518')
+        print(u'\n\u250C %s ' % green(" UMD verification app")
+              + u'\u2500' * 49 + u'\u2510')
+        print(u'\u2502' + u' ' * 72 + u'\u2502')
+        print(u'\u2502%s %s' % ("Quality criteria:".rjust(25),
+              blue("http://egi-qc.github.io"))
+              + u' ' * 23 + u'\u2502')
+        print(u'\u2502%s %s' % ("Codebase:".rjust(25),
+              blue("https://github.com/egi-qc/umd-verification"))
+              + u' ' * 4 + u'\u2502')
+        print(u'\u2502' + u' ' * 72 + u'\u2502')
+        print(u'\u2502' + u' ' * 7 + u'\u2500' * 65 + u'\u2518')
 
-        print(u'\u2502' + u' '*72)
+        print(u'\u2502' + u' ' * 72)
         if "repository_url" in cfg.keys():
             print(u'\u2502 Verification repositories used:')
             repos = to_list(cfg.pop("repository_url"))
@@ -164,23 +181,23 @@ def show_exec_banner(cfgdict, qc_envvars):
         basic_repo = ["epel_release", "umd_release", "igtf_repo"]
         for k in basic_repo:
             v = cfg.pop(k)
-            leftjust = len(max(basic_repo, key=len))+5
+            leftjust = len(max(basic_repo, key=len)) + 5
             print(u'\u2502\t%s %s' % (k.ljust(leftjust), blue(v)))
 
         print(u'\u2502')
         print(u'\u2502 Path locations:')
         for k in ["log_path", "yaim_path"]:
             v = cfg.pop(k)
-            leftjust = len(max(basic_repo, key=len))+5
+            leftjust = len(max(basic_repo, key=len)) + 5
             print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
 
         if qc_envvars:
             print(u'\u2502')
             print(u'\u2502 Local environment variables passed:')
-            leftjust = len(max(qc_envvars, key=len))+5
+            leftjust = len(max(qc_envvars, key=len)) + 5
             for k, v in qc_envvars.items():
                 cfg.pop("qcenv_%s" % k)
                 print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
 
         print(u'\u2502')
-        print(u'\u2514' + u'\u2500'*72)
+        print(u'\u2514' + u'\u2500' * 72)
