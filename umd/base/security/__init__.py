@@ -2,6 +2,7 @@ import os.path
 
 from umd.base.security import utils as sec_utils
 from umd.base.utils import QCStep
+from umd.base.utils import qcstep_request
 from umd.config import CFG
 
 
@@ -10,9 +11,10 @@ class Security(object):
         self.cfgtool = cfgtool
         self.need_cert = need_cert
         self.ca = ca
-        self.exceptions = exceptions
+        self.exceptions = exceptions # known_worldwritable_filelist: list with
+                                     # the known world writable files.
 
-    def qc_sec_2(self, **kwargs):
+    def qc_sec_2(self):
         """SHA-2 Certificates Support."""
         qc_step = QCStep("QC_SEC_2",
                          "SHA-2 Certificates Support",
@@ -36,11 +38,8 @@ class Security(object):
         else:
             qc_step.print_result("NA", "Product does not need certificates.")
 
-    def qc_sec_5(self, **kwargs):
-        """World Writable Files check.
-            (kwargs) known_worldwritable_filelist: list with
-            the known world writable files.
-        """
+    def qc_sec_5(self):
+        """World Writable Files check."""
         qc_step = QCStep("QC_SEC_5",
                          "World Writable Files",
                          os.path.join(CFG["log_path"], "qc_sec_5"))
@@ -51,7 +50,8 @@ class Security(object):
         if r:
             ww_filelist = sec_utils.get_filelist_from_find(r)
             try:
-                known_ww_filelist = kwargs["known_worldwritable_filelist"]
+                known_ww_filelist = self.exceptions[
+                        "known_worldwritable_filelist"]
             except KeyError:
                 known_ww_filelist = []
             if set(ww_filelist).difference(set(known_ww_filelist)):
@@ -74,10 +74,11 @@ class Security(object):
         #         print(yellow("Detected package world-writable files:\n%s"
         #                      % pkg_wwf_files))
 
-    def run(self):
-        self.qc_sec_2()
-        # NOTE(orviz): use defaultdict instead of try..except catch
-        try:
-            self.qc_sec_5(**self.exceptions["qc_sec_5"])
-        except KeyError:
+    @qcstep_request
+    def run(self, steps, *args, **kwargs):
+        if steps:
+            for method in steps:
+                method()
+        else:
+            self.qc_sec_2()
             self.qc_sec_5()

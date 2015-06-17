@@ -3,6 +3,7 @@ import os.path
 
 from umd.base.infomodel import utils as info_utils
 from umd.base.utils import QCStep
+from umd.base.utils import qcstep_request
 from umd.config import CFG
 from umd import exception
 from umd import system
@@ -33,7 +34,6 @@ def bdii_support(f):
 
         qc_step.print_result("NA", ("Product does not publish information "
                                     "through BDII."))
-
     return _support
 
 
@@ -137,7 +137,12 @@ class InfoModel(object):
         else:
             qc_step.print_result("WARNING", msg)
 
-    def run(self):
-        self.qc_info_1()
-        self.qc_info_2()
-        self.qc_info_3()
+    @qcstep_request
+    def run(self, steps, *args, **kwargs):
+        if steps:
+            for method in steps:
+                method()
+        else:
+            self.qc_info_1()
+            self.qc_info_2()
+            self.qc_info_3()
