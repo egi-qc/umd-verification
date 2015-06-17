@@ -51,6 +51,10 @@ class Deploy(Task):
         self.cfgtool = None
         self.ca = None
 
+        self.installation_type = None # FIXME default value?
+        self.cfg = None
+        self.qc_envvars = {}
+
     def pre_install(self):
         pass
 
@@ -69,29 +73,30 @@ class Deploy(Task):
     def post_validate(self):
         pass
 
-    def _install(self, *args, **kwargs):
-        Install(self.metapkg).run(*args, **kwargs)
+    def _install(self):
+        Install(self.metapkg).run(self.installation_type,
+                                  self.cfg["epel_release"],
+                                  self.cfg["umd_release"],
+                                  repository_url=self.cfg["repository_url"])
 
-    def _security(self, *args, **kwargs):
+    def _security(self):
         Security(self.cfgtool,
                  self.need_cert,
                  self.ca,
-                 self.exceptions).run(*args, **kwargs)
+                 self.exceptions).run()
 
-    def _infomodel(self, *args, **kwargs):
+    def _infomodel(self):
         InfoModel(self.cfgtool,
-                  self.has_infomodel).run(*args, **kwargs)
+                  self.has_infomodel).run()
 
-    def _validate(self, *args, **kwargs):
-        Validate().run(self.qc_specific_id, *args, **kwargs)
+    def _validate(self):
+        Validate().run(self.qc_specific_id, qc_envvars=self.qc_envvars)
 
     def _get_qc_envvars(self, d):
         return dict([(k.split("qcenv_")[1], v)
                      for k, v in d.items() if k.startswith("qcenv")])
 
-    def run(self,
-            installation_type,
-            **kwargs):
+    def run(self, installation_type, **kwargs):
         """Takes over base deployment.
 
         Arguments:
@@ -114,10 +119,16 @@ class Deploy(Task):
             qcenv_*
                 Pass environment variables needed by the QC specific checks.
         """
-        # Update & show configuration
+        # Update configuration
         CFG.update(kwargs)
-        qc_envvars = self._get_qc_envvars(kwargs)
-        show_exec_banner(CFG, qc_envvars)
+
+        # Set class attributes
+        self.cfg = CFG
+        self.installation_type = installation_type
+        self.qc_envvars = self._get_qc_envvars(kwargs)
+
+        # Show configuration summary
+        show_exec_banner(CFG, self.qc_envvars)
 
         # Configuration tool
         if self.nodetype and self.siteinfo:
@@ -140,10 +151,7 @@ class Deploy(Task):
 
         # QC_INST, QC_UPGRADE
         self.pre_install()
-        self._install(installation_type,
-                      CFG["epel_release"],
-                      CFG["umd_release"],
-                      repository_url=CFG["repository_url"])
+        self._install()
         self.post_install()
 
         # QC_SEC
@@ -154,5 +162,5 @@ class Deploy(Task):
 
         # QC_FUNC
         self.pre_validate()
-        self._validate(qc_envvars)
+        self._validate()
         self.post_validate()
