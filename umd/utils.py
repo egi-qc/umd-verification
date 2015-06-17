@@ -1,4 +1,5 @@
 import os.path
+from itertools import groupby
 
 from fabric.api import abort
 from fabric.api import local
@@ -151,6 +152,18 @@ def install(pkgs, repofile=None):
     """Shortcut for package installations."""
     pkgtool = PkgTool()
     return runcmd(pkgtool.install(pkgs, repofile))
+
+
+def run_qc_step(cfgdict):
+    """Run specific QC steps if requested through fab argument list."""
+    try:
+        if cfgdict["qc_step"]:
+            d = {}
+            for k,v in groupby([step.rsplit('_', 1) for step in cfgdict["qc_step"]], lambda x: x[0]):
+                d[k] = ['_'.join(s) for s in v]
+        return d
+    except KeyError:
+        return False
 
 
 def show_exec_banner(cfgdict, qc_envvars):

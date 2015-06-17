@@ -14,6 +14,23 @@ from umd.utils import format_error_msg
 from umd.utils import runcmd
 
 
+def qcstep_request(f):
+    """Decorator method that handles on-demand QC step executions."""
+    def _request(self, *args, **kwargs):
+        step_methods = []
+        if "qc_step" in kwargs.keys():
+            for step in kwargs["qc_step"]:
+                try:
+                    method = getattr(self, step.lower())
+                    step_methods.append(method)
+                except AttributeError:
+                    info("Ignoring QC step '%s': not defined." % step)
+                    continue
+
+        return f(self, step_methods, *args, **kwargs)
+    return _request
+
+
 class QCStep(object):
     """Manages all the common functions that are used in a QC step."""
     def __init__(self, id, description, logfile):

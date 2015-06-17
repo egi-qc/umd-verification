@@ -11,6 +11,7 @@ from umd.api import fail
 from umd.api import info
 from umd.api import ok
 from umd.base.utils import QCStep
+from umd.base.utils import qcstep_request
 from umd.config import CFG
 
 
@@ -109,7 +110,11 @@ class Validate(object):
 
         if config:
             failed_checks = self._run_checks(qc_step, config)
-            if not failed_checks:
+            if failed_checks:
+                qc_step.print_result("FAIL",
+                                     "Probes '%s' failed to run."
+                                     % failed_checks)
+            else:
                 qc_step.print_result("OK",
                                      ("Basic functionality probes ran "
                                       "successfully."))
@@ -125,14 +130,20 @@ class Validate(object):
 
         if config:
             failed_checks = self._run_checks(qc_step, config)
-            if not failed_checks:
+            if failed_checks:
+                qc_step.print_result("FAIL",
+                                     "Probes '%s' failed to run."
+                                     % failed_checks)
+            else:
                 qc_step.print_result("OK",
                                      "Fix/features probes ran successfully.")
         else:
             qc_step.print_result("NA",
                                  "No definition found for QC_FUNC_2.")
 
-    def run(self, qc_specific_id, qc_envvars={}):
+    @qcstep_request
+    def run(self, steps, qc_specific_id, *args, **kwargs):
+        qc_envvars = kwargs["qc_envvars"]
         if qc_specific_id:
             try:
                 with open(QC_SPECIFIC_FILE) as f:
@@ -154,8 +165,12 @@ class Validate(object):
             if qc_envvars:
                 self.qc_envvars = qc_envvars
 
-            self.qc_func_1(config["qc_func_1"])
-            self.qc_func_2(config["qc_func_2"])
+            if steps:
+                for method in steps:
+                    method(config[method.im_func.func_name])
+            else:
+                self.qc_func_1(config["qc_func_1"])
+                self.qc_func_2(config["qc_func_2"])
         else:
             info(("No QC-specific ID provided: no specific QC probes "
                   "will be ran."))

@@ -15,12 +15,23 @@ class ConfigDict(dict):
 
     def update(self, d):
         for k, v in d.items():
+            append_arg = False
             if k.startswith("repository_url"):
-                l = self.__getitem__("repository_url")
+                item = "repository_url"
+                append_arg = True
+            elif k.startswith("qc_step"):
+                item = "qc_step"
+                append_arg = True
+
+            if append_arg:
+                try:
+                    l = self.__getitem__(item)
+                except KeyError:
+                    l = []
                 if l:
-                    self.__setitem__("repository_url", l.append(v))
+                    self.__setitem__(item, l.append(v))
                 else:
-                    self.__setitem__("repository_url", [v])
+                    self.__setitem__(item, [v])
             else:
                 self.__setitem__(k, v)
 
