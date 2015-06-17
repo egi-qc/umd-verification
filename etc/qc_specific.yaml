@@ -8,6 +8,11 @@ argus:
         - test: "bin/argus/testsuites.sh"
           description: "Argus certification tests."
 
+ca:
+    qc_func_1:
+        - test: "bin/ca/fetch_crl.run"
+          description: "Run fetch_crl script with verbosity."
+
 cream:
     qc_func_1:
         - test: "bin/cream/"
@@ -16,15 +21,6 @@ cream:
           description: "Check whether the certificate is up-to-date."
           user: "umd"
           args: "/etc/grid-security/hostcert.pem"
-
-storm:
-    qc_func_1:
-        - test: "bin/user_creds"
-          description: "Create myproxy for ops.vo.ibergrid.eu VO."
-          user: "umd"
-        - test: "bin/srm"
-          description: "SRM client probes."
-          user: "umd"
 
 glexec-wn:
     qc_func_1:
@@ -36,6 +32,15 @@ glexec-wn:
           user: "umd"
         - test: "bin/glexec/test-transfer.sh"
           description: "Testing transfer of a specific proxy file."
+          user: "umd"
+
+storm:
+    qc_func_1:
+        - test: "bin/user_creds"
+          description: "Create myproxy for ops.vo.ibergrid.eu VO."
+          user: "umd"
+        - test: "bin/srm"
+          description: "SRM client probes."
           user: "umd"
 
 ui:
