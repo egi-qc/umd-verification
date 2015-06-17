@@ -61,11 +61,15 @@ class Validate(object):
         checklist = []
         for check in l:
             description, user, path, args = check
-            if os.path.isdir(path):
-                for f in self._get_files_from_dir(path):
-                    checklist.append((description, user, f, args))
-            elif os.path.isfile(path):
-                checklist.append(check)
+            if os.path.exists(path):
+                if os.path.isdir(path):
+                    for f in self._get_files_from_dir(path):
+                        checklist.append((description, user, f, args))
+                elif os.path.isfile(path):
+                    checklist.append(check)
+            else:
+                info("Could not execute check '%s': no such file or directory."
+                     % path)
 
         return checklist
 

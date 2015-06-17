@@ -1,0 +1,3 @@
+#!/bin/bash -eu
+
+[ ! -f /var/lock/subsys/fetch-crl-cron ] || ( [ -f /etc/sysconfig/fetch-crl ] && . /etc/sysconfig/fetch-crl ; /usr/sbin/fetch-crl -v -r 360 )
