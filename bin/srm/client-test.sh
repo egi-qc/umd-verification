@@ -12,11 +12,13 @@ VO=`voms-proxy-info -vo`
 case $1 in
     localhost) 
         SE_HOST=`hostname -f`
+	SRM_BASE="srm://$SE_HOST:8444/srm/managerv2?SFN=/ops.vo.ibergrid.eu"
+	EXTRA_OPTS="-b"
         ;;
     # FIXME(orviz) hardcoded values!
     storm) 
-        SE_HOST=srm01.ncg.ingrid.pt 
-	    SRM_BASE="srm://$SE_HOST:8444/srm/managerv2?SFN=/ibergrid/ops"
+        SE_HOST=srm01.ncg.ingrid.pt 	
+	SRM_BASE="srm://$SE_HOST:8444/srm/managerv2?SFN=/ibergrid/ops"
         ;;
     dpm)
         SE_HOST=lcg-srm.ecm.ub.es 
@@ -50,15 +52,15 @@ set -e
 
 case $2 in
     lcg-util)
-        lcg-ls -vl $SRM_BASE
-        lcg-cp -D srmv2 -v file:$FILE $SRM_BASE/$REMOTE_FILE
-        lcg-gt -T srmv2 -v $SRM_BASE/$REMOTE_FILE gsiftp 
-        lcg-gt -T srmv2 -v $SRM_BASE/$REMOTE_FILE https
-        lcg-gt -T srmv2 -v $SRM_BASE/$REMOTE_FILE file
-        lcg-ls -vl $SRM_BASE | grep $REMOTE_FILE 
-        lcg-cp -T srmv2 -v $SRM_BASE/$REMOTE_FILE file:$FILE2
+        lcg-ls $EXTRA_OPTS -D srmv2 -vl $SRM_BASE
+        lcg-cp $EXTRA_OPTS -D srmv2 -v file:$FILE $SRM_BASE/$REMOTE_FILE
+        lcg-gt $EXTRA_OPTS -T srmv2 -v $SRM_BASE/$REMOTE_FILE gsiftp 
+        lcg-gt $EXTRA_OPTS -T srmv2 -v $SRM_BASE/$REMOTE_FILE https
+        lcg-gt $EXTRA_OPTS -T srmv2 -v $SRM_BASE/$REMOTE_FILE file
+        lcg-ls $EXTRA_OPTS -D srmv2 -vl $SRM_BASE | grep $REMOTE_FILE 
+        lcg-cp $EXTRA_OPTS -T srmv2 -v $SRM_BASE/$REMOTE_FILE file:$FILE2
         diff $FILE $FILE2
-        lcg-del -b -T srmv2 -vl $SRM_BASE/$REMOTE_FILE
+        lcg-del $EXTRA_OPTS -T srmv2 -vl $SRM_BASE/$REMOTE_FILE
         ;;
     dcache-client)
         srmping -retry_num=2 -retry_timeout=10 -2 $SRM_BASE

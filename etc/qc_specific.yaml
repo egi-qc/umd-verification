@@ -39,9 +39,13 @@ storm:
         - test: "bin/user_creds"
           description: "Create myproxy for ops.vo.ibergrid.eu VO."
           user: "umd"
-        - test: "bin/srm"
-          description: "SRM client probes."
+        - test: "bin/srm/webdav"
+          description: "WebDAV functionality check."
           user: "umd"
+        - test: "bin/srm/client-test.sh"
+          description: "lcg-utils client."
+          user: "umd"
+          args: "localhost lcg-util"
 
 ui:
     qc_func_1: 
