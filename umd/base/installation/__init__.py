@@ -2,19 +2,20 @@ import os.path
 import shutil
 
 from umd.api import info
+from umd.config import CFG
 from umd import exception
 from umd.base.utils import QCStep
 from umd.utils import PkgTool
 
 
 class Install(object):
-    def __init__(self, metapkg):
+    def __init__(self):
         self.pkgtool = PkgTool()
-        self.metapkg = metapkg
+        self.metapkg = CFG["metapkg"]
 
     def _enable_verification_repo(self,
                                   qc_step,
-                                  repository_url,
+                                  url,
                                   download_dir="/tmp/repofiles"):
         """Downloads the repofiles found in the given URL.
 
@@ -23,7 +24,7 @@ class Install(object):
         qc_step.runcmd("rm -rf %s/*" % download_dir, fail_check=False)
         r = qc_step.runcmd("wget -P %s -r -l1 --no-parent -R*.html* %s"
                            % (download_dir,
-                              os.path.join(repository_url, "repofiles")))
+                              os.path.join(url, "repofiles")))
         if r.failed:
             qc_step.print_result("FAIL",
                                  "Error retrieving verification repofile.",
@@ -44,21 +45,9 @@ class Install(object):
                 shutil.copy2(f, os.path.join(repopath, repofile))
                 info("Verification repository '%s' enabled." % repofile)
 
-    def run(self,
-            installation_type,
-            epel_release_url,
-            umd_release_url,
-            repository_url=[],
-            **kwargs):
-        """Runs UMD installation.
-
-           Arguments::
-                installation_type: install from scratch ('install') or
-                                   update ('update')
-                epel_release_url: EPEL release (URL).
-                umd_release_url : UMD release (URL).
-                repository_url: verification repository URL (multiple allowed).
-        """
+    def run(self, **kwargs):
+        """Runs UMD installation."""
+        installation_type = CFG["installation_type"]
         if installation_type == "update":
             qc_step = QCStep("QC_UPGRADE_1", "Upgrade", "/tmp/qc_upgrade_1")
         elif installation_type == "install":
@@ -75,8 +64,8 @@ class Install(object):
                            "/etc/yum.repos.d/epel-*")):
             info(("Purged any previous EPEL or UMD repository file."))
 
-        for pkg in (("EPEL", epel_release_url),
-                    ("UMD", umd_release_url)):
+        for pkg in (("EPEL", CFG["epel_release"]),
+                    ("UMD", CFG["umd_release"])):
             pkg_id, pkg_url = pkg
             pkg_base = os.path.basename(pkg_url)
             pkg_loc = os.path.join("/tmp", pkg_base)
@@ -105,7 +94,7 @@ class Install(object):
                      % self.metapkg)
 
             # 2) Enable verification repository
-            for url in repository_url:
+            for url in CFG["repository_url"]:
                 self._enable_verification_repo(qc_step, url)
                 info("Verification repository '%s' enabled." % url)
 
@@ -116,7 +105,7 @@ class Install(object):
                                      msg="System successfully updated.")
         elif installation_type == "install":
             # 1) Enable verification repository
-            for url in repository_url:
+            for url in CFG["repository_url"]:
                 self._enable_verification_repo(qc_step, url)
                 info("Verification repository '%s' enabled." % url)
 

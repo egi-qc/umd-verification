@@ -38,9 +38,9 @@ def bdii_support(f):
 
 
 class InfoModel(object):
-    def __init__(self, cfgtool, has_infomodel):
-        self.cfgtool = cfgtool
-        self.has_infomodel = has_infomodel
+    def __init__(self):
+        self.cfgtool = CFG["cfgtool"]
+        self.has_infomodel = CFG["has_infomodel"]
 
         # NOTE(orviz): within a QCStep?
         install("glue-validator")

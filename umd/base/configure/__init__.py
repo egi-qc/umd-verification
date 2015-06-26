@@ -12,15 +12,10 @@ from umd.utils import to_list
 
 
 class YaimConfig(object):
-    def __init__(self,
-                 nodetype,
-                 siteinfo,
-                 config_path,
-                 pre_config,
-                 post_config):
-        self.nodetype = nodetype
-        self.siteinfo = siteinfo
-        self.config_path = config_path
+    def __init__(self, pre_config, post_config):
+        self.nodetype = CFG["nodetype"]
+        self.siteinfo = CFG["siteinfo"]
+        self.config_path = CFG["config_path"]
         self.pre_config = pre_config
         self.post_config = post_config
         self.has_run = False

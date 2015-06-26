@@ -20,7 +20,7 @@ QC_SPECIFIC_FILE = "etc/qc_specific.yaml"
 
 class Validate(object):
     def __init__(self):
-        self.qc_envvars = {}
+        self.qc_envvars = CFG["qc_envvars"]
 
     def _is_executable(self, f):
         """File executable check."""
@@ -143,7 +143,6 @@ class Validate(object):
 
     @qcstep_request
     def run(self, steps, qc_specific_id, *args, **kwargs):
-        qc_envvars = kwargs["qc_envvars"]
         if qc_specific_id:
             try:
                 with open(QC_SPECIFIC_FILE) as f:
@@ -161,9 +160,6 @@ class Validate(object):
             config = collections.defaultdict(dict)
             for k, v in d[qc_specific_id].items():
                 config[k] = v
-
-            if qc_envvars:
-                self.qc_envvars = qc_envvars
 
             if steps:
                 for method in steps:

@@ -7,12 +7,13 @@ from umd.config import CFG
 
 
 class Security(object):
-    def __init__(self, cfgtool, need_cert, ca, exceptions):
-        self.cfgtool = cfgtool
-        self.need_cert = need_cert
-        self.ca = ca
-        self.exceptions = exceptions # known_worldwritable_filelist: list with
-                                     # the known world writable files.
+    def __init__(self):
+        self.cfgtool = CFG["cfgtool"]
+        self.need_cert = CFG["need_cert"]
+        self.ca = CFG["ca"]
+        self.exceptions = CFG["exceptions"] # known_worldwritable_filelist:
+                                            # list with the known world
+                                            # writable files.
 
     def qc_sec_2(self):
         """SHA-2 Certificates Support."""
