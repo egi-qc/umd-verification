@@ -55,7 +55,6 @@ class Deploy(Task):
         self.cfgtool = None
         self.ca = None
         self.installation_type = None # FIXME default value?
-        #self.cfg = None
         self.qc_envvars = {}
         self.qc_steps = qc_steps
 
@@ -78,7 +77,9 @@ class Deploy(Task):
         pass
 
     def _install(self, **kwargs):
+        self.pre_install()
         Install().run(**kwargs)
+        self.post_install()
 
     def _security(self, **kwargs):
         Security().run(**kwargs)
@@ -87,7 +88,9 @@ class Deploy(Task):
         InfoModel().run(**kwargs)
 
     def _validate(self, **kwargs):
+        self.pre_validate()
         Validate().run(**kwargs)
+        self.post_validate()
 
     def _get_qc_envvars(self, d):
         return dict([(k.split("qcenv_")[1], v)
@@ -159,9 +162,7 @@ class Deploy(Task):
                 self.ca.create(trusted_ca_dir="/etc/grid-security/certificates")
 
             # QC_INST, QC_UPGRADE
-            self.pre_install()
             self._install()
-            self.post_install()
 
             # QC_SEC
             self._security()
@@ -170,6 +171,4 @@ class Deploy(Task):
             self._infomodel()
 
             # QC_FUNC
-            self.pre_validate()
             self._validate()
-            self.post_validate()
