@@ -10,8 +10,9 @@ from fabric.api import shell_env
 from umd.api import fail
 from umd.api import info
 from umd.api import ok
-from umd.base.utils import QCStep
+from umd.base.utils import get_qc_envvars
 from umd.base.utils import qcstep_request
+from umd.base.utils import QCStep
 from umd.config import CFG
 
 
@@ -20,7 +21,7 @@ QC_SPECIFIC_FILE = "etc/qc_specific.yaml"
 
 class Validate(object):
     def __init__(self):
-        self.qc_envvars = CFG["qc_envvars"]
+        self.qc_envvars = get_qc_envvars()
 
     def _is_executable(self, f):
         """File executable check."""

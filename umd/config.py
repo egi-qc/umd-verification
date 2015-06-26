@@ -18,11 +18,8 @@ class ConfigDict(dict):
         self.__setitem__("yaim_path", DEFAULTS["yaim"]["path"])
         self.__setitem__("log_path", DEFAULTS["base"]["log_path"])
 
-    #def __setitem__(self, k, v):
-    #    if v:
-    #        return super(ConfigDict, self).__setitem__(k, v)
-
     def update(self, d):
+        d_tmp = {}
         for k, v in d.items():
             append_arg = False
             if k.startswith("repository_url"):
@@ -34,14 +31,19 @@ class ConfigDict(dict):
 
             if append_arg:
                 try:
-                    l = self.__getitem__(item)
+                    l = d_tmp[item]
                 except KeyError:
                     l = []
                 if l:
-                    self.__setitem__(item, l.append(v))
+                    if v not in l:
+                        l.append(v)
+                        d_tmp[item] = l
                 else:
-                    self.__setitem__(item, [v])
+                    d_tmp[item] = [v]
             else:
-                self.__setitem__(k, v)
+                d_tmp[k] = v
+
+        super(ConfigDict, self).update(d_tmp)
+
 
 CFG = ConfigDict()

@@ -104,11 +104,16 @@ def runcmd(cmd,
     return r
 
 
-def yum(action, pkgs=None):
+def yum(action, dryrun, pkgs=None):
+    opts = ''
+    if dryrun:
+        runcmd("yum -y install yum-plugin-downloadonly")
+        opts = "--downloadonly"
+
     if pkgs:
-        return "yum -y %s %s" % (action, " ".join(pkgs))
+        return "yum -y %s %s %s" % (opts, action, " ".join(pkgs))
     else:
-        return "yum -y %s" % action
+        return "yum -y %s %s" % (opts, action)
 
 
 class PkgTool(object):
@@ -118,6 +123,9 @@ class PkgTool(object):
     REPOPATH = {
         "redhat": "/etc/yum.repos.d/",
     }
+
+    def __init__(self):
+        self.dryrun = False
 
     def _enable_repo(self, repofile):
         runcmd("wget %s -O %s" % (repofile,
@@ -142,9 +150,11 @@ class PkgTool(object):
         try:
             if pkgs:
                 pkgs = to_list(pkgs)
-                return self.PKGTOOL[system.distname](action, pkgs)
+                return self.PKGTOOL[system.distname](action,
+                                                     self.dryrun,
+                                                     pkgs=pkgs)
             else:
-                return self.PKGTOOL[system.distname](action)
+                return self.PKGTOOL[system.distname](action, self.dryrun)
         except KeyError:
             raise exception.InstallException("'%s' OS not supported"
                                              % system.distname)
@@ -154,18 +164,6 @@ def install(pkgs, repofile=None):
     """Shortcut for package installations."""
     pkgtool = PkgTool()
     return runcmd(pkgtool.install(pkgs, repofile))
-
-
-def run_qc_step():
-    """Run specific QC steps if requested through fab argument list."""
-    try:
-        d = {}
-        if CFG["qc_step"]:
-            for k,v in groupby([step.rsplit('_', 1) for step in CFG["qc_step"]], lambda x: x[0]):
-                d[k] = ['_'.join(s) for s in v]
-        return d
-    except KeyError:
-        return False
 
 
 def show_exec_banner():
