@@ -9,6 +9,7 @@ from umd.base import utils
 from umd.base.validate import Validate
 from umd.config import CFG
 from umd import exception
+from umd.utils import get_class_attrs
 from umd.utils import install
 from umd.utils import run_qc_step
 from umd.utils import show_exec_banner
@@ -25,6 +26,7 @@ class Deploy(Task):
                  nodetype=[],
                  siteinfo=[],
                  qc_specific_id=None,
+                 qc_steps={},
                  exceptions={}):
         """Arguments:
                 name: Fabric command name.
@@ -53,8 +55,9 @@ class Deploy(Task):
         self.cfgtool = None
         self.ca = None
         self.installation_type = None # FIXME default value?
-        self.cfg = None
+        #self.cfg = None
         self.qc_envvars = {}
+        self.qc_steps = qc_steps
 
     def pre_install(self):
         pass
@@ -75,26 +78,16 @@ class Deploy(Task):
         pass
 
     def _install(self, **kwargs):
-        Install(self.metapkg).run(self.installation_type,
-                                  self.cfg["epel_release"],
-                                  self.cfg["umd_release"],
-                                  repository_url=self.cfg["repository_url"],
-                                  **kwargs)
+        Install().run(**kwargs)
 
     def _security(self, **kwargs):
-        Security(self.cfgtool,
-                 self.need_cert,
-                 self.ca,
-                 self.exceptions).run(**kwargs)
+        Security().run(**kwargs)
 
     def _infomodel(self, **kwargs):
-        InfoModel(self.cfgtool,
-                  self.has_infomodel).run(**kwargs)
+        InfoModel().run(**kwargs)
 
     def _validate(self, **kwargs):
-        Validate().run(self.qc_specific_id,
-                       qc_envvars=self.qc_envvars,
-                       **kwargs)
+        Validate().run(**kwargs)
 
     def _get_qc_envvars(self, d):
         return dict([(k.split("qcenv_")[1], v)
@@ -103,11 +96,8 @@ class Deploy(Task):
     def run(self, installation_type, **kwargs):
         """Takes over base deployment.
 
-        Arguments:
             installation_type
                 Type of installation: 'install' (from scratch) or 'update'.
-
-        Keyword arguments (optional, takes default from etc/defaults.yaml):
             repository_url
                 Repository path with the verification content.
                 Could pass multiple values by prefixing with 'repository_url'.
@@ -128,21 +118,21 @@ class Deploy(Task):
                 Works exactly as 'repository_url' i.e. to pass more than one
                 QC step to run, prefix it as 'qc_step'.
         """
-        # Update configuration
-        CFG.update(kwargs)
-
         # Set class attributes
-        self.cfg = CFG
         self.installation_type = installation_type
         self.qc_envvars = self._get_qc_envvars(kwargs)
+        self.qc_steps = run_qc_step()
+
+        # Set configuration
+        CFG.update(get_class_attrs(self))
+        CFG.update(kwargs)
 
         # Show configuration summary
-        show_exec_banner(CFG, self.qc_envvars)
+        show_exec_banner()
 
         # Workflow
-        req_steps = run_qc_step(CFG)
-        if req_steps:
-            for k, v in req_steps.items():
+        if self.qc_steps:
+            for k, v in self.qc_steps.items():
                 try:
                     {"QC_DIST": self._install,
                      "QC_UPGRADE": self._install,
@@ -154,10 +144,7 @@ class Deploy(Task):
         else:
             # Configuration tool
             if self.nodetype and self.siteinfo:
-                self.cfgtool = YaimConfig(self.nodetype,
-                                          self.siteinfo,
-                                          CFG["yaim_path"],
-                                          pre_config=self.pre_config,
+                self.cfgtool = YaimConfig(pre_config=self.pre_config,
                                           post_config=self.post_config)
             #else:
             #    raise exception.ConfigException("Configuration not implemented.")

@@ -68,14 +68,10 @@ verify_proxy -> pepc
         install(["myproxy", "voms-clients", "ca-policy-egi-core"])
 
 
-glexec = GLExecWNDeploy(
+glexec_wn = GLExecWNDeploy(
     name="glexec-wn",
     doc="GLExec WN deployment.",
-    metapkg=["glexec",
-             "lcmaps-plugins-c-pep",
-             "lcmaps-plugins-c-pep-debuginfo",
-             "mkgltempdir",
-             "lcmaps-plugins-verify-proxy"],
+    metapkg=["glexec-wn"],
     need_cert=False,
     has_infomodel=False,
     qc_specific_id="glexec-wn"

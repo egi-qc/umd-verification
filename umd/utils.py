@@ -1,3 +1,4 @@
+import inspect
 import os.path
 from itertools import groupby
 
@@ -9,10 +10,11 @@ from fabric.colors import green
 from fabric.colors import red
 from fabric.context_managers import lcd
 
-from umd import exception
-from umd import system
 from umd.api import info
 from umd.api import fail
+from umd.config import CFG
+from umd import exception
+from umd import system
 
 
 def to_list(obj):
@@ -154,21 +156,21 @@ def install(pkgs, repofile=None):
     return runcmd(pkgtool.install(pkgs, repofile))
 
 
-def run_qc_step(cfgdict):
+def run_qc_step():
     """Run specific QC steps if requested through fab argument list."""
     try:
-        if cfgdict["qc_step"]:
-            d = {}
-            for k,v in groupby([step.rsplit('_', 1) for step in cfgdict["qc_step"]], lambda x: x[0]):
+        d = {}
+        if CFG["qc_step"]:
+            for k,v in groupby([step.rsplit('_', 1) for step in CFG["qc_step"]], lambda x: x[0]):
                 d[k] = ['_'.join(s) for s in v]
         return d
     except KeyError:
         return False
 
 
-def show_exec_banner(cfgdict, qc_envvars):
+def show_exec_banner():
         """Displays execution banner."""
-        cfg = cfgdict.copy()
+        cfg = CFG.copy()
 
         print(u'\n\u250C %s ' % green(" UMD verification app")
               + u'\u2500' * 49 + u'\u2510')
@@ -204,13 +206,22 @@ def show_exec_banner(cfgdict, qc_envvars):
             leftjust = len(max(basic_repo, key=len)) + 5
             print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
 
-        if qc_envvars:
+        if cfg["qc_envvars"]:
             print(u'\u2502')
             print(u'\u2502 Local environment variables passed:')
-            leftjust = len(max(qc_envvars, key=len)) + 5
-            for k, v in qc_envvars.items():
+            leftjust = len(max(cfg["qc_envvars"], key=len)) + 5
+            for k, v in cfg["qc_envvars"].items():
                 cfg.pop("qcenv_%s" % k)
                 print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
 
         print(u'\u2502')
         print(u'\u2514' + u'\u2500' * 72)
+
+
+def get_class_attrs(obj):
+    """Retuns a list of the class attributes for a given object."""
+    return dict([(attr, getattr(obj, attr))
+            for attr in dict(inspect.getmembers(
+                                obj,
+                                lambda a:not(inspect.isroutine(a)))).keys()
+            if not attr.startswith('__')])
