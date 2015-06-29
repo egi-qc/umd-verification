@@ -17,14 +17,10 @@ class Install(object):
                                   qc_step,
                                   url,
                                   download_dir="/tmp/repofiles"):
-        """Downloads the repofiles found in the given URL.
-
-           Note: repofiles can be found (typo?) without the ".repo" extension.
-        """
+        """Downloads the repofiles found in the given URL."""
         qc_step.runcmd("rm -rf %s/*" % download_dir, fail_check=False)
         r = qc_step.runcmd("wget -P %s -r -l1 --no-parent -R*.html* %s"
-                           % (download_dir,
-                              os.path.join(url, "repofiles")))
+                           % (download_dir, url))
         if r.failed:
             qc_step.print_result("FAIL",
                                  "Error retrieving verification repofile.",
@@ -32,18 +28,18 @@ class Install(object):
 
         repofiles = []
         for path in os.walk(download_dir):
-            if os.path.basename(path[0]) == "repofiles":
-                if path[-1]:
-                    repofiles.extend([os.path.join(path[0], f)
-                                      for f in path[-1]])
+            if path[2] and path[0].find("repofiles") != -1:
+                for f in path[2]:
+                    if not f.endswith(".repo"):
+                        info("File without '.repo' extension found: '%s'" % f)
+                    else:
+                        repofiles.append(os.path.join(path[0], f))
         if repofiles:
             repopath = self.pkgtool.get_path()
             for f in repofiles:
                 repofile = os.path.basename(f)
-                if not repofile.endswith(".repo"):
-                    repofile = '.'.join([repofile, "repo"])
                 shutil.copy2(f, os.path.join(repopath, repofile))
-                info("Verification repository '%s' enabled." % repofile)
+                info("Verification repository '%s' enabled." % f)
 
     def run(self, **kwargs):
         """Runs UMD installation."""
