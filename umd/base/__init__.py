@@ -11,7 +11,6 @@ from umd.config import CFG
 from umd import exception
 from umd.utils import get_class_attrs
 from umd.utils import install
-from umd.utils import run_qc_step
 from umd.utils import show_exec_banner
 
 
@@ -26,8 +25,9 @@ class Deploy(Task):
                  nodetype=[],
                  siteinfo=[],
                  qc_specific_id=None,
-                 qc_steps={},
-                 exceptions={}):
+                 qc_step={},
+                 exceptions={},
+                 dryrun=False):
         """Arguments:
                 name: Fabric command name.
                 doc: docstring that will appear when typing `fab -l`.
@@ -56,7 +56,8 @@ class Deploy(Task):
         self.ca = None
         self.installation_type = None # FIXME default value?
         self.qc_envvars = {}
-        self.qc_steps = qc_steps
+        self.qc_step = qc_step
+        self.dryrun = dryrun
 
     def pre_install(self):
         pass
@@ -92,11 +93,7 @@ class Deploy(Task):
         Validate().run(**kwargs)
         self.post_validate()
 
-    def _get_qc_envvars(self, d):
-        return dict([(k.split("qcenv_")[1], v)
-                     for k, v in d.items() if k.startswith("qcenv")])
-
-    def run(self, installation_type, **kwargs):
+    def run(self, **kwargs):
         """Takes over base deployment.
 
             installation_type
@@ -122,11 +119,6 @@ class Deploy(Task):
                 QC step to run, prefix it as 'qc_step'.
         """
         # Set class attributes
-        self.installation_type = installation_type
-        self.qc_envvars = self._get_qc_envvars(kwargs)
-        self.qc_steps = run_qc_step()
-
-        # Set configuration
         CFG.update(get_class_attrs(self))
         CFG.update(kwargs)
 
@@ -134,8 +126,9 @@ class Deploy(Task):
         show_exec_banner()
 
         # Workflow
-        if self.qc_steps:
-            for k, v in self.qc_steps.items():
+        if CFG["qc_step"]:
+            for step in CFG["qc_step"]:
+                k, v = (step.rsplit('_', 1)[0], step)
                 try:
                     {"QC_DIST": self._install,
                      "QC_UPGRADE": self._install,

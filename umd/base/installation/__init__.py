@@ -82,6 +82,11 @@ class Install(object):
         else:
             info("'yum-priorities' (UMD) requirement installed.")
 
+        if CFG["dryrun"]:
+            info(("Installation or upgrade process will be simulated "
+                  "(dryrun: ON)"))
+            self.pkgtool.dryrun = True
+
         if installation_type == "update":
             # 1) Install base (production) version
             r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
