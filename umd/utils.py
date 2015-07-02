@@ -67,6 +67,7 @@ def runcmd(cmd,
            fail_check=True,
            stop_on_error=False,
            logfile=None,
+           get_error_msg=False,
            stderr_to_stdout=False):
     """Runs a generic command.
             cmd: command to execute.
@@ -75,6 +76,7 @@ def runcmd(cmd,
                 interrupted in case of failure.
             stop_on_error: whether abort or not in case of failure.
             logfile: file to log the command execution.
+            get_error_msg: return the formatted error message.
             stderr_to_stdout: redirect standard error to standard output.
     """
     if stderr_to_stdout:
@@ -91,6 +93,8 @@ def runcmd(cmd,
     logs = []
     if logfile:
         logs = to_file(r, logfile)
+    if logs:
+        r.logfile = logs
 
     if fail_check and r.failed:
         msg = format_error_msg(logs, cmd)
@@ -98,17 +102,27 @@ def runcmd(cmd,
             abort(fail(msg % cmd))
         else:
             fail(msg % cmd)
+        if get_error_msg:
+            #if not msg:
+            #    debug("No message was created for command '%s'" % cmd)
+            r.msgerror = msg
 
-    if logs:
-        return r, logs
     return r
 
 
-def yum(action, pkgs=None):
+def yum(action, dryrun, pkgs=None):
+    opts = ''
+    if dryrun:
+        if system.distro_version == "redhat5":
+            runcmd("yum -y install yum-downloadonly")
+        elif system.distro_version == "redhat6":
+            runcmd("yum -y install yum-plugin-downloadonly")
+        opts = "--downloadonly"
+
     if pkgs:
-        return "yum -y %s %s" % (action, " ".join(pkgs))
+        return "yum -y %s %s %s" % (opts, action, " ".join(pkgs))
     else:
-        return "yum -y %s" % action
+        return "yum -y %s %s" % (opts, action)
 
 
 class PkgTool(object):
@@ -118,6 +132,9 @@ class PkgTool(object):
     REPOPATH = {
         "redhat": "/etc/yum.repos.d/",
     }
+
+    def __init__(self):
+        self.dryrun = False
 
     def _enable_repo(self, repofile):
         runcmd("wget %s -O %s" % (repofile,
@@ -142,9 +159,11 @@ class PkgTool(object):
         try:
             if pkgs:
                 pkgs = to_list(pkgs)
-                return self.PKGTOOL[system.distname](action, pkgs)
+                return self.PKGTOOL[system.distname](action,
+                                                     self.dryrun,
+                                                     pkgs=pkgs)
             else:
-                return self.PKGTOOL[system.distname](action)
+                return self.PKGTOOL[system.distname](action, self.dryrun)
         except KeyError:
             raise exception.InstallException("'%s' OS not supported"
                                              % system.distname)
@@ -154,18 +173,6 @@ def install(pkgs, repofile=None):
     """Shortcut for package installations."""
     pkgtool = PkgTool()
     return runcmd(pkgtool.install(pkgs, repofile))
-
-
-def run_qc_step():
-    """Run specific QC steps if requested through fab argument list."""
-    try:
-        d = {}
-        if CFG["qc_step"]:
-            for k,v in groupby([step.rsplit('_', 1) for step in CFG["qc_step"]], lambda x: x[0]):
-                d[k] = ['_'.join(s) for s in v]
-        return d
-    except KeyError:
-        return False
 
 
 def show_exec_banner():

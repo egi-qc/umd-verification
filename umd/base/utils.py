@@ -9,9 +9,11 @@ from fabric.colors import yellow
 from fabric.context_managers import lcd
 
 from umd.api import info
+from umd.config import CFG
 from umd import system
 from umd.utils import format_error_msg
 from umd.utils import runcmd
+from umd.utils import to_list
 
 
 def qcstep_request(f):
@@ -19,16 +21,24 @@ def qcstep_request(f):
     def _request(self, *args, **kwargs):
         step_methods = []
         if "qc_step" in kwargs.keys():
-            for step in kwargs["qc_step"]:
+            for step in to_list(kwargs["qc_step"]):
                 try:
                     method = getattr(self, step.lower())
                     step_methods.append(method)
                 except AttributeError:
                     info("Ignoring QC step '%s': not defined." % step)
                     continue
-
-        return f(self, step_methods, *args, **kwargs)
+        if step_methods:
+            return f(self, step_methods, *args, **kwargs)
     return _request
+
+
+def get_qc_envvars():
+    """Returns a dictionary with the bash environment variables found
+       in configuration.
+    """
+    return dict([(k.split("qcenv_")[1], v)
+                  for k, v in CFG.items() if k.startswith("qcenv")])
 
 
 class QCStep(object):
@@ -73,7 +83,9 @@ class QCStep(object):
                cmd,
                chdir=None,
                fail_check=True,
+               stop_on_error=True,
                log_to_file=True,
+               get_error_msg=False,
                stderr_to_stdout=False):
         logfile = None
         if log_to_file:
@@ -82,10 +94,15 @@ class QCStep(object):
         r = runcmd(cmd,
                    chdir=chdir,
                    fail_check=fail_check,
+                   stop_on_error=stop_on_error,
                    logfile=logfile,
+                   get_error_msg=get_error_msg,
                    stderr_to_stdout=stderr_to_stdout)
-        if len(r) == 2:
-            r, self.logs = r
+
+        try:
+            self.logs = r.logfile
+        except AttributeError:
+            pass
 
         return r
 

@@ -52,7 +52,8 @@ class Install(object):
                              "/tmp/qc_inst_1")
 
         r = qc_step.runcmd(self.pkgtool.remove(["epel-release*",
-                                                "umd-release*"]))
+                                                "umd-release*"]),
+                           stop_on_error=False)
         if r.failed:
             info("Could not delete [epel/umd]-release packages.")
 
@@ -82,6 +83,11 @@ class Install(object):
         else:
             info("'yum-priorities' (UMD) requirement installed.")
 
+        if CFG["dryrun"]:
+            info(("Installation or upgrade process will be simulated "
+                  "(dryrun: ON)"))
+            self.pkgtool.dryrun = True
+
         if installation_type == "update":
             # 1) Install base (production) version
             r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
@@ -95,8 +101,19 @@ class Install(object):
                 info("Verification repository '%s' enabled." % url)
 
             # 3) Update
-            r = qc_step.runcmd(self.pkgtool.update())
-            if not r.failed:
+            r = qc_step.runcmd(self.pkgtool.update(),
+                               fail_check=False,
+                               stop_on_error=False,
+                               get_error_msg=True)
+            if r.failed:
+                # YUM downloadonly plugin returns 1 on success
+                if r.stderr.find("--downloadonly specified") != 1:
+                    qc_step.print_result("OK",
+                                         ("Dry-run update ended "
+                                          "successfully."))
+                else:
+                    qc_step.print_result("FAIL", r.msgerror)
+            else:
                 qc_step.print_result("OK",
                                      msg="System successfully updated.")
         elif installation_type == "install":
@@ -106,9 +123,20 @@ class Install(object):
                 info("Verification repository '%s' enabled." % url)
 
             # 2) Install verification version
-            r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
+            r = qc_step.runcmd(self.pkgtool.install(self.metapkg),
+                               fail_check=False,
+                               stop_on_error=False,
+                               get_error_msg=True)
             # NOTE(orviz): missing WARNING case
-            if not r.failed:
+            if r.failed:
+                # YUM's downloadonly plugin returns 1 on success
+                if r.stderr.find("--downloadonly specified") != 1:
+                    qc_step.print_result("OK",
+                                         ("Dry-run installation ended "
+                                          "successfully."))
+                else:
+                    qc_step.print_result("FAIL", r.msgerror)
+            else:
                 qc_step.print_result("OK",
                                      ("Metapackage '%s' installed "
                                       "successfully.." % self.metapkg))
