@@ -8,6 +8,9 @@ from umd import exception
 fqdn = socket.getfqdn()
 
 distname, version, distid = platform.dist()
+distname = distname.lower()
+version = version.lower()
+distid = distid.lower()
 
 # major version
 version_major = version.split('.')[0]
@@ -16,4 +19,4 @@ if not version_major.isdigit():
                                       "for '%s'" % version))
 
 # distro_version
-distro_version = ''.join([distname, version_major])
+distro_version = ''.join([distname, version_major]).lower()

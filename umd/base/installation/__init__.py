@@ -6,6 +6,7 @@ from umd.api import fail
 from umd.config import CFG
 from umd import exception
 from umd.base.utils import QCStep
+from umd import system
 from umd.utils import PkgTool
 
 
@@ -44,45 +45,64 @@ class Install(object):
 
     def run(self, **kwargs):
         """Runs UMD installation."""
+        # Handle installation type
         installation_type = CFG["installation_type"]
         if installation_type == "update":
             qc_step = QCStep("QC_UPGRADE_1", "Upgrade", "/tmp/qc_upgrade_1")
         elif installation_type == "install":
-            qc_step = QCStep("QC_INST_1",
+            qc_step = QCStep("QC_DIST_1",
                              "Binary Distribution",
                              "/tmp/qc_inst_1")
 
-        r = qc_step.runcmd(self.pkgtool.remove(["epel-release*",
-                                                "umd-release*"]),
-                           stop_on_error=False)
-        if r.failed:
-            info("Could not delete [epel/umd]-release packages.")
+        repo_config = True
+        if "ignore_repo_config" in kwargs.keys():
+            repo_config = False
 
-        if qc_step.runcmd(("/bin/rm -f /etc/yum.repos.d/UMD-* "
-                           "/etc/yum.repos.d/epel-*")):
-            info(("Purged any previous EPEL or UMD repository file."))
+        if repo_config:
+            # Distribution-based settings
+            repopath = self.pkgtool.client.path
+            msg_purge = "UMD"
+            paths_to_purge = ["%s/UMD-*" % repopath]
+            pkgs_to_purge = ["umd-release*"]
+            pkgs_to_download = [("UMD", CFG["umd_release"])]
+            pkgs_additional = []
+            if system.distname == "redhat":
+                msg_purge = " ".join([msg_purge, "and/or EPEL"])
+                paths_to_purge.append("%s/epel-*" % repopath)
+                pkgs_to_purge.append("epel-release*")
+                pkgs_to_download.append(("EPEL", CFG["epel_release"]))
+                pkgs_additional.append("yum-priorities")
 
-        for pkg in (("EPEL", CFG["epel_release"]),
-                    ("UMD", CFG["umd_release"])):
-            pkg_id, pkg_url = pkg
-            pkg_base = os.path.basename(pkg_url)
-            pkg_loc = os.path.join("/tmp", pkg_base)
-            if qc_step.runcmd("wget %s -O %s" % (pkg_url, pkg_loc)):
-                info("%s release RPM fetched from %s." % (pkg_id, pkg_url))
-
-            r = qc_step.runcmd(self.pkgtool.install(pkg_loc))
+            # Installation/upgrade workflow
+            r = qc_step.runcmd(self.pkgtool.remove(pkgs_to_purge),
+                               stop_on_error=False)
             if r.failed:
-                qc_step.print_result("FAIL",
-                                     "Error while installing %s release."
-                                     % pkg_id)
-            else:
-                info("%s release package installed." % pkg_id)
+                info("Could not delete %s release packages." % msg_purge)
 
-        r = qc_step.runcmd(self.pkgtool.install("yum-priorities"))
-        if r.failed:
-            info("Error while installing 'yum-priorities'.")
-        else:
-            info("'yum-priorities' (UMD) requirement installed.")
+            if qc_step.runcmd("/bin/rm -f %s" % " ".join(paths_to_purge)):
+                info("Purged any previous %s repository file." % msg_purge)
+
+            for pkg in pkgs_to_download:
+                pkg_id, pkg_url = pkg
+                pkg_base = os.path.basename(pkg_url)
+                pkg_loc = os.path.join("/tmp", pkg_base)
+                if qc_step.runcmd("wget %s -O %s" % (pkg_url, pkg_loc)):
+                    info("%s release package fetched from %s." % (pkg_id, pkg_url))
+
+                r = qc_step.runcmd(self.pkgtool.install(pkg_loc))
+                if r.failed:
+                    qc_step.print_result("FAIL",
+                                         "Error while installing %s release."
+                                         % pkg_id)
+                else:
+                    info("%s release package installed." % pkg_id)
+
+            for pkg in pkgs_additional:
+                r = qc_step.runcmd(self.pkgtool.install(pkg))
+                if r.failed:
+                    info("Error while installing '%s'." % pkg)
+                else:
+                    info("'%s' requirement installed." % pkg)
 
         if CFG["dryrun"]:
             info(("Installation or upgrade process will be simulated "
@@ -136,6 +156,8 @@ class Install(object):
             else:
                 is_ok = False
                 msgtext = r.msgerror
+        else:
+            msgtext = "Installation ended successfully."
 
         if is_ok:
             if self.metapkg:
