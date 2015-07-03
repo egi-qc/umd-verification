@@ -1,7 +1,11 @@
 from umd.base import Deploy
 
+class BDIIDeploy(Deploy):
+    def post_install(self):
+        self.cfgtool.run()
 
-bdii_site = Deploy(
+
+bdii_site = BDIIDeploy(
     name="bdii-site",
     doc="Site BDII deployment.",
     metapkg="emi-bdii-site",

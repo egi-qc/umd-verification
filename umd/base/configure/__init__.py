@@ -7,6 +7,7 @@ from fabric.context_managers import lcd
 
 from umd.api import fail
 from umd.api import info
+from umd.config import CFG
 from umd import exception
 from umd.utils import to_list
 
@@ -15,12 +16,12 @@ class YaimConfig(object):
     def __init__(self, pre_config, post_config):
         self.nodetype = CFG["nodetype"]
         self.siteinfo = CFG["siteinfo"]
-        self.config_path = CFG["config_path"]
+        self.config_path = CFG["yaim_path"]
         self.pre_config = pre_config
         self.post_config = post_config
         self.has_run = False
 
-    def run(self, qc_step):
+    def run(self):
         self.pre_config()
 
         self.nodetype = to_list(self.nodetype)

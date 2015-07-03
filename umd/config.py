@@ -21,25 +21,28 @@ class ConfigDict(dict):
     def update(self, d):
         d_tmp = {}
         for k, v in d.items():
-            append_arg = False
-            if k.startswith("repository_url"):
-                item = "repository_url"
-                append_arg = True
-            elif k.startswith("qc_step"):
-                item = "qc_step"
-                append_arg = True
+            if v:
+                append_arg = False
+                if k.startswith("repository_url"):
+                    item = "repository_url"
+                    append_arg = True
+                elif k.startswith("qc_step"):
+                    item = "qc_step"
+                    append_arg = True
 
-            if append_arg:
-                try:
-                    l = d_tmp[item]
-                except KeyError:
-                    l = []
-                if l:
-                    if v not in l:
-                        l.append(v)
-                        d_tmp[item] = l
+                if append_arg:
+                    try:
+                        l = d_tmp[item]
+                    except KeyError:
+                        l = []
+                    if l:
+                        if v not in l:
+                            l.append(v)
+                            d_tmp[item] = l
+                    else:
+                        d_tmp[item] = [v]
                 else:
-                    d_tmp[item] = [v]
+                    d_tmp[k] = v
             else:
                 d_tmp[k] = v
 

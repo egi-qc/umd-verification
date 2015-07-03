@@ -125,6 +125,22 @@ class Deploy(Task):
         # Show configuration summary
         show_exec_banner()
 
+        # Configuration tool
+        if self.nodetype and self.siteinfo:
+            self.cfgtool = YaimConfig(pre_config=self.pre_config,
+                                      post_config=self.post_config)
+        #else:
+        #    raise exception.ConfigException("Configuration not implemented.")
+
+        # Certification Authority
+        if self.need_cert:
+            install("ca-policy-egi-core", repofile=CFG["igtf_repo"])
+            self.ca = utils.OwnCA(
+                domain_comp_country="es",
+                domain_comp="UMDverification",
+                common_name="UMDVerificationOwnCA")
+            self.ca.create(trusted_ca_dir="/etc/grid-security/certificates")
+
         # Workflow
         if CFG["qc_step"]:
             for step in CFG["qc_step"]:
@@ -138,22 +154,6 @@ class Deploy(Task):
                 except KeyError, e:
                     fail("%s step not found in the Quality Criteria" % k)
         else:
-            # Configuration tool
-            if self.nodetype and self.siteinfo:
-                self.cfgtool = YaimConfig(pre_config=self.pre_config,
-                                          post_config=self.post_config)
-            #else:
-            #    raise exception.ConfigException("Configuration not implemented.")
-
-            # Certification Authority
-            if self.need_cert:
-                install("ca-policy-egi-core", repofile=CFG["igtf_repo"])
-                self.ca = utils.OwnCA(
-                    domain_comp_country="es",
-                    domain_comp="UMDverification",
-                    common_name="UMDVerificationOwnCA")
-                self.ca.create(trusted_ca_dir="/etc/grid-security/certificates")
-
             # QC_INST, QC_UPGRADE
             self._install()
 
