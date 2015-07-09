@@ -1,6 +1,7 @@
 import inspect
-import os.path
 from itertools import groupby
+import os.path
+import re
 
 from fabric.api import abort
 from fabric.api import local
@@ -145,10 +146,45 @@ class Yum(object):
         return d
 
 
+class Apt(object):
+    def __init__(self):
+        self.path = "/etc/apt/sources.list.d/"
+
+    def run(self, action, dryrun, pkgs=None):
+        # Check if package exists locally => dpkg
+        if os.path.exists(pkgs[0]):
+            return "dpkg -i %s" % " ".join(pkgs)
+
+        opts = ''
+        if dryrun:
+            opts = "--dry-run"
+
+        if pkgs:
+            return "apt-get -y %s %s %s" % (opts, action, " ".join(pkgs))
+        else:
+            return "apt-get -y %s %s" % (opts, action)
+
+    def get_repos(self):
+        """Gets the list of enabled repositories."""
+        return runcmd(("grep -h ^deb /etc/apt/sources.list "
+                       "/etc/apt/sources.list.d/*")).split('\n')
+
+    def get_pkglist(self, r):
+        d = {}
+        for line in r.split('\n'):
+            if line.startswith("Setting up"):
+                 pkg, version = re.search(("Setting up ([a-zA-Z-]+) "
+                                           "\((.+)\)"), line).groups()
+                 d[pkg] = '-'.join([pkg, version])
+        return d
+
+
 class PkgTool(object):
     def __init__(self):
         self.client = {
+            "debian": Apt,
             "redhat": Yum,
+	    "ubuntu": Apt,
         }[system.distname]()
         self.dryrun = False
 
@@ -157,6 +193,9 @@ class PkgTool(object):
 
     def get_pkglist(self, r):
         return self.client.get_pkglist(r)
+
+    def get_repos(self):
+        return self.client.get_repos()
 
     def install(self, pkgs):
         return self._exec(action="install", pkgs=pkgs)
@@ -177,12 +216,6 @@ class PkgTool(object):
         except KeyError:
             raise exception.InstallException("'%s' OS not supported"
                                              % system.distname)
-
-
-def install(pkgs, repofile=None):
-    """Shortcut for package installations."""
-    pkgtool = PkgTool()
-    return runcmd(pkgtool.install(pkgs, repofile))
 
 
 def show_exec_banner():
@@ -210,7 +243,10 @@ def show_exec_banner():
 
         print(u'\u2502')
         print(u'\u2502 Repository basic configuration:')
-        basic_repo = ["epel_release", "umd_release", "igtf_repo"]
+        if system.distname == "redhat":
+            basic_repo = ["epel_release", "umd_release", "igtf_repo"]
+        elif system.distname in ("debian", "ubuntu"):
+            basic_repo = ["umd_release", "igtf_repo"]
         for k in basic_repo:
             v = cfg.pop(k)
             leftjust = len(max(basic_repo, key=len)) + 5
@@ -242,3 +278,14 @@ def get_class_attrs(obj):
                                 obj,
                                 lambda a:not(inspect.isroutine(a)))).keys()
             if not attr.startswith('__')])
+
+
+def install(pkgs):
+    """Shortcut for package installations."""
+    pkgtool = PkgTool()
+    return runcmd(pkgtool.install(pkgs))
+
+def get_repos():
+    """Shortcut for getting enabled repositories in the system."""
+    pkgtool = PkgTool()
+    return pkgtool.get_repos()
