@@ -2,6 +2,7 @@ import os.path
 import shutil
 
 from umd.api import info
+from umd.api import fail
 from umd.config import CFG
 from umd import exception
 from umd.base.utils import QCStep
@@ -89,33 +90,25 @@ class Install(object):
             self.pkgtool.dryrun = True
 
         if installation_type == "update":
-            # 1) Install base (production) version
-            r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
-            if not r.failed:
-                info("UMD product/s '%s' installation finished."
-                     % self.metapkg)
+            if CFG["repository_url"]:
+                # 1) Install base (production) version
+                r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
+                if not r.failed:
+                    info("UMD product/s '%s' production version installed."
+                         % self.metapkg)
 
-            # 2) Enable verification repository
-            for url in CFG["repository_url"]:
-                self._enable_verification_repo(qc_step, url)
-                info("Verification repository '%s' enabled." % url)
+                # 2) Enable verification repository
+                for url in CFG["repository_url"]:
+                    self._enable_verification_repo(qc_step, url)
+                    info("Verification repository '%s' enabled." % url)
 
             # 3) Update
             r = qc_step.runcmd(self.pkgtool.update(),
                                fail_check=False,
                                stop_on_error=False,
                                get_error_msg=True)
-            if r.failed:
-                # YUM downloadonly plugin returns 1 on success
-                if r.stderr.find("--downloadonly specified") != 1:
-                    qc_step.print_result("OK",
-                                         ("Dry-run update ended "
-                                          "successfully."))
-                else:
-                    qc_step.print_result("FAIL", r.msgerror)
-            else:
-                qc_step.print_result("OK",
-                                     msg="System successfully updated.")
+            d = self.pkgtool.get_pkglist(r)
+
         elif installation_type == "install":
             # 1) Enable verification repository
             for url in CFG["repository_url"]:
@@ -127,20 +120,36 @@ class Install(object):
                                fail_check=False,
                                stop_on_error=False,
                                get_error_msg=True)
+            d = self.pkgtool.get_pkglist(r)
+
             # NOTE(orviz): missing WARNING case
-            if r.failed:
-                # YUM's downloadonly plugin returns 1 on success
-                if r.stderr.find("--downloadonly specified") != 1:
-                    qc_step.print_result("OK",
-                                         ("Dry-run installation ended "
-                                          "successfully."))
-                else:
-                    qc_step.print_result("FAIL", r.msgerror)
-            else:
-                qc_step.print_result("OK",
-                                     ("Metapackage '%s' installed "
-                                      "successfully.." % self.metapkg))
         else:
             raise exception.InstallException(("Installation type '%s' "
                                               "not implemented."
                                               % installation_type))
+        is_ok = True
+        if r.failed:
+            # YUM's downloadonly plugin returns 1 on success
+            if r.stderr.find("--downloadonly specified") != 1:
+                is_ok = True
+                msgtext = "Dry-run installation ended successfully."
+            else:
+                is_ok = False
+                msgtext = r.msgerror
+
+        if is_ok:
+            if self.metapkg:
+                for pkg in self.metapkg:
+                    try:
+                        info("Package '%s' installed version: %s." % (pkg, d[pkg]))
+                    except KeyError:
+                        fail("Package '%s' could not be installed." % pkg)
+                        is_ok = False
+                        msgtext = "Not all the packages could be installed."
+            else:
+                info("List of packages updated: %s" % self.pkgtool.get_pkglist(r))
+
+        if is_ok:
+            qc_step.print_result("OK", msgtext)
+        else:
+            qc_step.print_result("FAIL", msgtext)

@@ -1,5 +1,6 @@
 from fabric.tasks import Task
 
+from umd.api import abort
 from umd.api import fail
 from umd.base.configure import YaimConfig
 from umd.base.infomodel import InfoModel
@@ -146,13 +147,15 @@ class Deploy(Task):
             for step in CFG["qc_step"]:
                 k, v = (step.rsplit('_', 1)[0], step)
                 try:
-                    {"QC_DIST": self._install,
-                     "QC_UPGRADE": self._install,
-                     "QC_SEC": self._security,
-                     "QC_INFO": self._infomodel,
-                     "QC_FUNC": self._validate}[k](**{"qc_step": v})
+                    step_mappings = {"QC_DIST": self._install,
+                        "QC_UPGRADE": self._install,
+                        "QC_SEC": self._security,
+                        "QC_INFO": self._infomodel,
+                        "QC_FUNC": self._validate}
                 except KeyError, e:
-                    fail("%s step not found in the Quality Criteria" % k)
+                    abort(fail("%s step not found in the Quality Criteria" % k))
+
+                step_mappings[k](**{"qc_step": v})
         else:
             # QC_INST, QC_UPGRADE
             self._install()

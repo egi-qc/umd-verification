@@ -14,7 +14,11 @@ def get_metapkg_list():
                  to_list(ui.metapkg),
                  ["emi-cream-ce",
                   "apel-client",
-                  "apel-lib"]):
+                  "apel-lib",
+                  "cvmfs",
+                  "squid",
+                  "xrootd",
+                  "dpm-xrootd"]):
         l.extend(pkgs)
     return l
 

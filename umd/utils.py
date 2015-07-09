@@ -110,43 +110,55 @@ def runcmd(cmd,
     return r
 
 
-def yum(action, dryrun, pkgs=None):
-    opts = ''
-    if dryrun:
-        if system.distro_version == "redhat5":
-            runcmd("yum -y install yum-downloadonly")
-        elif system.distro_version == "redhat6":
-            runcmd("yum -y install yum-plugin-downloadonly")
-        opts = "--downloadonly"
+class Yum(object):
+    def __init__(self):
+        self.path = "/etc/yum.repos.d/"
 
-    if pkgs:
-        return "yum -y %s %s %s" % (opts, action, " ".join(pkgs))
-    else:
-        return "yum -y %s %s" % (opts, action)
+    def run(self, action, dryrun, pkgs=None):
+        opts = ''
+        if dryrun:
+            if system.distro_version == "redhat5":
+                runcmd("yum -y install yum-downloadonly")
+            elif system.distro_version == "redhat6":
+                runcmd("yum -y install yum-plugin-downloadonly")
+            opts = "--downloadonly"
+
+        if action == "pkglist":
+            return "yum history packages-list %s" % " ".join(pkgs)
+
+        if pkgs:
+            return "yum -y %s %s %s" % (opts, action, " ".join(pkgs))
+        else:
+            return "yum -y %s %s" % (opts, action)
+
+    def get_pkglist(self, r):
+        """Gets the list of packages being installed parsing yum output."""
+        d = {}
+        for line in filter(None, r.stdout.split('=')):
+            if line.startswith("\nInstalling:\n"):
+                for line2 in line.split('\n'):
+                    try:
+                        name, arch, version, repo, size, unit = line2.split()
+                        d[name] = '.'.join(['-'.join([name, version]), arch])
+                    except ValueError:
+                        pass
+        return d
 
 
 class PkgTool(object):
-    PKGTOOL = {
-        "redhat": yum,
-    }
-    REPOPATH = {
-        "redhat": "/etc/yum.repos.d/",
-    }
-
     def __init__(self):
+        self.client = {
+            "redhat": Yum,
+        }[system.distname]()
         self.dryrun = False
 
-    def _enable_repo(self, repofile):
-        runcmd("wget %s -O %s" % (repofile,
-                                  os.path.join(self.REPOPATH[system.distname],
-                                               os.path.basename(repofile))))
-
     def get_path(self):
-        return self.REPOPATH[system.distname]
+        return self.client.path
 
-    def install(self, pkgs, repofile=None):
-        if repofile:
-            self._enable_repo(repofile)
+    def get_pkglist(self, r):
+        return self.client.get_pkglist(r)
+
+    def install(self, pkgs):
         return self._exec(action="install", pkgs=pkgs)
 
     def remove(self, pkgs):
@@ -159,11 +171,9 @@ class PkgTool(object):
         try:
             if pkgs:
                 pkgs = to_list(pkgs)
-                return self.PKGTOOL[system.distname](action,
-                                                     self.dryrun,
-                                                     pkgs=pkgs)
+                return self.client.run(action, self.dryrun, pkgs=pkgs)
             else:
-                return self.PKGTOOL[system.distname](action, self.dryrun)
+                return self.client.run(action, self.dryrun)
         except KeyError:
             raise exception.InstallException("'%s' OS not supported"
                                              % system.distname)
