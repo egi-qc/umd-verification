@@ -124,9 +124,6 @@ class Yum(object):
                 runcmd("yum -y install yum-plugin-downloadonly")
             opts = "--downloadonly"
 
-        if action == "pkglist":
-            return "yum history packages-list %s" % " ".join(pkgs)
-
         if pkgs:
             return "yum -y %s %s %s" % (opts, action, " ".join(pkgs))
         else:
