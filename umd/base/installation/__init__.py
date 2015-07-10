@@ -67,10 +67,10 @@ class Install(object):
             pkgs_to_download = [("UMD", CFG["umd_release"])]
             pkgs_additional = []
             if system.distname == "redhat":
-                msg_purge = " ".join([msg_purge, "and/or EPEL"])
-                paths_to_purge.append("%s/epel-*" % repopath)
-                pkgs_to_purge.append("epel-release*")
-                pkgs_to_download.append(("EPEL", CFG["epel_release"]))
+                msg_purge = " ".join(["EPEL and/or", msg_purge])
+                paths_to_purge.insert(0, "%s/epel-*" % repopath)
+                pkgs_to_purge.insert(0, "epel-release*")
+                pkgs_to_download.insert(0, ("EPEL", CFG["epel_release"]))
                 pkgs_additional.append("yum-priorities")
 
             # Installation/upgrade workflow
