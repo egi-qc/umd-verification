@@ -124,6 +124,9 @@ class Yum(object):
                 runcmd("yum -y install yum-plugin-downloadonly")
             opts = "--downloadonly"
 
+        if action == "refresh":
+            action = "makecache"
+
         if pkgs:
             return "yum -y %s %s %s" % (opts, action, " ".join(pkgs))
         else:
@@ -155,6 +158,9 @@ class Apt(object):
         opts = ''
         if dryrun:
             opts = "--dry-run"
+
+        if action == "refresh":
+            action = "update"
 
         if pkgs:
             return "apt-get -y %s %s %s" % (opts, action, " ".join(pkgs))
@@ -196,6 +202,9 @@ class PkgTool(object):
 
     def install(self, pkgs):
         return self._exec(action="install", pkgs=pkgs)
+
+    def refresh(self):
+        return self._exec(action="refresh")
 
     def remove(self, pkgs):
         return self._exec(action="remove", pkgs=pkgs)

@@ -104,6 +104,9 @@ class Install(object):
                 else:
                     info("'%s' requirement installed." % pkg)
 
+        # Refresh repositories
+        qc_step.runcmd(self.pkgtool.refresh())
+
         if CFG["dryrun"]:
             info(("Installation or upgrade process will be simulated "
                   "(dryrun: ON)"))
