@@ -13,6 +13,7 @@ from umd import exception
 from umd.utils import get_class_attrs
 from umd.utils import install
 from umd.utils import show_exec_banner
+from umd.utils import to_list
 
 
 class Deploy(Task):
@@ -46,7 +47,7 @@ class Deploy(Task):
         self.name = name
         if doc:
             self.__doc__ = doc
-        self.metapkg = metapkg
+        self.metapkg = to_list(metapkg)
         self.need_cert = need_cert
         self.has_infomodel = has_infomodel
         self.nodetype = nodetype

@@ -9,17 +9,11 @@ from umd.utils import to_list
 # FIXME This should be obtained programatically
 def get_metapkg_list():
     l = []
-    for pkgs in (to_list(sl6.metapkg),
-                 to_list(glexec_wn.metapkg),
-                 to_list(ui.metapkg),
-                 ["emi-cream-ce",
-                  "apel-client",
-                  "apel-lib",
-                  "cvmfs",
-                  "squid",
-                  "xrootd",
-                  "dpm-xrootd"]):
-        l.extend(pkgs)
+    for pkg in ["cvmfs"]:
+        if isinstance(pkg, list):
+            l.extend(pkg)
+        else:
+            l.append(pkg)
     return l
 
 
