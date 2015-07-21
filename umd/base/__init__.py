@@ -136,7 +136,7 @@ class Deploy(Task):
 
         # Certification Authority
         if self.need_cert:
-            install("ca-policy-egi-core", repofile=CFG["igtf_repo"])
+            install("ca-policy-egi-core")
             self.ca = utils.OwnCA(
                 domain_comp_country="es",
                 domain_comp="UMDverification",

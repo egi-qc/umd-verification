@@ -143,6 +143,16 @@ class Yum(object):
                         d[name] = '.'.join(['-'.join([name, version]), arch])
                     except ValueError:
                         pass
+
+        # YUM: last version installed
+        for line in r.stdout.split('\n'):
+            m = re.search("Package (.+) already installed and latest version",
+                          line)
+            if m:
+                all = ' '.join(m.groups())
+                name = re.search("([a-zA-Z0-9-_]+)-\d+.+", all).groups()[0]
+                d[name] = ' '.join([all, "(already installed)"])
+
         return d
 
 
