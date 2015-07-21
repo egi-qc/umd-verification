@@ -150,9 +150,12 @@ class Install(object):
             raise exception.InstallException(("Installation type '%s' "
                                               "not implemented."
                                               % installation_type))
+
         is_ok = True
+        # r.stderr
         if r.failed:
-            # YUM's downloadonly plugin returns 1 on success
+            # FIXME (should be within YUM class) YUM's downloadonly
+            # plugin returns 1 on success
             if r.stderr.find("--downloadonly specified") != 1:
                 is_ok = True
                 msgtext = "Dry-run installation ended successfully."
