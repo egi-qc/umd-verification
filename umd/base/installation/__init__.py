@@ -44,6 +44,8 @@ class Install(object):
                 shutil.copy2(f, os.path.join(repopath, repofile))
                 info("Verification repository '%s' enabled." % f)
 
+        self.pkgtool.refresh()
+
     def run(self, **kwargs):
         """Runs UMD installation."""
         # Handle installation type
