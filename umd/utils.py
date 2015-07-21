@@ -114,6 +114,8 @@ def runcmd(cmd,
 class Yum(object):
     def __init__(self):
         self.path = "/etc/yum.repos.d/"
+        self.extension = ".repo"
+        self.repodir = "repofiles"
 
     def run(self, action, dryrun, pkgs=None):
         opts = ''
@@ -131,6 +133,11 @@ class Yum(object):
             return "yum -y %s %s %s" % (opts, action, " ".join(pkgs))
         else:
             return "yum -y %s %s" % (opts, action)
+
+    def get_repos(self):
+        #runcmd("yum repolist")
+        #raise NotImplementedError()
+        return []
 
     def get_pkglist(self, r):
         """Gets the list of packages being installed parsing yum output."""
@@ -203,6 +210,12 @@ class PkgTool(object):
 
     def get_path(self):
         return self.client.path
+
+    def get_extension(self):
+        return self.client.extension
+
+    def get_repodir(self):
+        return self.client.repodir
 
     def get_pkglist(self, r):
         return self.client.get_pkglist(r)
