@@ -5,6 +5,7 @@ from umd.api import fail
 from umd.base.configure import YaimConfig
 from umd.base.infomodel import InfoModel
 from umd.base.installation import Install
+from umd.base.operations import Operations
 from umd.base.security import Security
 from umd.base import utils
 from umd.base.validate import Validate
@@ -26,6 +27,7 @@ class Deploy(Task):
                  has_infomodel=True,
                  nodetype=[],
                  siteinfo=[],
+                 qc_mon_capable=False,
                  qc_specific_id=None,
                  qc_step={},
                  exceptions={},
@@ -57,6 +59,7 @@ class Deploy(Task):
         self.cfgtool = None
         self.ca = None
         self.installation_type = None # FIXME default value?
+        self.qc_mon_capable = qc_mon_capable
         self.qc_envvars = {}
         self.qc_step = qc_step
         self.dryrun = dryrun
@@ -89,6 +92,9 @@ class Deploy(Task):
 
     def _infomodel(self, **kwargs):
         InfoModel().run(**kwargs)
+
+    def _operations(self, **kwargs):
+        Operations().run(**kwargs)
 
     def _validate(self, **kwargs):
         self.pre_validate()
@@ -129,7 +135,8 @@ class Deploy(Task):
 
         # Configuration tool
         if self.nodetype and self.siteinfo:
-            self.cfgtool = YaimConfig(pre_config=self.pre_config,
+            #self.cfgtool = YaimConfig(pre_config=self.pre_config,
+            CFG["cfgtool"] = YaimConfig(pre_config=self.pre_config,
                                       post_config=self.post_config)
         #else:
         #    raise exception.ConfigException("Configuration not implemented.")
@@ -137,11 +144,13 @@ class Deploy(Task):
         # Certification Authority
         if self.need_cert:
             install("ca-policy-egi-core")
-            self.ca = utils.OwnCA(
+            #self.ca = utils.OwnCA(
+            CFG["ca"] = utils.OwnCA(
                 domain_comp_country="es",
                 domain_comp="UMDverification",
                 common_name="UMDVerificationOwnCA")
-            self.ca.create(trusted_ca_dir="/etc/grid-security/certificates")
+            #self.ca.create(trusted_ca_dir="/etc/grid-security/certificates")
+            CFG["ca"].create(trusted_ca_dir="/etc/grid-security/certificates")
 
         # Workflow
         if CFG["qc_step"]:
@@ -166,6 +175,9 @@ class Deploy(Task):
 
             # QC_INFO
             self._infomodel()
+
+            # QC_MON
+            self._operations()
 
             # QC_FUNC
             self._validate()
