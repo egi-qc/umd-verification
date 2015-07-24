@@ -28,8 +28,7 @@ def qcstep_request(f):
                 except AttributeError:
                     info("Ignoring QC step '%s': not defined." % step)
                     continue
-        if step_methods:
-            return f(self, step_methods, *args, **kwargs)
+        return f(self, step_methods, *args, **kwargs)
     return _request
 
 
