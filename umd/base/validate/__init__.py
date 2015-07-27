@@ -143,7 +143,8 @@ class Validate(object):
                                  "No definition found for QC_FUNC_2.")
 
     @qcstep_request
-    def run(self, steps, qc_specific_id, *args, **kwargs):
+    def run(self, steps, *args, **kwargs):
+        qc_specific_id = CFG["qc_specific_id"]
         if qc_specific_id:
             try:
                 with open(QC_SPECIFIC_FILE) as f:
