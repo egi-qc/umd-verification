@@ -24,9 +24,10 @@ cream:
 
 glexec-wn:
     qc_func_1:
-        - test: "bin/user_creds"
-          description: "Create myproxy for ops.vo.ibergrid.eu VO."
+        - test: "bin/myproxy/client-test.sh"
+          description: "Retrieve myproxy for ops.vo.ibergrid.eu VO."
           user: "umd"
+          args: "retrieve"
         - test: "bin/glexec/test-basic.sh"
           description: "Testing basic functionality."
           user: "umd"
@@ -36,9 +37,10 @@ glexec-wn:
 
 storm:
     qc_func_1:
-        - test: "bin/user_creds"
-          description: "Create myproxy for ops.vo.ibergrid.eu VO."
+        - test: "bin/myproxy/client-test.sh"
+          description: "Retrieve myproxy for ops.vo.ibergrid.eu VO."
           user: "umd"
+          args: "retrieve"
         - test: "bin/srm/webdav"
           description: "WebDAV functionality check."
           user: "umd"
@@ -49,9 +51,10 @@ storm:
 
 ui:
     qc_func_1: 
-        - test: "bin/user_creds"
-          description: "Create myproxy for ops.vo.ibergrid.eu VO."
+        - test: "bin/myproxy/client-test.sh"
+          description: "Retrieve myproxy for ops.vo.ibergrid.eu VO."
           user: "umd"
+          args: "retrieve"
         - test: "bin/srm/client-test.sh"
           description: "lcg-utils client."
           user: "umd"
@@ -68,3 +71,12 @@ ui:
           description: "gfal2-util."
           user: "umd"
           args: "dcache gfal2-util"
+        - test: "bin/myproxy/client-test.sh"
+          description: "myproxy client commands testing."
+          user: "umd"
+
+myproxy-client:
+    qc_func_1: 
+        - test: "bin/myproxy/client-test.sh"
+          description: "myproxy client commands testing."
+          user: "umd"

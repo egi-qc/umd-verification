@@ -32,10 +32,7 @@ class Install(object):
         for path in os.walk(download_dir):
             if path[2] and path[0].find(self.pkgtool.get_repodir()) != -1:
                 for f in path[2]:
-                    if not f.endswith(self.pkgtool.get_extension()):
-                        info("File without '%s' extension found: '%s'"
-                             % (self.pkgtool.get_extension(), f))
-                    else:
+                    if f.endswith(self.pkgtool.get_extension()):
                         repofiles.append(os.path.join(path[0], f))
         if repofiles:
             repopath = self.pkgtool.get_path()

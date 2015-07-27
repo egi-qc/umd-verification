@@ -33,7 +33,7 @@ def to_file(r, logfile):
         dirname = os.path.dirname(fname)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-            info("Log directory '%s' has been created.")
+            info("Log directory '%s' has been created." % dirname)
         with open(fname, 'a') as f:
             f.write(msg)
             f.flush()

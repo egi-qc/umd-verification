@@ -9,3 +9,12 @@ ui = Deploy(
     nodetype="UI",
     siteinfo=["site-info-UI.def"],
     qc_specific_id="ui")
+
+ui_myproxy = Deploy(
+    name="ui-myproxy",
+    doc="User Interface (UI) & myproxy client testing.",
+    metapkg="emi-ui",
+    has_infomodel=False,
+    nodetype="UI",
+    siteinfo=["site-info-UI.def"],
+    qc_specific_id="myproxy-client")
