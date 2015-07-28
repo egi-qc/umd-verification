@@ -1,18 +1,17 @@
-from fabric.api import abort
-from fabric.api import puts
-from fabric.colors import red
+from fabric import api as fabric_api
+from fabric import colors
 
 
 def info(msg):
     """Prints info/debug logs."""
-    puts("[INFO] %s" % msg)
+    fabric_api.puts("[INFO] %s" % msg)
 
 
 def fail(msg):
     """Prints info/debug logs."""
-    puts("[%s] %s" % (red("FAIL"), msg))
+    fabric_api.puts("[%s] %s" % (colors.red("FAIL"), msg))
 
 
 def ok(msg):
     """Prints info/debug logs."""
-    puts("[OK] %s" % msg)
+    fabric_api.puts("[OK] %s" % msg)

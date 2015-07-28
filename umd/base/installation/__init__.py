@@ -1,19 +1,18 @@
 import os.path
 import shutil
 
-from umd.api import info
-from umd.api import fail
-from umd.config import CFG
+from umd import api
+from umd.base import utils as butils
+from umd import config
 from umd import exception
-from umd.base.utils import QCStep
 from umd import system
-from umd.utils import PkgTool
+from umd import utils
 
 
 class Install(object):
     def __init__(self):
-        self.pkgtool = PkgTool()
-        self.metapkg = CFG["metapkg"]
+        self.pkgtool = utils.PkgTool()
+        self.metapkg = config.CFG["metapkg"]
 
     def _enable_verification_repo(self,
                                   qc_step,
@@ -21,9 +20,9 @@ class Install(object):
                                   download_dir="/tmp/repofiles"):
         """Downloads the repofiles found in the given URL."""
         qc_step.runcmd("rm -rf %s/*" % download_dir, fail_check=False)
-        r = qc_step.runcmd("wget -P %s -r --no-parent -R*.html* %s"
-                           % (download_dir, url),
-                           stop_on_error=False)
+        qc_step.runcmd("wget -P %s -r --no-parent -R*.html* %s"
+                       % (download_dir, url),
+                       stop_on_error=False)
         repofiles = []
         for path in os.walk(download_dir):
             if path[2] and path[0].find(self.pkgtool.get_repodir()) != -1:
@@ -35,7 +34,7 @@ class Install(object):
             for f in repofiles:
                 repofile = os.path.basename(f)
                 shutil.copy2(f, os.path.join(repopath, repofile))
-                info("Verification repository '%s' enabled." % repofile)
+                api.info("Verification repository '%s' enabled." % repofile)
 
         else:
             qc_step.print_result("FAIL",
@@ -43,17 +42,18 @@ class Install(object):
                                  % self.pkgtool.get_extension(),
                                  do_abort=True)
 
-
     def run(self, **kwargs):
         """Runs UMD installation."""
         # Handle installation type
-        installation_type = CFG["installation_type"]
+        installation_type = config.CFG["installation_type"]
         if installation_type == "update":
-            qc_step = QCStep("QC_UPGRADE_1", "Upgrade", "/tmp/qc_upgrade_1")
+            qc_step = butils.QCStep("QC_UPGRADE_1",
+                                    "Upgrade",
+                                    "/tmp/qc_upgrade_1")
         elif installation_type == "install":
-            qc_step = QCStep("QC_DIST_1",
-                             "Binary Distribution",
-                             "/tmp/qc_inst_1")
+            qc_step = butils.QCStep("QC_DIST_1",
+                                    "Binary Distribution",
+                                    "/tmp/qc_inst_1")
 
         repo_config = True
         if "ignore_repo_config" in kwargs.keys():
@@ -65,30 +65,32 @@ class Install(object):
             msg_purge = "UMD"
             paths_to_purge = ["%s/UMD-*" % repopath]
             pkgs_to_purge = ["umd-release*"]
-            pkgs_to_download = [("UMD", CFG["umd_release"])]
+            pkgs_to_download = [("UMD", config.CFG["umd_release"])]
             pkgs_additional = []
             if system.distname == "redhat":
                 msg_purge = " ".join(["EPEL and/or", msg_purge])
                 paths_to_purge.insert(0, "%s/epel-*" % repopath)
                 pkgs_to_purge.insert(0, "epel-release*")
-                pkgs_to_download.insert(0, ("EPEL", CFG["epel_release"]))
+                pkgs_to_download.insert(0, ("EPEL",
+                                            config.CFG["epel_release"]))
                 pkgs_additional.append("yum-priorities")
 
             # Installation/upgrade workflow
             r = qc_step.runcmd(self.pkgtool.remove(pkgs_to_purge),
                                stop_on_error=False)
             if r.failed:
-                info("Could not delete %s release packages." % msg_purge)
+                api.info("Could not delete %s release packages." % msg_purge)
 
             if qc_step.runcmd("/bin/rm -f %s" % " ".join(paths_to_purge)):
-                info("Purged any previous %s repository file." % msg_purge)
+                api.info("Purged any previous %s repository file." % msg_purge)
 
             for pkg in pkgs_to_download:
                 pkg_id, pkg_url = pkg
                 pkg_base = os.path.basename(pkg_url)
                 pkg_loc = os.path.join("/tmp", pkg_base)
                 if qc_step.runcmd("wget %s -O %s" % (pkg_url, pkg_loc)):
-                    info("%s release package fetched from %s." % (pkg_id, pkg_url))
+                    api.info("%s release package fetched from %s."
+                             % (pkg_id, pkg_url))
 
                 r = qc_step.runcmd(self.pkgtool.install(pkg_loc))
                 if r.failed:
@@ -96,33 +98,33 @@ class Install(object):
                                          "Error while installing %s release."
                                          % pkg_id)
                 else:
-                    info("%s release package installed." % pkg_id)
+                    api.info("%s release package installed." % pkg_id)
 
             for pkg in pkgs_additional:
                 r = qc_step.runcmd(self.pkgtool.install(pkg))
                 if r.failed:
-                    info("Error while installing '%s'." % pkg)
+                    api.info("Error while installing '%s'." % pkg)
                 else:
-                    info("'%s' requirement installed." % pkg)
+                    api.info("'%s' requirement installed." % pkg)
 
         # Refresh repositories
         qc_step.runcmd(self.pkgtool.refresh())
 
-        if CFG["dryrun"]:
-            info(("Installation or upgrade process will be simulated "
-                  "(dryrun: ON)"))
+        if config.CFG["dryrun"]:
+            api.info(("Installation or upgrade process will be simulated "
+                      "(dryrun: ON)"))
             self.pkgtool.dryrun = True
 
         if installation_type == "update":
-            if CFG["repository_url"]:
+            if config.CFG["repository_url"]:
                 # 1) Install base (production) version
                 r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
                 if not r.failed:
-                    info("UMD product/s '%s' production version installed."
-                         % self.metapkg)
+                    api.info("UMD product/s '%s' production version installed."
+                             % self.metapkg)
 
                 # 2) Enable verification repository
-                for url in CFG["repository_url"]:
+                for url in config.CFG["repository_url"]:
                     self._enable_verification_repo(qc_step, url)
 
             # 3) Update
@@ -134,7 +136,7 @@ class Install(object):
 
         elif installation_type == "install":
             # 1) Enable verification repository
-            for url in CFG["repository_url"]:
+            for url in config.CFG["repository_url"]:
                 self._enable_verification_repo(qc_step, url)
 
             # 2) Install verification version
@@ -168,13 +170,15 @@ class Install(object):
             if self.metapkg:
                 for pkg in self.metapkg:
                     try:
-                        info("Package '%s' installed version: %s." % (pkg, d[pkg]))
+                        api.info("Package '%s' installed version: %s."
+                                 % (pkg, d[pkg]))
                     except KeyError:
-                        fail("Package '%s' could not be installed." % pkg)
+                        api.fail("Package '%s' could not be installed." % pkg)
                         is_ok = False
                         msgtext = "Not all the packages could be installed."
             else:
-                info("List of packages updated: %s" % self.pkgtool.get_pkglist(r))
+                api.info("List of packages updated: %s"
+                         % self.pkgtool.get_pkglist(r))
 
         if is_ok:
             qc_step.print_result("OK", msgtext)

@@ -1,3 +1,4 @@
+argparse
 fabric
 python-ldap
 PyYAML

@@ -1,6 +1,6 @@
-from umd.api import info
-from umd.base import Deploy
-from umd.utils import install
+from umd import api
+from umd import base
+from umd import utils
 
 
 exceptions = {
@@ -9,29 +9,27 @@ exceptions = {
             ["/var/blah/user_blah_job_registry.bjr/registry.locktest"]}}
 
 
-class CreamCEStandalone(Deploy):
+class CreamCEStandalone(base.Deploy):
     """CREAM CE standalone deployment (configuration via Yaim)."""
     def pre_config(self):
-        info("PRE-config actions.")
+        api.info("PRE-config actions.")
 
-        install("sudo")
+        utils.install("sudo")
 
-        info("<sudo> package installed.")
-        info("END of PRE-config actions.")
+        api.info("<sudo> package installed.")
+        api.info("END of PRE-config actions.")
 
 
-class CreamCEGridengine(Deploy):
-    """CREAM CE + GridEngine on Scientific Linux deployment (configuration
-       via Yaim).
-    """
+class CreamCEGridengine(base.Deploy):
+    """CREAM CE + GridEngine on Scientific Linux deployment."""
     def pre_config(self):
-        info("PRE-config actions.")
+        api.info("PRE-config actions.")
 
-        install(["sudo", "gridengine", "gridengine-qmaster"])
+        utils.install(["sudo", "gridengine", "gridengine-qmaster"])
 
-        info(("<sudo>, <gridengine> and <gridengine-qmaster> packages "
-              "installed."))
-        info("END of PRE-config actions.")
+        api.info(("<sudo>, <gridengine> and <gridengine-qmaster> packages "
+                  "installed."))
+        api.info("END of PRE-config actions.")
 
 
 standalone = CreamCEStandalone(

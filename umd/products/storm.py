@@ -1,12 +1,11 @@
 import pwd
 
-from umd.api import info
-from umd.base import Deploy
-from umd.utils import install
-from umd.utils import runcmd
+from umd import api
+from umd import base
+from umd import utils
 
 
-class StormDeploy(Deploy):
+class StormDeploy(base.Deploy):
     """Single-node Storm deployment."""
 
     pre_validate_pkgs = ["storm-srm-client", "uberftp", "curl", "myproxy",
@@ -25,40 +24,43 @@ class StormDeploy(Deploy):
         elif os == "sl6":
             metapkg.append("storm-webdav")
             nodetype.append("se_storm_webdav")
-        super(StormDeploy, self).__init__(name=name, need_cert="True",
-                                          metapkg=metapkg, nodetype=nodetype,
-                                          siteinfo=["site-info-storm.def"],
-                                          qc_specific_id="storm")
+        super(StormDeploy, self).__init__(
+            name=name,
+            need_cert="True",
+            metapkg=metapkg,
+            nodetype=nodetype,
+            siteinfo=["site-info-storm.def"],
+            qc_specific_id="storm")
 
     def pre_install(self):
-        info("PRE-install actions.")
+        api.info("PRE-install actions.")
 
         try:
             pwd.getpwnam("storm")
         except KeyError:
-            runcmd("/usr/sbin/adduser -M storm")
+            utils.runcmd("/usr/sbin/adduser -M storm")
 
-        info("users storm and gridhttps added")
-        info("END of PRE-install actions.")
+        api.info("users storm and gridhttps added")
+        api.info("END of PRE-install actions.")
 
     def pre_config(self):
-        info("PRE-config actions.")
+        api.info("PRE-config actions.")
 
-        install("ntp")
-        info("<ntp> installed.")
+        utils.install("ntp")
+        api.info("<ntp> installed.")
 
-        runcmd("mount -o remount,acl,user_xattr /")
-        info("Enabled ACLs and Extended Attribute Support in /")
+        utils.runcmd("mount -o remount,acl,user_xattr /")
+        api.info("Enabled ACLs and Extended Attribute Support in /")
 
-        info("END of PRE-config actions.")
+        api.info("END of PRE-config actions.")
 
     def pre_validate(self):
-        info("PRE-validate actions.")
+        api.info("PRE-validate actions.")
 
-        install(self.pre_validate_pkgs)
-        info("<%s> installed." % ", ".join(self.pre_validate_pkgs))
+        utils.install(self.pre_validate_pkgs)
+        api.info("<%s> installed." % ", ".join(self.pre_validate_pkgs))
 
-        info("END of PRE-validate actions.")
+        api.info("END of PRE-validate actions.")
 
 
 sl5 = StormDeploy("sl5")

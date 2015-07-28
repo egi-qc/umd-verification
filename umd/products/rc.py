@@ -1,9 +1,4 @@
-from umd.base import Deploy
-
-from umd.products.glexec import glexec_wn
-from umd.products.storm import sl5,sl6
-from umd.products.ui import ui
-from umd.utils import to_list
+from umd import base
 
 
 # FIXME This should be obtained programatically
@@ -17,7 +12,7 @@ def get_metapkg_list():
     return l
 
 
-rc = Deploy(
+rc = base.Deploy(
     name="release-candidate",
     doc="Release Candidate probe.",
     metapkg=get_metapkg_list(),

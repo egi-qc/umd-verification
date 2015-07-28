@@ -2,18 +2,13 @@ import os
 import os.path
 import sys
 
-from fabric.colors import blue
-from fabric.colors import green
-from fabric.colors import red
-from fabric.colors import yellow
-from fabric.context_managers import lcd
+import fabric
+from fabric import colors
 
-from umd.api import info
-from umd.config import CFG
+from umd import api
+from umd import config
 from umd import system
-from umd.utils import format_error_msg
-from umd.utils import runcmd
-from umd.utils import to_list
+from umd import utils
 
 
 def qcstep_request(f):
@@ -21,23 +16,21 @@ def qcstep_request(f):
     def _request(self, *args, **kwargs):
         step_methods = []
         if "qc_step" in kwargs.keys():
-            for step in to_list(kwargs["qc_step"]):
+            for step in utils.to_list(kwargs["qc_step"]):
                 try:
                     method = getattr(self, step.lower())
                     step_methods.append(method)
                 except AttributeError:
-                    info("Ignoring QC step '%s': not defined." % step)
+                    api.info("Ignoring QC step '%s': not defined." % step)
                     continue
         return f(self, step_methods, *args, **kwargs)
     return _request
 
 
 def get_qc_envvars():
-    """Returns a dictionary with the bash environment variables found
-       in configuration.
-    """
+    """Returns a dict with the bash environment variables found in conf."""
     return dict([(k.split("qcenv_")[1], v)
-                  for k, v in CFG.items() if k.startswith("qcenv")])
+                 for k, v in config.CFG.items() if k.startswith("qcenv")])
 
 
 class QCStep(object):
@@ -53,8 +46,8 @@ class QCStep(object):
 
     def _print_header(self):
         """Prints a QC header with the id and description."""
-        print("[[%s: %s]]" % (blue(self.id),
-                              blue(self.description)))
+        print("[[%s: %s]]" % (colors.blue(self.id),
+                              colors.blue(self.description)))
 
     def _remove_last_logfile(self):
         for stdtype in ("stdout", "stderr"):
@@ -65,15 +58,15 @@ class QCStep(object):
     def print_result(self, level, msg, do_abort=False):
         """Prints the final result of the current QC step."""
         level_color = {
-            "FAIL": red,
-            "NA": green,
-            "OK": green,
-            "WARNING": yellow,
+            "FAIL": colors.red,
+            "NA": colors.green,
+            "OK": colors.green,
+            "WARNING": colors.yellow,
         }
 
         msg = "[%s] %s." % (level_color[level](level), msg)
         if do_abort:
-            msg = ' '.join([msg, format_error_msg(self.logs)])
+            msg = ' '.join([msg, utils.format_error_msg(self.logs)])
             print(msg)
             sys.exit(-1)
         else:
@@ -91,14 +84,13 @@ class QCStep(object):
         if log_to_file:
             logfile = self.logfile
 
-        r = runcmd(cmd,
-                   chdir=chdir,
-                   fail_check=fail_check,
-                   stop_on_error=stop_on_error,
-                   logfile=logfile,
-                   get_error_msg=get_error_msg,
-                   stderr_to_stdout=stderr_to_stdout)
-
+        r = utils.runcmd(cmd,
+                         chdir=chdir,
+                         fail_check=fail_check,
+                         stop_on_error=stop_on_error,
+                         logfile=logfile,
+                         get_error_msg=get_error_msg,
+                         stderr_to_stdout=stderr_to_stdout)
         try:
             self.logs = r.logfile
         except AttributeError:
@@ -125,18 +117,19 @@ class OwnCA(object):
                                 signing policy file under the trusted CA
                                 directory.
         """
-        runcmd("mkdir -p %s" % self.workspace)
-        with lcd(self.workspace):
+        utils.runcmd("mkdir -p %s" % self.workspace)
+        with fabric.context_manager.lcd(self.workspace):
             subject = "/DC=%s/DC=%s/CN=%s" % (self.domain_comp_country,
                                               self.domain_comp,
                                               self.common_name)
-            runcmd(("openssl req -x509 -nodes -days 1 -newkey rsa:2048 "
-                    "-out ca.pem -outform PEM -keyout ca.key -subj "
-                    "'%s'" % subject))
+            utils.runcmd(("openssl req -x509 -nodes -days 1 -newkey rsa:2048 "
+                          "-out ca.pem -outform PEM -keyout ca.key -subj "
+                          "'%s'" % subject))
             if trusted_ca_dir:
-                hash = runcmd("openssl x509 -noout -hash -in ca.pem")
-                runcmd("cp ca.pem %s" % os.path.join(trusted_ca_dir,
-                                                     '.'.join([hash, '0'])))
+                hash = utils.runcmd("openssl x509 -noout -hash -in ca.pem")
+                utils.runcmd("cp ca.pem %s"
+                             % os.path.join(trusted_ca_dir,
+                                            '.'.join([hash, '0'])))
                 with open(os.path.join(
                     trusted_ca_dir,
                     '.'.join([hash, "signing_policy"])), 'w') as f:
@@ -158,19 +151,20 @@ class OwnCA(object):
                 key_prv: Alternate path to store the certificate's private key.
                 key_pub: Alternate path to store the certificate's public key.
         """
-        with lcd(self.workspace):
-            runcmd(("openssl req -newkey rsa:%s -nodes -sha1 -keyout "
-                    "cert.key -keyform PEM -out cert.req -outform PEM "
-                    "-subj '/DC=%s/DC=%s/CN=%s'" % (hash,
-                                                    self.domain_comp_country,
-                                                    self.domain_comp,
-                                                    hostname)))
-            runcmd(("openssl x509 -req -in cert.req -CA ca.pem -CAkey ca.key "
-                    "-CAcreateserial -out cert.crt -days 1"))
+        with fabric.context_manager.lcd(self.workspace):
+            utils.runcmd(("openssl req -newkey rsa:%s -nodes -sha1 -keyout "
+                          "cert.key -keyform PEM -out cert.req -outform PEM "
+                          "-subj '/DC=%s/DC=%s/CN=%s'"
+                          % (hash,
+                             self.domain_comp_country,
+                             self.domain_comp,
+                             hostname)))
+            utils.runcmd(("openssl x509 -req -in cert.req -CA ca.pem -CAkey "
+                          "ca.key -CAcreateserial -out cert.crt -days 1"))
 
             if key_prv:
-                runcmd("cp cert.key %s" % key_prv)
-                info("Private key stored in '%s'." % key_prv)
+                utils.runcmd("cp cert.key %s" % key_prv)
+                api.info("Private key stored in '%s'." % key_prv)
             if key_pub:
-                runcmd("cp cert.crt %s" % key_pub)
-                info("Public key stored in '%s'." % key_pub)
+                utils.runcmd("cp cert.crt %s" % key_pub)
+                api.info("Public key stored in '%s'." % key_pub)

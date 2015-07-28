@@ -1,6 +1,7 @@
-from umd.base import Deploy
+from umd import base
 
-class BDIIDeploy(Deploy):
+
+class BDIIDeploy(base.Deploy):
     def post_install(self):
         self.cfgtool.run()
 

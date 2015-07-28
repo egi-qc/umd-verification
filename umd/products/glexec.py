@@ -1,44 +1,43 @@
 import grp
 import pwd
 
-from umd.api import info
-from umd.base import Deploy
-from umd.utils import install
-from umd.utils import runcmd
+from umd import api
+from umd import base
+from umd import utils
 
 
-class GLExecWNDeploy(Deploy):
+class GLExecWNDeploy(base.Deploy):
     def post_install(self):
         s_groups = [t[0] for t in grp.getgrall()]
         s_users = [t[0] for t in pwd.getpwall()]
 
-        info("Configuration actions.")
+        api.info("Configuration actions.")
 
         if "iberops" not in s_groups:
-            runcmd("groupadd -g 23200 iberops")
+            utils.runcmd("groupadd -g 23200 iberops")
         for i in xrange(5):
             user = "iberops00%s" % i
             if user not in s_users:
-                runcmd("useradd -m -u 2320%s -g 23200 %s" % (i, user))
-        info("Group 'iberops' and user accounts created.")
+                utils.runcmd("useradd -m -u 2320%s -g 23200 %s" % (i, user))
+        api.info("Group 'iberops' and user accounts created.")
 
         if "iberopses" not in s_groups:
-            runcmd("groupadd -g 23210 iberopses")
+            utils.runcmd("groupadd -g 23210 iberopses")
         for i in xrange(5):
             user = "iberopses00%s" % i
             if user not in s_users:
-                runcmd("useradd -m -u 2321%s -g 23210 %s" % (i, user))
-        info("Group 'iberopses' and user accounts created.")
+                utils.runcmd("useradd -m -u 2321%s -g 23210 %s" % (i, user))
+        api.info("Group 'iberopses' and user accounts created.")
 
-        runcmd("cp /etc/glexec.conf /etc/glexec.conf.0")
-        info("Backup /etc/glexec.conf file.")
-        runcmd(("sed -i 's/.*user_white_list.*/user_white_list = umd/g' "
-                "/etc/glexec.conf"))
-        info("User 'umd' white-listed in /etc/glexec.conf")
+        utils.runcmd("cp /etc/glexec.conf /etc/glexec.conf.0")
+        api.info("Backup /etc/glexec.conf file.")
+        utils.runcmd(("sed -i 's/.*user_white_list.*/user_white_list = umd/g' "
+                      "/etc/glexec.conf"))
+        api.info("User 'umd' white-listed in /etc/glexec.conf")
 
-        runcmd(("cp /etc/lcmaps/lcmaps-glexec.db "
-                "/etc/lcmaps/lcmaps-glexec.db.0"))
-        info("Backup /etc/lcmaps/lcmaps-glexec.db file.")
+        utils.runcmd(("cp /etc/lcmaps/lcmaps-glexec.db "
+                      "/etc/lcmaps/lcmaps-glexec.db.0"))
+        api.info("Backup /etc/lcmaps/lcmaps-glexec.db file.")
         lcmaps_db = """
 # where to look for modules
 path = /usr/lib64/lcmaps
@@ -61,11 +60,11 @@ verify_proxy -> pepc
         """
         with open("/etc/lcmaps/lcmaps-glexec.db", 'w') as f:
             f.write(lcmaps_db)
-        info("GLExec lcmaps configured.")
+        api.info("GLExec lcmaps configured.")
 
     def pre_validate(self):
-        info("PRE-validate actions.")
-        install(["myproxy", "voms-clients", "ca-policy-egi-core"])
+        api.info("PRE-validate actions.")
+        utils.install(["myproxy", "voms-clients", "ca-policy-egi-core"])
 
 
 glexec_wn = GLExecWNDeploy(

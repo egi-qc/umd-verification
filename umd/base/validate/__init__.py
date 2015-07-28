@@ -2,26 +2,22 @@
 import collections
 import os
 import pwd
+
+from fabric import api as fabric_api
 import yaml
 
-from fabric.api import abort
-from fabric.api import shell_env
-
-from umd.api import fail
-from umd.api import info
-from umd.api import ok
-from umd.base.utils import get_qc_envvars
-from umd.base.utils import qcstep_request
-from umd.base.utils import QCStep
-from umd.config import CFG
+from umd import api
+from umd.base import utils as butils
+from umd import config
 
 
+# FIXME Move to defaults.yaml
 QC_SPECIFIC_FILE = "etc/qc_specific.yaml"
 
 
 class Validate(object):
     def __init__(self):
-        self.qc_envvars = get_qc_envvars()
+        self.qc_envvars = butils.get_qc_envvars()
 
     def _is_executable(self, f):
         """File executable check."""
@@ -47,11 +43,10 @@ class Validate(object):
             if user:
                 qc_step.runcmd("useradd -m %s" % user)
 
-    def _get_checklist(self, config):
-        """Returns a list of 4-item (description, user, filename, args)
-           tuples."""
+    def _get_checklist(self, cfg):
+        """Returns a 4-item (description, user, filename, args) list."""
         l = []
-        for checkdata in config:
+        for checkdata in cfg:
             d = collections.defaultdict(str)
             for k, v in checkdata.items():
                 d[k] = v
@@ -70,47 +65,47 @@ class Validate(object):
                 elif os.path.isfile(path):
                     checklist.append(check)
             else:
-                info("Could not execute check '%s': no such file or directory."
-                     % path)
+                api.info(("Could not execute check '%s': no such file or "
+                          "directory." % path))
 
         return checklist
 
-    def _run_checks(self, qc_step, config):
+    def _run_checks(self, qc_step, cfg):
         """Runs the checks received."""
         failed_checks = []
-        for check in self._get_checklist(config):
+        for check in self._get_checklist(cfg):
             description, user, f, args = check
-            info("Probe '%s'" % description)
+            api.info("Probe '%s'" % description)
 
             cmd = "./%s" % " ".join([f, args])
             if user:
                 cmd = "su %s -c \"%s\"" % (user, cmd)
 
-            cmd_failed = False
             if not self._is_executable(f):
-                info("Could not run check '%s': file is not executable" % f)
-                cmd_failed = True
+                api.info("Could not run check '%s': file is not executable"
+                         % f)
             else:
                 self._handle_user(qc_step, user)
-                with shell_env(**self.qc_envvars):
+                with fabric_api.shell_env(**self.qc_envvars):
                     r = qc_step.runcmd(cmd,
                                        fail_check=False,
                                        stderr_to_stdout=True)
                     if r.failed:
                         failed_checks.append(cmd)
                     else:
-                        info("Command '%s' ran successfully" % cmd)
+                        api.info("Command '%s' ran successfully" % cmd)
 
         return failed_checks
 
-    def qc_func_1(self, config):
+    def qc_func_1(self, cfg):
         """Basic Funcionality Test."""
-        qc_step = QCStep("QC_FUNC_1",
-                         "Basic Funcionality Test.",
-                         os.path.join(CFG["log_path"], "qc_func_1"))
+        qc_step = butils.QCStep("QC_FUNC_1",
+                                "Basic Funcionality Test.",
+                                os.path.join(config.CFG["log_path"],
+                                             "qc_func_1"))
 
-        if config:
-            failed_checks = self._run_checks(qc_step, config)
+        if cfg:
+            failed_checks = self._run_checks(qc_step, cfg)
             if failed_checks:
                 qc_step.print_result("FAIL",
                                      "Probes '%s' failed to run."
@@ -123,14 +118,15 @@ class Validate(object):
             qc_step.print_result("NA",
                                  "No definition found for QC_FUNC_1.")
 
-    def qc_func_2(self, config):
+    def qc_func_2(self, cfg):
         """New features/bug fixes testing."""
-        qc_step = QCStep("QC_FUNC_2",
-                         "New features/bug fixes testing.",
-                         os.path.join(CFG["log_path"], "qc_func_2"))
+        qc_step = butils.QCStep("QC_FUNC_2",
+                                "New features/bug fixes testing.",
+                                os.path.join(config.CFG["log_path"],
+                                             "qc_func_2"))
 
-        if config:
-            failed_checks = self._run_checks(qc_step, config)
+        if cfg:
+            failed_checks = self._run_checks(qc_step, cfg)
             if failed_checks:
                 qc_step.print_result("FAIL",
                                      "Probes '%s' failed to run."
@@ -142,33 +138,33 @@ class Validate(object):
             qc_step.print_result("NA",
                                  "No definition found for QC_FUNC_2.")
 
-    @qcstep_request
+    @butils.qcstep_request
     def run(self, steps, *args, **kwargs):
-        qc_specific_id = CFG["qc_specific_id"]
+        qc_specific_id = config.CFG["qc_specific_id"]
         if qc_specific_id:
             try:
                 with open(QC_SPECIFIC_FILE) as f:
                     d = yaml.load(f)
             except IOError:
-                info("Could not load QC-specific config file: %s"
-                     % QC_SPECIFIC_FILE)
+                api.info("Could not load QC-specific config file: %s"
+                         % QC_SPECIFIC_FILE)
             try:
                 d[qc_specific_id]
             except KeyError:
-                info("QC-specific ID '%s' definition not found "
-                     "in configuration file '%s'"
-                     % (qc_specific_id, QC_SPECIFIC_FILE))
+                api.info("QC-specific ID '%s' definition not found "
+                         "in configuration file '%s'"
+                         % (qc_specific_id, QC_SPECIFIC_FILE))
 
-            config = collections.defaultdict(dict)
+            cfg = collections.defaultdict(dict)
             for k, v in d[qc_specific_id].items():
-                config[k] = v
+                cfg[k] = v
 
             if steps:
                 for method in steps:
-                    method(config[method.im_func.func_name])
+                    method(cfg[method.im_func.func_name])
             else:
-                self.qc_func_1(config["qc_func_1"])
-                self.qc_func_2(config["qc_func_2"])
+                self.qc_func_1(cfg["qc_func_1"])
+                self.qc_func_2(cfg["qc_func_2"])
         else:
-            info(("No QC-specific ID provided: no specific QC probes "
-                  "will be ran."))
+            api.info(("No QC-specific ID provided: no specific QC probes "
+                      "will be ran."))
