@@ -16,7 +16,7 @@ class ConfigDict(dict):
         self.__setitem__("igtf_repo", DEFAULTS["igtf_repo"][system.distname])
         self.__setitem__("yaim_path", DEFAULTS["yaim"]["path"])
         self.__setitem__("log_path", DEFAULTS["base"]["log_path"])
-        if system.distname == "redhat":
+        if system.distname in ["redhat", "centos"]:
             self.__setitem__("epel_release", DEFAULTS["epel_release"][system.distro_version])
 
     def update(self, d):

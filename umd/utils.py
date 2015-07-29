@@ -202,6 +202,7 @@ class Apt(object):
 class PkgTool(object):
     def __init__(self):
         self.client = {
+            "centos": Yum,
             "debian": Apt,
             "redhat": Yum,
 	    "ubuntu": Apt,
@@ -272,10 +273,9 @@ def show_exec_banner():
 
         print(u'\u2502')
         print(u'\u2502 Repository basic configuration:')
-        if system.distname == "redhat":
-            basic_repo = ["epel_release", "umd_release", "igtf_repo"]
-        elif system.distname in ("debian", "ubuntu"):
-            basic_repo = ["umd_release", "igtf_repo"]
+        basic_repo = ["umd_release", "igtf_repo"]
+        if system.distname in ["redhat", "centos"]:
+            basic_repo.append("epel_release")
         for k in basic_repo:
             v = cfg.pop(k)
             leftjust = len(max(basic_repo, key=len)) + 5
