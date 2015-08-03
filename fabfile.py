@@ -5,6 +5,7 @@ from umd.products.bdii import *
 from umd.products.ca import *
 from umd.products.creamce import *
 from umd.products.glexec import *
+from umd.products.myproxy import *
 from umd.products.rc import *
 from umd.products.storm import *
 from umd.products.ui import *

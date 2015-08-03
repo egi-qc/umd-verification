@@ -26,7 +26,7 @@ class Security(object):
                                key_prv="/etc/grid-security/hostkey.pem",
                                key_pub="/etc/grid-security/hostcert.pem")
 
-            r = self.cfgtool.run(qc_step)
+            r = self.cfgtool.run()
             if r and r.failed:
                 qc_step.print_result("FAIL",
                                      "YAIM configuration failed with SHA-2 "

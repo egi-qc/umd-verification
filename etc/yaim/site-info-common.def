@@ -8,7 +8,8 @@ WN_LIST=`pwd`/wn-list
 SITE_NAME=GRID-SITE
 
 BDII_HOST=bdii.`hostname -d`
-PX_HOST=px.`hostname -d`
+#PX_HOST=px.`hostname -d`
+PX_HOST=gridpx01.ifca.es
 SE_HOST=se.`hostname -d`
 
 SE_LIST=$SE_HOST
