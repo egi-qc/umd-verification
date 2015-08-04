@@ -6,4 +6,4 @@ python /tmp/get-pip.py
 
 apt-get install gcc python-dev python-ldap
 pip install Fabric
-pip install PyYAML
+pip install -r umd-verification/requirements.txt

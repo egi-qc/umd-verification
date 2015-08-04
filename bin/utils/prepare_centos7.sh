@@ -10,4 +10,4 @@ yum -y install python-pip
 
 yum -y install gcc python-devel python-ldap
 pip install fabric
-pip install PyYAML
+pip install -r umd-verification/requirements.txt
