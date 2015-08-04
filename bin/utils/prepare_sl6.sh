@@ -13,4 +13,4 @@ python /tmp/get-pip.py
 
 # Getting issues with upper versions
 pip install Fabric==1.8.1
-pip install PyYAML
+pip install -r umd-verification/requirements.txt

@@ -11,4 +11,4 @@ yum -y install python26 python26-devel gcc python26-ldap
 wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
 python26 /tmp/get-pip.py
 pip install Fabric
-pip install PyYAML
+pip install -r umd-verification/requirements.txt
