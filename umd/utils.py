@@ -95,7 +95,7 @@ def runcmd(cmd,
     if fail_check and r.failed:
         msg = format_error_msg(logs, cmd)
         if stop_on_error:
-            api.abort(api.fail(msg % cmd))
+            fabric_api.abort(api.fail(msg % cmd))
         else:
             api.fail(msg % cmd)
         if get_error_msg:

@@ -1,3 +1,4 @@
+from fabric import api as fabric_api
 from fabric import tasks
 
 from umd import api
@@ -159,8 +160,8 @@ class Deploy(tasks.Task):
                         "QC_INFO": self._infomodel,
                         "QC_FUNC": self._validate}
                 except KeyError:
-                    api.abort(api.fail(("%s step not found in the Quality "
-                                        "Criteria" % k)))
+                    fabric_api.abort(api.fail(("%s step not found in the "
+                                               "Quality Criteria" % k)))
 
                 step_mappings[k](**{"qc_step": v})
         else:

@@ -1,5 +1,8 @@
+import sys
+
 import yaml
 
+from umd import api
 from umd import system
 
 
@@ -10,17 +13,32 @@ def load_defaults():
 
 class ConfigDict(dict):
     def __init__(self):
-        DEFAULTS = load_defaults()
+        self.defaults = load_defaults()
+
+        self._validate()
+        self._set()
+
+    def _set(self):
         self.__setitem__("repository_url", "")
         self.__setitem__("umd_release",
-                         DEFAULTS["umd_release"][system.distro_version])
-        self.__setitem__("igtf_repo", DEFAULTS["igtf_repo"][system.distname])
-        self.__setitem__("yaim_path", DEFAULTS["yaim"]["path"])
-        self.__setitem__("log_path", DEFAULTS["base"]["log_path"])
-        self.__setitem__("umdnsu_url", DEFAULTS["nagios"]["umdnsu_url"])
+                         self.defaults["umd_release"][system.distro_version])
+        self.__setitem__("igtf_repo",
+                         self.defaults["igtf_repo"][system.distname])
+        self.__setitem__("yaim_path", self.defaults["yaim"]["path"])
+        self.__setitem__("log_path", self.defaults["base"]["log_path"])
+        self.__setitem__("umdnsu_url", self.defaults["nagios"]["umdnsu_url"])
         if system.distname in ["redhat", "centos"]:
-            self.__setitem__("epel_release",
-                             DEFAULTS["epel_release"][system.distro_version])
+            self.__setitem__(
+                "epel_release",
+                self.defaults["epel_release"][system.distro_version])
+
+    def _validate(self):
+        try:
+            self.defaults["umd_release"][system.distro_version]
+            self.defaults["igtf_repo"][system.distname]
+        except KeyError:
+            api.info("'%s' OS not supported" % system.distro_version)
+            sys.exit(0)
 
     def update(self, d):
         d_tmp = {}
