@@ -130,9 +130,22 @@ class Yum(object):
             return "yum -y %s %s" % (opts, action)
 
     def get_repos(self):
-        # runcmd("yum repolist")
-        # raise NotImplementedError()
-        return []
+        l = []
+        is_repo = False
+        for line in runcmd("yum repolist").split('\n'):
+            l_str = filter(None, line.split('  '))
+            if "repo id" in l_str:
+                is_repo = True
+                continue
+            try:
+                if l_str[0].startswith("repolist"):
+                    is_repo = False
+                    continue
+            except IndexError:
+                pass
+            if is_repo:
+                l.append(l_str[0])
+        return l
 
     def get_pkglist(self, r):
         """Gets the list of packages being installed parsing yum output."""

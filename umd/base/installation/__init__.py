@@ -128,6 +128,7 @@ class Install(object):
                     self._enable_verification_repo(qc_step, url)
 
             # 3) Update
+            api.info("Using repositories: %s" % self.pkgtool.get_repos())
             r = qc_step.runcmd(self.pkgtool.update(),
                                fail_check=False,
                                stop_on_error=False,
@@ -140,6 +141,7 @@ class Install(object):
                 self._enable_verification_repo(qc_step, url)
 
             # 2) Install verification version
+            api.info("Using repositories: %s" % self.pkgtool.get_repos())
             r = qc_step.runcmd(self.pkgtool.install(self.metapkg),
                                fail_check=False,
                                stop_on_error=False,
