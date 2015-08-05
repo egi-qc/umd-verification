@@ -21,13 +21,9 @@ class Install(object):
                                   download_dir="/tmp/repofiles"):
         """Downloads the repofiles found in the given URL."""
         qc_step.runcmd("rm -rf %s/*" % download_dir, fail_check=False)
-        r = qc_step.runcmd("wget -P %s -r -l1 --no-parent -R*.html* %s"
-                           % (download_dir, url))
-        if r.failed:
-            qc_step.print_result("FAIL",
-                                 "Error retrieving verification repofile.",
-                                 do_abort=True)
-
+        r = qc_step.runcmd("wget -P %s -r --no-parent -R*.html* %s"
+                           % (download_dir, url),
+                           stop_on_error=False)
         repofiles = []
         for path in os.walk(download_dir):
             if path[2] and path[0].find(self.pkgtool.get_repodir()) != -1:
@@ -39,7 +35,14 @@ class Install(object):
             for f in repofiles:
                 repofile = os.path.basename(f)
                 shutil.copy2(f, os.path.join(repopath, repofile))
-                info("Verification repository '%s' enabled." % f)
+                info("Verification repository '%s' enabled." % repofile)
+
+        else:
+            qc_step.print_result("FAIL",
+                                 "Could not find any valid '%s' filename."
+                                 % self.pkgtool.get_extension(),
+                                 do_abort=True)
+
 
     def run(self, **kwargs):
         """Runs UMD installation."""
@@ -121,7 +124,6 @@ class Install(object):
                 # 2) Enable verification repository
                 for url in CFG["repository_url"]:
                     self._enable_verification_repo(qc_step, url)
-                    info("Verification repository '%s' enabled." % url)
 
             # 3) Update
             r = qc_step.runcmd(self.pkgtool.update(),
@@ -134,7 +136,6 @@ class Install(object):
             # 1) Enable verification repository
             for url in CFG["repository_url"]:
                 self._enable_verification_repo(qc_step, url)
-                info("Verification repository '%s' enabled." % url)
 
             # 2) Install verification version
             r = qc_step.runcmd(self.pkgtool.install(self.metapkg),
