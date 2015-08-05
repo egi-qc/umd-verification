@@ -8,6 +8,12 @@ argus:
         - test: "bin/argus/testsuites.sh"
           description: "Argus certification tests."
 
+argus-ees:
+    qc_func_1:
+        - test: "bin/argus/ees.sh"
+          description: "Check EES basic functionality."
+          user: "umd"
+
 ca:
     qc_func_1:
         - test: "bin/ca/fetch_crl.run"
