@@ -1,7 +1,7 @@
 import re
+import StringIO
 
 import ldif
-from StringIO import StringIO
 
 
 def get_gluevalidator_summary(r):
@@ -18,7 +18,7 @@ def get_gluevalidator_summary(r):
 
 def ldifize(ldap_result):
     """Writes ldap's query result in LDIF format to the given file."""
-    out = StringIO()
+    out = StringIO.StringIO()
     for dn, attrs in ldap_result:
         ldif_writer = ldif.LDIFWriter(out)
         ldif_writer.unparse(dn, attrs)

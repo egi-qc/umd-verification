@@ -1,19 +1,13 @@
 import inspect
-from itertools import groupby
 import os.path
 import re
 
-from fabric.api import abort
-from fabric.api import local
-from fabric.api import settings
-from fabric.colors import blue
-from fabric.colors import green
-from fabric.colors import red
-from fabric.context_managers import lcd
+import fabric
+from fabric import api as fabric_api
+from fabric import colors
 
-from umd.api import info
-from umd.api import fail
-from umd.config import CFG
+from umd import api
+from umd import config
 from umd import exception
 from umd import system
 
@@ -33,7 +27,7 @@ def to_file(r, logfile):
         dirname = os.path.dirname(fname)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-            info("Log directory '%s' has been created." % dirname)
+            api.info("Log directory '%s' has been created." % dirname)
         with open(fname, 'a') as f:
             f.write(msg)
             f.flush()
@@ -71,6 +65,7 @@ def runcmd(cmd,
            get_error_msg=False,
            stderr_to_stdout=False):
     """Runs a generic command.
+
             cmd: command to execute.
             chdir: local directory to run the command from.
             fail_check: boolean that indicates if the workflow must be
@@ -84,12 +79,12 @@ def runcmd(cmd,
         cmd = ' '.join([cmd, "2>&1"])
 
     if chdir:
-        with lcd(chdir):
-            with settings(warn_only=True):
-                r = local(cmd, capture=True)
+        with fabric.context_manager.lcd(chdir):
+            with fabric_api.settings(warn_only=True):
+                r = api.local(cmd, capture=True)
     else:
-        with settings(warn_only=True):
-            r = local(cmd, capture=True)
+        with fabric_api.settings(warn_only=True):
+            r = fabric_api.local(cmd, capture=True)
 
     logs = []
     if logfile:
@@ -100,12 +95,12 @@ def runcmd(cmd,
     if fail_check and r.failed:
         msg = format_error_msg(logs, cmd)
         if stop_on_error:
-            abort(fail(msg % cmd))
+            api.abort(api.fail(msg % cmd))
         else:
-            fail(msg % cmd)
+            api.fail(msg % cmd)
         if get_error_msg:
-            #if not msg:
-            #    debug("No message was created for command '%s'" % cmd)
+            # if not msg:
+            #     debug("No message was created for command '%s'" % cmd)
             r.msgerror = msg
 
     return r
@@ -135,8 +130,8 @@ class Yum(object):
             return "yum -y %s %s" % (opts, action)
 
     def get_repos(self):
-        #runcmd("yum repolist")
-        #raise NotImplementedError()
+        # runcmd("yum repolist")
+        # raise NotImplementedError()
         return []
 
     def get_pkglist(self, r):
@@ -193,9 +188,9 @@ class Apt(object):
         d = {}
         for line in r.split('\n'):
             if line.startswith("Setting up"):
-                 pkg, version = re.search(("Setting up ([a-zA-Z-]+) "
-                                           "\((.+)\)"), line).groups()
-                 d[pkg] = '-'.join([pkg, version])
+                pkg, version = re.search(("Setting up ([a-zA-Z-]+) "
+                                          "\((.+)\)"), line).groups()
+                d[pkg] = '-'.join([pkg, version])
         return d
 
 
@@ -205,7 +200,7 @@ class PkgTool(object):
             "centos": Yum,
             "debian": Apt,
             "redhat": Yum,
-	    "ubuntu": Apt,
+            "ubuntu": Apt,
         }[system.distname]()
         self.dryrun = False
 
@@ -250,16 +245,16 @@ class PkgTool(object):
 
 def show_exec_banner():
         """Displays execution banner."""
-        cfg = CFG.copy()
+        cfg = config.CFG.copy()
 
-        print(u'\n\u250C %s ' % green(" UMD verification app")
+        print(u'\n\u250C %s ' % colors.green(" UMD verification app")
               + u'\u2500' * 49 + u'\u2510')
         print(u'\u2502' + u' ' * 72 + u'\u2502')
         print(u'\u2502%s %s' % ("Quality criteria:".rjust(25),
-              blue("http://egi-qc.github.io"))
+              colors.blue("http://egi-qc.github.io"))
               + u' ' * 23 + u'\u2502')
         print(u'\u2502%s %s' % ("Codebase:".rjust(25),
-              blue("https://github.com/egi-qc/umd-verification"))
+              colors.blue("https://github.com/egi-qc/umd-verification"))
               + u' ' * 4 + u'\u2502')
         print(u'\u2502' + u' ' * 72 + u'\u2502')
         print(u'\u2502' + u' ' * 7 + u'\u2500' * 65 + u'\u2518')
@@ -269,7 +264,7 @@ def show_exec_banner():
             print(u'\u2502 Verification repositories used:')
             repos = to_list(cfg.pop("repository_url"))
             for repo in repos:
-                print(u'\u2502\t%s' % blue(repo))
+                print(u'\u2502\t%s' % colors.blue(repo))
 
         print(u'\u2502')
         print(u'\u2502 Repository basic configuration:')
@@ -279,7 +274,7 @@ def show_exec_banner():
         for k in basic_repo:
             v = cfg.pop(k)
             leftjust = len(max(basic_repo, key=len)) + 5
-            print(u'\u2502\t%s %s' % (k.ljust(leftjust), blue(v)))
+            print(u'\u2502\t%s %s' % (k.ljust(leftjust), colors.blue(v)))
 
         print(u'\u2502')
         print(u'\u2502 Path locations:')
@@ -303,16 +298,17 @@ def show_exec_banner():
 def get_class_attrs(obj):
     """Retuns a list of the class attributes for a given object."""
     return dict([(attr, getattr(obj, attr))
-            for attr in dict(inspect.getmembers(
-                                obj,
-                                lambda a:not(inspect.isroutine(a)))).keys()
-            if not attr.startswith('__')])
+                 for attr in dict(inspect.getmembers(
+                     obj,
+                     lambda a:not(inspect.isroutine(a)))).keys()
+                 if not attr.startswith('__')])
 
 
 def install(pkgs):
     """Shortcut for package installations."""
     pkgtool = PkgTool()
     return runcmd(pkgtool.install(pkgs))
+
 
 def get_repos():
     """Shortcut for getting enabled repositories in the system."""

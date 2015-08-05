@@ -1,9 +1,10 @@
-from umd.base import Deploy
-from umd.utils import install
+from umd import base
+from umd import utils
 
-class MyProxyDeploy(Deploy):
+
+class MyProxyDeploy(base.Deploy):
     def pre_config(self):
-        install(["fetch-crl", "glite-px-myproxy-yaim"])
+        utils.install(["fetch-crl", "glite-px-myproxy-yaim"])
 
 
 myproxy = MyProxyDeploy(

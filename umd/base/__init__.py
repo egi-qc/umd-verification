@@ -1,23 +1,18 @@
-from fabric.tasks import Task
+from fabric import tasks
 
-from umd.api import abort
-from umd.api import fail
+from umd import api
 from umd.base.configure import YaimConfig
 from umd.base.infomodel import InfoModel
 from umd.base.installation import Install
 from umd.base.operations import Operations
 from umd.base.security import Security
-from umd.base import utils
+from umd.base import utils as butils
 from umd.base.validate import Validate
-from umd.config import CFG
-from umd import exception
-from umd.utils import get_class_attrs
-from umd.utils import install
-from umd.utils import show_exec_banner
-from umd.utils import to_list
+from umd import config
+from umd import utils
 
 
-class Deploy(Task):
+class Deploy(tasks.Task):
     """Base class for UMD deployments."""
     def __init__(self,
                  name,
@@ -33,6 +28,7 @@ class Deploy(Task):
                  exceptions={},
                  dryrun=False):
         """Arguments:
+
                 name: Fabric command name.
                 doc: docstring that will appear when typing `fab -l`.
                 metapkg: list of UMD metapackages to install.
@@ -49,7 +45,7 @@ class Deploy(Task):
         self.name = name
         if doc:
             self.__doc__ = doc
-        self.metapkg = to_list(metapkg)
+        self.metapkg = utils.to_list(metapkg)
         self.need_cert = need_cert
         self.has_infomodel = has_infomodel
         self.nodetype = nodetype
@@ -58,7 +54,7 @@ class Deploy(Task):
         self.exceptions = exceptions
         self.cfgtool = None
         self.ca = None
-        self.installation_type = None # FIXME default value?
+        self.installation_type = None  # FIXME default value?
         self.qc_mon_capable = qc_mon_capable
         self.qc_envvars = {}
         self.qc_step = qc_step
@@ -127,43 +123,44 @@ class Deploy(Task):
                 QC step to run, prefix it as 'qc_step'.
         """
         # Set class attributes
-        CFG.update(get_class_attrs(self))
-        CFG.update(kwargs)
+        config.CFG.update(utils.get_class_attrs(self))
+        config.CFG.update(kwargs)
 
         # Show configuration summary
-        show_exec_banner()
+        utils.show_exec_banner()
 
         # Configuration tool
         if self.nodetype and self.siteinfo:
-            #self.cfgtool = YaimConfig(pre_config=self.pre_config,
-            CFG["cfgtool"] = YaimConfig(pre_config=self.pre_config,
-                                      post_config=self.post_config)
-        #else:
-        #    raise exception.ConfigException("Configuration not implemented.")
+            config.CFG["cfgtool"] = YaimConfig(
+                pre_config=self.pre_config,
+                post_config=self.post_config)
+        # else:
+        #     raise exception.ConfigException("Configuration not implemented.")
 
         # Certification Authority
         if self.need_cert:
-            install("ca-policy-egi-core")
-            #self.ca = utils.OwnCA(
-            CFG["ca"] = utils.OwnCA(
+            utils.install("ca-policy-egi-core")
+            config.CFG["ca"] = butils.OwnCA(
                 domain_comp_country="es",
                 domain_comp="UMDverification",
                 common_name="UMDVerificationOwnCA")
-            #self.ca.create(trusted_ca_dir="/etc/grid-security/certificates")
-            CFG["ca"].create(trusted_ca_dir="/etc/grid-security/certificates")
+            config.CFG["ca"].create(
+                trusted_ca_dir="/etc/grid-security/certificates")
 
         # Workflow
-        if CFG["qc_step"]:
-            for step in CFG["qc_step"]:
+        if config.CFG["qc_step"]:
+            for step in config.CFG["qc_step"]:
                 k, v = (step.rsplit('_', 1)[0], step)
                 try:
-                    step_mappings = {"QC_DIST": self._install,
+                    step_mappings = {
+                        "QC_DIST": self._install,
                         "QC_UPGRADE": self._install,
                         "QC_SEC": self._security,
                         "QC_INFO": self._infomodel,
                         "QC_FUNC": self._validate}
-                except KeyError, e:
-                    abort(fail("%s step not found in the Quality Criteria" % k))
+                except KeyError:
+                    api.abort(api.fail(("%s step not found in the Quality "
+                                        "Criteria" % k)))
 
                 step_mappings[k](**{"qc_step": v})
         else:

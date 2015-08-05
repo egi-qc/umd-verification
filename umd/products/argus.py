@@ -1,7 +1,7 @@
-from umd.base import Deploy
+from umd import base
 
 
-argus = Deploy(
+argus = base.Deploy(
     name="argus",
     doc="ARGUS server deployment.",
     metapkg="emi-argus",
