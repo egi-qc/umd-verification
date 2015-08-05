@@ -1,7 +1,7 @@
 import os
 import os.path
+import sys
 
-from fabric.api import abort
 from fabric.colors import blue
 from fabric.colors import green
 from fabric.colors import red
@@ -74,7 +74,8 @@ class QCStep(object):
         msg = "[%s] %s." % (level_color[level](level), msg)
         if do_abort:
             msg = ' '.join([msg, format_error_msg(self.logs)])
-            abort(msg)
+            print(msg)
+            sys.exit(-1)
         else:
             print(msg)
 
