@@ -1,4 +1,5 @@
 import inspect
+import os
 import os.path
 import re
 
@@ -79,9 +80,9 @@ def runcmd(cmd,
         cmd = ' '.join([cmd, "2>&1"])
 
     if chdir:
-        with fabric.context_manager.lcd(chdir):
+        with fabric.context_managers.lcd(chdir):
             with fabric_api.settings(warn_only=True):
-                r = api.local(cmd, capture=True)
+                r = fabric_api.local(cmd, capture=True)
     else:
         with fabric_api.settings(warn_only=True):
             r = fabric_api.local(cmd, capture=True)
@@ -232,7 +233,22 @@ class PkgTool(object):
     def get_repos(self):
         return self.client.get_repos()
 
-    def install(self, pkgs):
+    def enable_repo(self, repolist):
+        if not os.path.exists(self.client.path):
+            os.makedirs(self.client.path)
+        l = []
+        for repo in to_list(repolist):
+            r = runcmd("wget %s -O %s" % (repo,
+                                          os.path.join(
+                                              self.client.path,
+                                              os.path.basename(repo))))
+            if r.failed:
+                l.append(repo)
+        return l
+
+    def install(self, pkgs, enable_repo=[]):
+        if enable_repo:
+            self.enable_repo(enable_repo)
         return self._exec(action="install", pkgs=pkgs)
 
     def refresh(self):
@@ -317,10 +333,10 @@ def get_class_attrs(obj):
                  if not attr.startswith('__')])
 
 
-def install(pkgs):
+def install(pkgs, enable_repo=[]):
     """Shortcut for package installations."""
     pkgtool = PkgTool()
-    return runcmd(pkgtool.install(pkgs))
+    return runcmd(pkgtool.install(pkgs, enable_repo))
 
 
 def get_repos():

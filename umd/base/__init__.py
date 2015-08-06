@@ -1,3 +1,5 @@
+import sys
+
 from fabric import api as fabric_api
 from fabric import tasks
 
@@ -140,7 +142,11 @@ class Deploy(tasks.Task):
 
         # Certification Authority
         if self.need_cert:
-            utils.install("ca-policy-egi-core")
+            r = utils.install("ca-policy-egi-core",
+                              enable_repo=config.CFG["igtf_repo"])
+            if r.failed:
+                sys.exit(-1)
+
             config.CFG["ca"] = butils.OwnCA(
                 domain_comp_country="es",
                 domain_comp="UMDverification",
