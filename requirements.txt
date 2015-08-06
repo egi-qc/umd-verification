@@ -1,5 +1,5 @@
 argparse
 fabric
-python-ldap
 PyYAML
 requests
+#python-ldap
