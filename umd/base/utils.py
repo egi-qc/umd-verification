@@ -118,7 +118,7 @@ class OwnCA(object):
                                 directory.
         """
         utils.runcmd("mkdir -p %s" % self.workspace)
-        with fabric.context_manager.lcd(self.workspace):
+        with fabric.context_managers.lcd(self.workspace):
             subject = "/DC=%s/DC=%s/CN=%s" % (self.domain_comp_country,
                                               self.domain_comp,
                                               self.common_name)
@@ -151,7 +151,7 @@ class OwnCA(object):
                 key_prv: Alternate path to store the certificate's private key.
                 key_pub: Alternate path to store the certificate's public key.
         """
-        with fabric.context_manager.lcd(self.workspace):
+        with fabric.context_managers.lcd(self.workspace):
             utils.runcmd(("openssl req -newkey rsa:%s -nodes -sha1 -keyout "
                           "cert.key -keyform PEM -out cert.req -outform PEM "
                           "-subj '/DC=%s/DC=%s/CN=%s'"
