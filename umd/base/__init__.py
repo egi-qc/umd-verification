@@ -132,6 +132,9 @@ class Deploy(tasks.Task):
         # Show configuration summary
         utils.show_exec_banner()
 
+        # Check&print input
+        utils.check_input()
+
         # Configuration tool
         if self.nodetype and self.siteinfo:
             config.CFG["cfgtool"] = YaimConfig(
