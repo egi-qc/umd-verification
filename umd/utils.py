@@ -1,6 +1,7 @@
 import inspect
 import os
 import os.path
+import sys
 import re
 
 import fabric
@@ -289,7 +290,7 @@ def show_exec_banner():
         print(u'\u2502' + u' ' * 7 + u'\u2500' * 65 + u'\u2518')
 
         print(u'\u2502' + u' ' * 72)
-        if "repository_url" in cfg.keys():
+        if "repository_url" in cfg.keys() and cfg["repository_url"]:
             print(u'\u2502 Verification repositories used:')
             repos = to_list(cfg.pop("repository_url"))
             for repo in repos:
@@ -322,6 +323,26 @@ def show_exec_banner():
 
         print(u'\u2502')
         print(u'\u2514' + u'\u2500' * 72)
+
+
+def check_input():
+    """Performs a list of checks based on input parameters."""
+    # 1) Type of installation
+    if config.CFG["installation_type"]:
+        api.info("Installation type: %s" % config.CFG["installation_type"])
+    else:
+        api.fail(("Need to provide the type of installation to be performed: "
+                  "(install, upgrade)"))
+        sys.exit(1)
+    # 2) Verification repository URL
+    if not config.CFG["repository_url"]:
+        api.warn("No verification repository URL provided.")
+    # 3) Metapackage
+    if config.CFG["metapkg"]:
+        msg = "Metapackage/s selected: %s" % ''.join([
+            "\n\t+ %s" % mpkg for mpkg in config.CFG["metapkg"]])
+        api.info(msg)
+    print(u'\u2500' * 73)
 
 
 def get_class_attrs(obj):
