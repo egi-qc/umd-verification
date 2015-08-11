@@ -71,7 +71,5 @@ glexec_wn = GLExecWNDeploy(
     name="glexec-wn",
     doc="GLExec WN deployment.",
     metapkg=["glexec-wn"],
-    need_cert=False,
-    has_infomodel=False,
     qc_specific_id="glexec-wn"
 )

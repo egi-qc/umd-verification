@@ -22,7 +22,7 @@ class Deploy(tasks.Task):
                  doc=None,
                  metapkg=[],
                  need_cert=False,
-                 has_infomodel=True,
+                 has_infomodel=False,
                  nodetype=[],
                  siteinfo=[],
                  qc_mon_capable=False,

@@ -12,6 +12,7 @@ myproxy = MyProxyDeploy(
     doc="MyProxy server deployment.",
     metapkg="myproxy",
     need_cert=True,
+    has_infomodel=True,
     nodetype="PX",
     siteinfo=["site-info-PX.def"],
     qc_specific_id="myproxy")

@@ -67,5 +67,4 @@ crl = base.Deploy(
         "ca-policy-egi-core",
         "ca-policy-lcg",
         "fetch-crl"],
-    has_infomodel=False,
     qc_specific_id="ca")
