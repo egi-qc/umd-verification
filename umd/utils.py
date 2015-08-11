@@ -1,8 +1,8 @@
 import inspect
 import os
 import os.path
-import sys
 import re
+import sys
 
 import fabric
 from fabric import api as fabric_api
