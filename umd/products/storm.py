@@ -26,7 +26,8 @@ class StormDeploy(base.Deploy):
             nodetype.append("se_storm_webdav")
         super(StormDeploy, self).__init__(
             name=name,
-            need_cert="True",
+            need_cert=True,
+            has_infomodel=True,
             metapkg=metapkg,
             nodetype=nodetype,
             siteinfo=["site-info-storm.def"],
