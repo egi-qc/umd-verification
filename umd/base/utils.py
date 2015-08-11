@@ -68,7 +68,7 @@ class QCStep(object):
         if do_abort:
             msg = ' '.join([msg, utils.format_error_msg(self.logs)])
             print(msg)
-            sys.exit(-1)
+            sys.exit(1)
         else:
             print(msg)
 
