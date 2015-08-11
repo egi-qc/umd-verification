@@ -1,5 +1,3 @@
-import sys
-
 from fabric import api as fabric_api
 from fabric import tasks
 
@@ -152,7 +150,8 @@ class Deploy(tasks.Task):
             r = utils.install("ca-policy-egi-core",
                               enable_repo=config.CFG["igtf_repo"])
             if r.failed:
-                sys.exit(-1)
+                api.fail("Could not install 'ca-policy-egi-core' package.",
+                         do_abort=True)
 
             config.CFG["ca"] = butils.OwnCA(
                 domain_comp_country="es",

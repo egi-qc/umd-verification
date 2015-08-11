@@ -2,7 +2,6 @@ import inspect
 import os
 import os.path
 import re
-import sys
 
 import fabric
 from fabric import api as fabric_api
@@ -332,8 +331,7 @@ def check_input():
         api.info("Installation type: %s" % config.CFG["installation_type"])
     else:
         api.fail(("Need to provide the type of installation to be performed: "
-                  "(install, upgrade)"))
-        sys.exit(1)
+                  "(install, upgrade)"), do_abort=True)
     # 2) Verification repository URL
     if not config.CFG["repository_url"]:
         api.warn("No verification repository URL provided.")
