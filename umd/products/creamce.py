@@ -1,5 +1,6 @@
 from umd import api
 from umd import base
+from umd.base.configure.yaim import YaimConfig
 from umd import utils
 
 
@@ -37,8 +38,9 @@ standalone = CreamCEStandalone(
     metapkg="emi-cream-ce",
     need_cert=True,
     has_infomodel=True,
-    nodetype="creamCE",
-    siteinfo=["site-info-creamCE.def"],
+    cfgtool=YaimConfig(
+        nodetype="creamCE",
+        siteinfo=["site-info-creamCE.def"]),
     qc_specific_id="cream",
     exceptions=exceptions)
 
@@ -47,8 +49,9 @@ gridenginerized = CreamCEGridengine(
     metapkg="emi-cream-ce emi-ge-utils",
     need_cert=True,
     has_infomodel=True,
-    nodetype=["creamCE", "SGE_utils"],
-    siteinfo=["site-info-creamCE.def",
-              "site-info-SGE_utils.def"],
+    cfgtool=YaimConfig(
+        nodetype=["creamCE", "SGE_utils"],
+        siteinfo=["site-info-creamCE.def",
+                  "site-info-SGE_utils.def"]),
     qc_specific_id="cream",
     exceptions=exceptions)

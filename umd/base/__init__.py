@@ -2,7 +2,6 @@ from fabric import api as fabric_api
 from fabric import tasks
 
 from umd import api
-from umd.base.configure import YaimConfig
 from umd.base.infomodel import InfoModel
 from umd.base.installation import Install
 from umd.base.operations import Operations
@@ -21,8 +20,7 @@ class Deploy(tasks.Task):
                  metapkg=[],
                  need_cert=False,
                  has_infomodel=False,
-                 nodetype=[],
-                 siteinfo=[],
+                 cfgtool=None,
                  qc_mon_capable=False,
                  qc_specific_id=None,
                  qc_step={},
@@ -36,8 +34,7 @@ class Deploy(tasks.Task):
                 need_cert: whether installation type requires a signed cert.
                 has_infomodel: whether the product publishes information
                                about itself.
-                nodetype: list of YAIM nodetypes to be configured.
-                siteinfo: list of site-info files to be used.
+                cfgtool: configuration tool object.
                 qc_specific_id: ID that match the list of QC-specific checks
                     to be executed. The check definition must be included in
                     etc/qc_specific.yaml
@@ -49,11 +46,9 @@ class Deploy(tasks.Task):
         self.metapkg = utils.to_list(metapkg)
         self.need_cert = need_cert
         self.has_infomodel = has_infomodel
-        self.nodetype = nodetype
-        self.siteinfo = siteinfo
         self.qc_specific_id = qc_specific_id
         self.exceptions = exceptions
-        self.cfgtool = None
+        self.cfgtool = cfgtool
         self.ca = None
         self.installation_type = None  # FIXME default value?
         self.qc_mon_capable = qc_mon_capable
@@ -138,12 +133,8 @@ class Deploy(tasks.Task):
         utils.check_input()
 
         # Configuration tool
-        if self.nodetype and self.siteinfo:
-            config.CFG["cfgtool"] = YaimConfig(
-                pre_config=self.pre_config,
-                post_config=self.post_config)
-        # else:
-        #     raise exception.ConfigException("Configuration not implemented.")
+        config.CFG["cfgtool"].pre_config = self.pre_config
+        config.CFG["cfgtool"].post_config = self.post_config
 
         # Certification Authority
         if self.need_cert:

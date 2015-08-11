@@ -1,4 +1,5 @@
 from umd import base
+from umd.base.configure.yaim import YaimConfig
 from umd import utils
 
 
@@ -15,8 +16,9 @@ argus = base.Deploy(
     metapkg="emi-argus",
     need_cert=True,
     has_infomodel=True,
-    nodetype="ARGUS_server",
-    siteinfo=["site-info-ARGUS_server.def"],
+    cfgtool=YaimConfig(
+        nodetype="ARGUS_server",
+        siteinfo=["site-info-ARGUS_server.def"]),
     qc_specific_id="argus")
 
 ees = EESDeploy(

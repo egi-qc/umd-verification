@@ -2,6 +2,7 @@ import pwd
 
 from umd import api
 from umd import base
+from umd.base.configure.yaim import YaimConfig
 from umd import utils
 
 
@@ -29,8 +30,9 @@ class StormDeploy(base.Deploy):
             need_cert=True,
             has_infomodel=True,
             metapkg=metapkg,
-            nodetype=nodetype,
-            siteinfo=["site-info-storm.def"],
+            cfgtool=YaimConfig(
+                nodetype=nodetype,
+                siteinfo=["site-info-storm.def"]),
             qc_specific_id="storm")
 
     def pre_install(self):

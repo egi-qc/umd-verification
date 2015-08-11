@@ -1,4 +1,5 @@
 from umd import base
+from umd.base.configure.yaim import YaimConfig
 from umd import utils
 
 
@@ -13,6 +14,7 @@ myproxy = MyProxyDeploy(
     metapkg="myproxy",
     need_cert=True,
     has_infomodel=True,
-    nodetype="PX",
-    siteinfo=["site-info-PX.def"],
+    cfgtool=YaimConfig(
+        nodetype="PX",
+        siteinfo=["site-info-PX.def"]),
     qc_specific_id="myproxy")
