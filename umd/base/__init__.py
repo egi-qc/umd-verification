@@ -125,6 +125,10 @@ class Deploy(tasks.Task):
                 Works exactly as 'repository_url' i.e. to pass more than one
                 QC step to run, prefix it as 'qc_step'.
         """
+        # Init configuration
+        config.CFG.validate()
+        config.CFG.set()
+
         # Set class attributes
         config.CFG.update(utils.get_class_attrs(self))
         config.CFG.update(kwargs)

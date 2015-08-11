@@ -13,10 +13,14 @@ class ConfigDict(dict):
     def __init__(self):
         self.defaults = load_defaults()
 
-        self._validate()
-        self._set()
+    def validate(self):
+        try:
+            self.defaults["umd_release"][system.distro_version]
+            self.defaults["igtf_repo"][system.distname]
+        except KeyError:
+            api.info("'%s' OS not supported" % system.distro_version)
 
-    def _set(self):
+    def set(self):
         self.__setitem__("repository_url", "")
         self.__setitem__("umd_release",
                          self.defaults["umd_release"][system.distro_version])
@@ -29,13 +33,6 @@ class ConfigDict(dict):
             self.__setitem__(
                 "epel_release",
                 self.defaults["epel_release"][system.distro_version])
-
-    def _validate(self):
-        try:
-            self.defaults["umd_release"][system.distro_version]
-            self.defaults["igtf_repo"][system.distname]
-        except KeyError:
-            api.info("'%s' OS not supported" % system.distro_version)
 
     def update(self, d):
         d_tmp = {}
@@ -66,3 +63,5 @@ class ConfigDict(dict):
                 d_tmp[k] = v
 
         super(ConfigDict, self).update(d_tmp)
+
+CFG = ConfigDict()
