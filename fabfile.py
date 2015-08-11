@@ -1,5 +1,6 @@
 from fabric import state
 
+from umd import config
 from umd.products.argus import *    # NOQA
 from umd.products.bdii import *     # NOQA
 from umd.products.ca import *       # NOQA
@@ -19,3 +20,5 @@ state.output.user = True
 state.output.stderr = False
 state.output.aborts = False
 state.output.debug = False
+
+CFG = config.ConfigDict()

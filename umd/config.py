@@ -1,5 +1,3 @@
-import sys
-
 import yaml
 
 from umd import api
@@ -38,7 +36,6 @@ class ConfigDict(dict):
             self.defaults["igtf_repo"][system.distname]
         except KeyError:
             api.info("'%s' OS not supported" % system.distro_version)
-            sys.exit(0)
 
     def update(self, d):
         d_tmp = {}
@@ -69,6 +66,3 @@ class ConfigDict(dict):
                 d_tmp[k] = v
 
         super(ConfigDict, self).update(d_tmp)
-
-
-CFG = ConfigDict()
