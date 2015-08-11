@@ -185,4 +185,4 @@ class Install(object):
         if is_ok:
             qc_step.print_result("OK", msgtext)
         else:
-            qc_step.print_result("FAIL", msgtext)
+            qc_step.print_result("FAIL", msgtext, do_abort=True)
