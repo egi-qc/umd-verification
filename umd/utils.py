@@ -2,6 +2,7 @@ import inspect
 import os
 import os.path
 import re
+import tempfile
 
 import fabric
 from fabric import api as fabric_api
@@ -14,10 +15,10 @@ from umd import system
 
 
 def to_list(obj):
-    if not isinstance(obj, (str, list)):
+    if not isinstance(obj, (str, list, tuple)):
         raise exception.ConfigException("obj variable type '%s' not supported."
                                         % type(obj))
-    elif isinstance(obj, str):
+    elif isinstance(obj, (str, tuple)):
         return [obj]
     return obj
 
@@ -52,10 +53,13 @@ def to_file(r, logfile):
 
 
 def format_error_msg(logs, cmd=None):
-    msg = "See more information in logs (%s)." % ','.join(logs)
+    msg_l = []
+    if logs:
+        msg_l.append("See more information in logs (%s)." % ','.join(logs))
     if cmd:
-        msg = ' '.join(["Error while executing command '%s'.", msg])
-    return msg
+        msg_l.append("Error while executing command '%s'." % cmd)
+
+    return ' '.join(msg_l)
 
 
 def runcmd(cmd,
@@ -96,9 +100,9 @@ def runcmd(cmd,
     if fail_check and r.failed:
         msg = format_error_msg(logs, cmd)
         if stop_on_error:
-            fabric_api.abort(api.fail(msg % cmd))
+            fabric_api.abort(api.fail(msg))
         else:
-            api.fail(msg % cmd)
+            api.fail(msg)
         if get_error_msg:
             # if not msg:
             #     debug("No message was created for command '%s'" % cmd)
@@ -307,7 +311,7 @@ def show_exec_banner():
 
         print(u'\u2502')
         print(u'\u2502 Path locations:')
-        for k in ["log_path", "yaim_path"]:
+        for k in ["log_path", "yaim_path", "puppet_path"]:
             v = cfg.pop(k)
             leftjust = len(max(basic_repo, key=len)) + 5
             print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
@@ -362,3 +366,41 @@ def get_repos():
     """Shortcut for getting enabled repositories in the system."""
     pkgtool = PkgTool()
     return pkgtool.get_repos()
+
+
+def is_on_path(prog):
+    """Checks if a given executable is on the current PATH."""
+    r = runcmd("which %s" % prog)
+    if r.failed:
+        return False
+    else:
+        return r
+
+
+def clone_repo(repotype, repourl):
+    """Clone a repository in a temporary directory."""
+    dirname = tempfile.mkdtemp()
+
+    if repotype in ["git"]:
+        if not is_on_path("git"):
+            r = install("git")
+            if r.failed:
+                api.fail("Could not install 'git'.")
+        cmd = "git clone %s %s" % (repourl, dirname)
+    elif repotype in ["hg", "mercurial"]:
+        if not is_on_path("hg"):
+            r = install("mercurial")
+            if r.failed:
+                api.fail("Could not install 'mercurial'.")
+        cmd = "hg clone %s %s" % (repourl, dirname)
+    else:
+        raise NotImplementedError(("Current implementation does not support "
+                                   "repository type '%s'" % repotype))
+
+    r = runcmd(cmd)
+    if r.failed:
+        api.fail("Could not clone repository '%s' (via %s)"
+                 % (repourl, repotype))
+        dirname = None
+        os.rmdir(dirname)
+    return dirname

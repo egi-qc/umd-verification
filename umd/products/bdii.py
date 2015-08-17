@@ -1,4 +1,5 @@
 from umd import base
+from umd.base.configure.yaim import YaimConfig
 
 
 class BDIIDeploy(base.Deploy):
@@ -11,5 +12,6 @@ bdii_site = BDIIDeploy(
     doc="Site BDII deployment.",
     metapkg="emi-bdii-site",
     has_infomodel=True,
-    nodetype="BDII_site",
-    siteinfo=["site-info-BDII_site.def"])
+    cfgtool=YaimConfig(
+        nodetype="BDII_site",
+        siteinfo=["site-info-BDII_site.def"]))
