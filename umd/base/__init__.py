@@ -23,7 +23,7 @@ class Deploy(tasks.Task):
                  cfgtool=None,
                  qc_mon_capable=False,
                  qc_specific_id=None,
-                 qc_step={},
+                 qc_step=[],
                  exceptions={},
                  dryrun=False):
         """Arguments:
