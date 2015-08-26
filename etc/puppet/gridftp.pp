@@ -1,1 +1,1 @@
-class {"globus::gridftp": tcp_range => "20000,25000" }
+class { "gridftp": }

@@ -86,3 +86,13 @@ myproxy-client:
         - test: "bin/myproxy/client-test.sh"
           description: "myproxy client commands testing."
           user: "umd"
+
+gridftp:
+    qc_func_1: 
+        - test: "bin/myproxy/client-test.sh"
+          description: "Retrieve myproxy for ops.vo.ibergrid.eu VO."
+          user: "umd"
+          args: "retrieve"
+        - test: "bin/gridftp/client-test.sh"
+          description: "GridFTP transfer check using globus-url-copy."
+          user: "root"

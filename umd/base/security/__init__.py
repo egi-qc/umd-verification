@@ -22,9 +22,10 @@ class Security(object):
                          os.path.join(config.CFG["log_path"], "qc_sec_2"))
 
         if self.need_cert:
-            self.ca.issue_cert(hash="2048",
-                               key_prv="/etc/grid-security/hostkey.pem",
-                               key_pub="/etc/grid-security/hostcert.pem")
+            config.CFG["cert"] = self.ca.issue_cert(
+                hash="2048",
+                key_prv="/etc/grid-security/hostkey.pem",
+                key_pub="/etc/grid-security/hostcert.pem")
 
             r = self.cfgtool.run()
             if r and r.failed:

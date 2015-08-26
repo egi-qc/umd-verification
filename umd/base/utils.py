@@ -99,6 +99,12 @@ class QCStep(object):
         return r
 
 
+class OwnCACert(object):
+    """Host certificate class."""
+    def __init__(self, subject):
+        self.subject = subject
+
+
 class OwnCA(object):
     """Creates a Certification Authority to sign host certificates."""
     def __init__(self,
@@ -109,6 +115,9 @@ class OwnCA(object):
         self.domain_comp = domain_comp
         self.common_name = common_name
         self.workspace = os.path.join("/root/", common_name)
+        self.subject = "/DC=%s/DC=%s/CN=%s" % (self.domain_comp_country,
+                                               self.domain_comp,
+                                               self.common_name)
 
     def create(self, trusted_ca_dir=None):
         """Creates the CA public and private key.
@@ -119,9 +128,7 @@ class OwnCA(object):
         """
         utils.runcmd("mkdir -p %s" % self.workspace)
         with fabric.context_managers.lcd(self.workspace):
-            subject = "/DC=%s/DC=%s/CN=%s" % (self.domain_comp_country,
-                                              self.domain_comp,
-                                              self.common_name)
+            subject = self.subject
             utils.runcmd(("openssl req -x509 -nodes -days 1 -newkey rsa:2048 "
                           "-out ca.pem -outform PEM -keyout ca.key -subj "
                           "'%s'" % subject))
@@ -152,13 +159,13 @@ class OwnCA(object):
                 key_pub: Alternate path to store the certificate's public key.
         """
         with fabric.context_managers.lcd(self.workspace):
+            subject = "/DC=%s/DC=%s/CN=%s" % (self.domain_comp_country,
+                                              self.domain_comp,
+                                              hostname)
             utils.runcmd(("openssl req -newkey rsa:%s -nodes -sha1 -keyout "
                           "cert.key -keyform PEM -out cert.req -outform PEM "
-                          "-subj '/DC=%s/DC=%s/CN=%s'"
-                          % (hash,
-                             self.domain_comp_country,
-                             self.domain_comp,
-                             hostname)))
+                          "-subj '%s'"
+                          % (hash, subject)))
             utils.runcmd(("openssl x509 -req -in cert.req -CA ca.pem -CAkey "
                           "ca.key -CAcreateserial -out cert.crt -days 1"))
 
@@ -168,3 +175,5 @@ class OwnCA(object):
             if key_pub:
                 utils.runcmd("cp cert.crt %s" % key_pub)
                 api.info("Public key stored in '%s'." % key_pub)
+
+        return OwnCACert(subject)
