@@ -133,8 +133,9 @@ class Deploy(tasks.Task):
         utils.check_input()
 
         # Configuration tool
-        config.CFG["cfgtool"].pre_config = self.pre_config
-        config.CFG["cfgtool"].post_config = self.post_config
+        if config.CFG["cfgtool"]:
+            config.CFG["cfgtool"].pre_config = self.pre_config
+            config.CFG["cfgtool"].post_config = self.post_config
 
         # Certification Authority
         if self.need_cert:
