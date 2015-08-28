@@ -190,11 +190,14 @@ class Yum(object):
 class Apt(object):
     def __init__(self):
         self.path = "/etc/apt/sources.list.d/"
+        self.extension = ".list"
+        # FIXME this is not right
+        self.repodir = "repo-files"
 
     def run(self, action, dryrun, pkgs=None):
-        # Check if package exists locally => dpkg
-        if os.path.exists(pkgs[0]):
-            return "dpkg -i %s" % " ".join(pkgs)
+        if pkgs:
+            if os.path.exists(pkgs[0]):
+                return "dpkg -i %s" % " ".join(pkgs)
 
         opts = ''
         if dryrun:
@@ -213,12 +216,28 @@ class Apt(object):
         return runcmd(("grep -h ^deb /etc/apt/sources.list "
                        "/etc/apt/sources.list.d/*")).split('\n')
 
+    def remove_repo(self, repolist):
+        """Remove all the appearances of a list of repositories.
+
+        :repolist: list of repository names.
+        """
+        install("software-properties-common")
+        available_repos = self.get_repos()
+
+        for repo in repolist:
+            for available_repo in available_repos:
+                if available_repo.find(repo) != -1:
+                    runcmd("apt-add-repository -r '%s'" % available_repo)
+                    api.info("Existing repository removed: %s"
+                             % available_repo)
+
     def get_pkglist(self, r):
         d = {}
         for line in r.split('\n'):
-            if line.startswith("Setting up"):
-                pkg, version = re.search(("Setting up ([a-zA-Z-]+) "
-                                          "\((.+)\)"), line).groups()
+            m = re.search(("^Setting up ([a-zA-Z-]+) "
+                           "\((.+)\)"), line)
+            if m:
+                pkg, version = m.groups()
                 d[pkg] = '-'.join([pkg, version])
         return d
 
