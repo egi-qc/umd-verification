@@ -21,27 +21,34 @@ class CADeploy(base.Deploy):
             if system.distro_version == "ubuntu14":
                 utils.install("software-properties-common")
 
-        for repo in utils.get_repos():
-            if repo.find("egi-igtf") != -1:
-                utils.runcmd("apt-add-repository -r '%s'" % repo)
-                api.info("Repository removed: %s" % repo)
+            for repo in utils.get_repos():
+                if repo.find("egi-igtf") != -1:
+                    utils.runcmd("apt-add-repository -r '%s'" % repo)
+                    api.info("Repository removed: %s" % repo)
 
-        utils.runcmd("apt-add-repository '%s'" % verification_repo,
-                     stop_on_error=True)
-        api.info("Repository appended: %s" % verification_repo)
+            utils.runcmd("apt-add-repository '%s'" % verification_repo,
+                         stop_on_error=True)
+            api.info("Repository appended: %s" % verification_repo)
+        # elif system.distname in [ "redhat" ]:
+        #     for repo in utils.get_repos():
+        #         if repo in ["EGI-trustanchors"]:
+        #             utils.remove_repo(repo)
 
     def pre_install(self):
         if not config.CFG["repository_url"]:
-            api.fail("No CA verification URL was given.")
+            api.fail("No CA verification URL was given.", stop_on_error=True)
+
+        utils.remove_repo(["EGI-trustanchors", "LCG-trustanchors"])
 
         # Set verification CA repository
-        self.set_repos()
+        # self.set_repos()
 
-        # Install UMD release -> contains the pubkey
-        utils.runcmd("wget %s -O /tmp/umd_release.deb"
-                     % config.CFG["umd_release"])
-        utils.install("/tmp/umd_release.deb")
-        utils.runcmd("apt-get update")
+        # if system.distname in ["debian", "ubuntu"]:
+        #     # Install UMD release -> contains the pubkey
+        #     utils.runcmd("wget %s -O /tmp/umd_release.deb"
+        #                  % config.CFG["umd_release"])
+        #     utils.install("/tmp/umd_release.deb")
+        #     utils.runcmd("apt-get update")
 
     def _install(self, **kwargs):
         kwargs.update({"ignore_repo_config": True})
