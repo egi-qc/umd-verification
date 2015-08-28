@@ -1,5 +1,4 @@
 import json
-import os.path
 
 import requests
 
@@ -12,8 +11,7 @@ class Operations(object):
         """Service Probes."""
         qc_step = butils.QCStep("QC_MON_1",
                                 "Service Probes",
-                                os.path.join(config.CFG["log_path"],
-                                             "qc_mon_1"))
+                                "qc_mon_1")
 
         if config.CFG["qc_mon_capable"]:
             headers = {"content-type": "application/json"}

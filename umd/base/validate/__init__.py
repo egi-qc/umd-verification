@@ -101,8 +101,7 @@ class Validate(object):
         """Basic Funcionality Test."""
         qc_step = butils.QCStep("QC_FUNC_1",
                                 "Basic Funcionality Test.",
-                                os.path.join(config.CFG["log_path"],
-                                             "qc_func_1"))
+                                "qc_func_1")
 
         if cfg:
             failed_checks = self._run_checks(qc_step, cfg)
@@ -122,8 +121,7 @@ class Validate(object):
         """New features/bug fixes testing."""
         qc_step = butils.QCStep("QC_FUNC_2",
                                 "New features/bug fixes testing.",
-                                os.path.join(config.CFG["log_path"],
-                                             "qc_func_2"))
+                                "qc_func_2")
 
         if cfg:
             failed_checks = self._run_checks(qc_step, cfg)

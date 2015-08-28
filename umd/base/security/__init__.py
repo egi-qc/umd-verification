@@ -1,5 +1,3 @@
-import os.path
-
 from umd.base.security import utils as sec_utils
 from umd.base.utils import QCStep
 from umd.base.utils import qcstep_request
@@ -19,7 +17,7 @@ class Security(object):
         """SHA-2 Certificates Support."""
         qc_step = QCStep("QC_SEC_2",
                          "SHA-2 Certificates Support",
-                         os.path.join(config.CFG["log_path"], "qc_sec_2"))
+                         "qc_sec_2")
 
         if self.need_cert:
             config.CFG["cert"] = self.ca.issue_cert(
@@ -44,7 +42,7 @@ class Security(object):
         """World Writable Files check."""
         qc_step = QCStep("QC_SEC_5",
                          "World Writable Files",
-                         os.path.join(config.CFG["log_path"], "qc_sec_5"))
+                         "qc_sec_5")
 
         r = qc_step.runcmd(("find / -not \\( -path \"/proc\" -prune \\) "
                             "-type f -perm -002 -exec ls -l {} \;"),
