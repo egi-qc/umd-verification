@@ -28,7 +28,13 @@ class CADeploy(base.Deploy):
         ca_version = ''.join(ca_version.replace('/', '.', 1).replace('/', '-'))
         repo = os.path.join(repo, '-'.join(["ca-policy-egi-core",
                                            ca_version]))
-        utils.runcmd("apt-add-repository 'deb %s egi-igtf core'" % repo)
+        repodeb = "deb %s egi-igtf core" % repo
+
+        if system.distro_version == "debian6":
+            utils.runcmd("echo '%s' > /etc/apt/sources.list.d/egi-igtf.list"
+                         % repodeb)
+        else:
+            utils.runcmd("apt-add-repository '%s'" % repodeb)
         utils.runcmd("wget -q -O - %s | apt-key add -"
                      % os.path.join(repo, "GPG-KEY-EUGridPMA-RPM-3"))
 
