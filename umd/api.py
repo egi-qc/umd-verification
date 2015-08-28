@@ -1,5 +1,3 @@
-import sys
-
 from fabric import api as fabric_api
 from fabric import colors
 
@@ -9,11 +7,13 @@ def info(msg):
     fabric_api.puts("[INFO] %s" % msg)
 
 
-def fail(msg, do_abort=False):
+def fail(msg, stop_on_error=False):
     """Prints info/debug logs."""
-    fabric_api.puts("[%s] %s" % (colors.red("FAIL"), msg))
-    if do_abort:
-        sys.exit(1)
+    msg = "[%s] %s" % (colors.red("FAIL"), msg)
+    if stop_on_error:
+        fabric_api.abort(fabric_api.puts(msg))
+    else:
+        fabric_api.puts(msg)
 
 
 def ok(msg):

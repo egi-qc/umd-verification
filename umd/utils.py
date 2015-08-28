@@ -134,24 +134,6 @@ class Yum(object):
         else:
             return "yum -y %s %s" % (opts, action)
 
-    def get_repos(self):
-        l = []
-        is_repo = False
-        for line in runcmd("yum repolist").split('\n'):
-            l_str = filter(None, line.split('  '))
-            if "repo id" in l_str:
-                is_repo = True
-                continue
-            try:
-                if l_str[0].startswith("repolist"):
-                    is_repo = False
-                    continue
-            except IndexError:
-                pass
-            if is_repo:
-                l.append(l_str[0])
-        return l
-
     def get_pkglist(self, r):
         """Gets the list of packages being installed parsing yum output."""
         d = {}
@@ -174,6 +156,35 @@ class Yum(object):
                 d[name] = ' '.join([all, "(already installed)"])
 
         return d
+
+    def get_repos(self):
+        l = []
+        is_repo = False
+        for line in runcmd("yum repolist").split('\n'):
+            l_str = filter(None, line.split('  '))
+            if "repo id" in l_str:
+                is_repo = True
+                continue
+            try:
+                if l_str[0].startswith("repolist"):
+                    is_repo = False
+                    continue
+            except IndexError:
+                pass
+            if is_repo:
+                l.append(l_str[0])
+        return l
+
+    def remove_repo(self, repolist):
+        """Remove all the appearances of a list of repositories.
+
+        :repolist: list of repository names (ID between brackets)
+        """
+        for repo in repolist:
+            r = runcmd("grep %s %s/* | cut -d':' -f1|uniq" % (repo, self.path))
+            for f in r.split('\n'):
+                os.remove(f)
+                api.info("Existing repository '%s' removed." % f)
 
 
 class Apt(object):
@@ -249,6 +260,9 @@ class PkgTool(object):
             if r.failed:
                 l.append(repo)
         return l
+
+    def remove_repo(self, repolist):
+        return self.client.remove_repo(to_list(repolist))
 
     def install(self, pkgs, enable_repo=[]):
         if enable_repo:
@@ -366,6 +380,12 @@ def get_repos():
     """Shortcut for getting enabled repositories in the system."""
     pkgtool = PkgTool()
     return pkgtool.get_repos()
+
+
+def remove_repo(repo):
+    """Shortcut for removing repository files."""
+    pkgtool = PkgTool()
+    return pkgtool.remove_repo(repo)
 
 
 def is_on_path(prog):
