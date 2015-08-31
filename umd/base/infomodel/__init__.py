@@ -1,5 +1,3 @@
-import os.path
-
 import ldap
 
 from umd.base.infomodel import utils as info_utils
@@ -15,18 +13,15 @@ def bdii_support(f):
         if f.func_name == "qc_info_1":
             qc_step = butils.QCStep("QC_INFO_1",
                                     "GlueSchema 1.3 Support",
-                                    os.path.join(config.CFG["log_path"],
-                                                 "qc_info_1"))
+                                    "qc_info_1")
         elif f.func_name == "qc_info_2":
             qc_step = butils.QCStep("QC_INFO_2",
                                     "GlueSchema 2.0 Support",
-                                    os.path.join(config.CFG["log_path"],
-                                                 "qc_info_2"))
+                                    "qc_info_2")
         elif f.func_name == "qc_info_3":
             qc_step = butils.QCStep("QC_INFO_3",
                                     "Middleware Version Information",
-                                    os.path.join(config.CFG["log_path"],
-                                                 "qc_info_3"))
+                                    "qc_info_3")
 
         if self.has_infomodel:
             if self.cfgtool:

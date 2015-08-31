@@ -38,7 +38,7 @@ class QCStep(object):
     def __init__(self, id, description, logfile):
         self.id = id
         self.description = description
-        self.logfile = logfile
+        self.logfile = os.path.join(config.CFG["log_path"], logfile)
         self.logs = []
 
         self._print_header()

@@ -49,11 +49,11 @@ class Install(object):
         if installation_type == "update":
             qc_step = butils.QCStep("QC_UPGRADE_1",
                                     "Upgrade",
-                                    "/tmp/qc_upgrade_1")
+                                    "qc_upgrade_1")
         elif installation_type == "install":
             qc_step = butils.QCStep("QC_DIST_1",
                                     "Binary Distribution",
-                                    "/tmp/qc_inst_1")
+                                    "qc_inst_1")
 
         repo_config = True
         if "ignore_repo_config" in kwargs.keys():
