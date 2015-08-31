@@ -127,7 +127,10 @@ class Install(object):
                 for url in config.CFG["repository_url"]:
                     self._enable_verification_repo(qc_step, url)
 
-            # 3) Update
+                # 3) Refresh
+                qc_step.runcmd(self.pkgtool.refresh())
+
+            # 4) Update
             api.info("Using repositories: %s" % self.pkgtool.get_repos())
             r = qc_step.runcmd(self.pkgtool.update(),
                                fail_check=False,
@@ -140,7 +143,10 @@ class Install(object):
             for url in config.CFG["repository_url"]:
                 self._enable_verification_repo(qc_step, url)
 
-            # 2) Install verification version
+            # 2) Refresh
+            qc_step.runcmd(self.pkgtool.refresh())
+
+            # 3) Install verification version
             api.info("Using repositories: %s" % self.pkgtool.get_repos())
             r = qc_step.runcmd(self.pkgtool.install(self.metapkg),
                                fail_check=False,

@@ -16,27 +16,29 @@ class CADeploy(base.Deploy):
 
         if system.distname in ["debian", "ubuntu"]:
             repo = "egi-igtf"
+            utils.runcmd("wget -q -O - %s | apt-key add -"
+                         % os.path.join(config.CFG["repository_url"][0],
+                                        "GPG-KEY-EUGridPMA-RPM-3"))
         elif system.distname in ["redhat"]:
             repo = ["EGI-trustanchors", "LCG-trustanchors"]
 
         utils.remove_repo(repo)
 
         # FIXME(orviz) workaround CA release with no Debian '.list' repofile
-        # Just one repository is expected
-        repo = config.CFG["repository_url"][0]
-        ca_version = urlparse.urlparse(repo).path.split("cas/")[-1]
-        ca_version = ''.join(ca_version.replace('/', '.', 1).replace('/', '-'))
-        repo = os.path.join(repo, '-'.join(["ca-policy-egi-core",
-                                           ca_version]))
-        repodeb = "deb %s egi-igtf core" % repo
+        if system.distname in [ "debian", "ubuntu" ]:
+             Just one repository is expected
+            repo = config.CFG["repository_url"][0]
+            ca_version = urlparse.urlparse(repo).path.split("cas/")[-1]
+            ca_version = ''.join(ca_version.replace('/', '.', 1).replace('/', '-'))
+            repo = os.path.join(repo, '-'.join(["ca-policy-egi-core",
+                                               ca_version]))
+            repodeb = "deb %s egi-igtf core" % repo
 
-        if system.distro_version == "debian6":
-            utils.runcmd("echo '%s' > /etc/apt/sources.list.d/egi-igtf.list"
-                         % repodeb)
-        else:
-            utils.runcmd("apt-add-repository '%s'" % repodeb)
-        utils.runcmd("wget -q -O - %s | apt-key add -"
-                     % os.path.join(repo, "GPG-KEY-EUGridPMA-RPM-3"))
+            if system.distro_version == "debian6":
+                utils.runcmd("echo '%s' > /etc/apt/sources.list.d/egi-igtf.list"
+                             % repodeb)
+            else:
+                utils.runcmd("apt-add-repository '%s'" % repodeb)
 
     def _install(self, **kwargs):
         kwargs.update({"ignore_repo_config": True})
