@@ -181,8 +181,8 @@ class Yum(object):
         :repolist: list of repository names (ID between brackets)
         """
         for repo in repolist:
+            r = runcmd("grep %s %s/* | cut -d':' -f1|uniq" % (repo, self.path))
             if r:
-                r = runcmd("grep %s %s/* | cut -d':' -f1|uniq" % (repo, self.path))
                 for f in r.split('\n'):
                     os.remove(f)
                     api.info("Existing repository '%s' removed." % f)
