@@ -107,9 +107,6 @@ class Install(object):
                 else:
                     api.info("'%s' requirement installed." % pkg)
 
-        # Refresh repositories
-        qc_step.runcmd(self.pkgtool.refresh())
-
         if config.CFG["dryrun"]:
             api.info(("Installation or upgrade process will be simulated "
                       "(dryrun: ON)"))
@@ -165,7 +162,7 @@ class Install(object):
         if r.failed:
             # FIXME (should be within YUM class) YUM's downloadonly
             # plugin returns 1 on success
-            if r.stderr.find("--downloadonly specified") != 1:
+            if r.stderr.find("--downloadonly specified") != -1:
                 is_ok = True
                 msgtext = "Dry-run installation ended successfully."
             else:

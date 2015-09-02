@@ -170,8 +170,10 @@ class OwnCA(object):
                           "ca.key -CAcreateserial -out cert.crt -days 1"))
 
             if key_prv:
+                utils.runcmd("chmod 600 cert.key")
                 utils.runcmd("cp cert.key %s" % key_prv)
-                api.info("Private key stored in '%s'." % key_prv)
+                api.info("Private key stored in '%s' (with 600 perms)."
+                         % key_prv)
             if key_pub:
                 utils.runcmd("cp cert.crt %s" % key_pub)
                 api.info("Public key stored in '%s'." % key_pub)

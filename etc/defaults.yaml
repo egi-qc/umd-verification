@@ -13,6 +13,10 @@ umd_release:
     ubuntu14: "http://repository.egi.eu/sw/production/umd/3/debian/dists/squeeze/main/binary-amd64/umd-release-3.0.0_all.deb" 
     centos7:  "" 
 
+puppet_release:
+    redhat5: "https://yum.puppetlabs.com/puppetlabs-release-el-5.noarch.rpm" 
+    redhat6: "https://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm" 
+
 igtf_repo:
     redhat: "http://repository.egi.eu/sw/production/cas/1/current/repo-files/EGI-trustanchors.repo" 
     centos: "http://repository.egi.eu/sw/production/cas/1/current/repo-files/EGI-trustanchors.repo" 
