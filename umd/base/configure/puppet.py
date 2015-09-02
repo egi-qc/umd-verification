@@ -4,6 +4,7 @@ import os.path
 from umd import api
 from umd.base.configure import BaseConfig
 from umd import config
+from umd import system
 from umd import utils
 
 
@@ -29,6 +30,28 @@ class PuppetConfig(BaseConfig):
         self.module_from_repository = utils.to_list(module_from_repository)
         self.module_path = utils.to_list(module_path)
 
+    def v3_workaround(self):
+        # 1) Include hiera functions in Puppet environment
+        utils.install("rubygems")
+        utils.runcmd(("gem install hiera-puppet --install-dir "
+                      "/etc/puppet/modules"))
+        utils.runcmd("mv /etc/puppet/modules/gems/* /etc/puppet/modules/")
+        # 2) Hiera variables
+        if self.hiera_data:
+            with open("/etc/puppet/hiera.yaml", 'w') as f:
+                f.write("""
+                ---
+                :backends:
+                  - yaml
+                :yaml:
+                  :datadir: /etc/puppet/hieradata
+                :hierarchy:
+                  - global
+                """)
+            utils.runcmd("mkdir /etc/puppet/hieradata")
+            utils.runcmd("cp %s /etc/puppet/hieradata/global.yaml"
+                         % self.hiera_data)
+
     def config(self):
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
         if self.hiera_data:
@@ -39,28 +62,29 @@ class PuppetConfig(BaseConfig):
 
         # Puppet versions <3 workarounds
         puppet_version = utils.runcmd("facter -p puppetversion")
-        if (version.StrictVersion(puppet_version)
+        if puppet_version and (version.StrictVersion(puppet_version)
            < version.StrictVersion("3.0")):
-            # 1) Include hiera functions in Puppet environment
-            utils.install("rubygems")
-            utils.runcmd(("gem install hiera-puppet --install-dir "
-                          "/etc/puppet/modules"))
-            utils.runcmd("mv /etc/puppet/modules/gems/* /etc/puppet/modules/")
-            # 2) Hiera variables
-            if self.hiera_data:
-                with open("/etc/puppet/hiera.yaml", 'w') as f:
-                    f.write("""
-                    ---
-                    :backends:
-                      - yaml
-                    :yaml:
-                      :datadir: /etc/puppet/hieradata
-                    :hierarchy:
-                      - global
-                    """)
-                utils.runcmd("mkdir /etc/puppet/hieradata")
-                utils.runcmd("cp %s /etc/puppet/hieradata/global.yaml"
-                             % self.hiera_data)
+            # self.v3_workaround()
+            pkg_url = config.CFG["puppet_release"]
+            pkg_loc = "/tmp/puppet-release.rpm"
+            r = utils.runcmd("wget %s -O %s" % (pkg_url, pkg_loc))
+            if r.failed:
+                api.fail("Could not fetch Puppet package from '%s'" % pkg_url,
+                         stop_on_error=True)
+            else:
+                api.info("Fetched Puppet release package from '%s'." % pkg_url)
+            utils.install(pkg_loc)
+            utils.runcmd(("sed '/enabled=1/a\priority=1' "
+                          "/etc/yum.repos.d/puppet*"))
+
+            # FIXME (orviz) Remove this check when dropping redhat5 support
+            if system.distro_version == "redhat5":
+                pkg = ("ftp://rpmfind.net/linux/centos/5.11/os/x86_64/CentOS/"
+                       "virt-what-1.11-2.el5.x86_64.rpm")
+                utils.runcmd(("wget %s -O /tmp/virt-what.rpm && yum -y "
+                              "install /tmp/virt-what.rpm") % pkg)
+
+            utils.install("puppet")
 
         for mod in self.module_from_puppetforge:
             r = utils.runcmd("puppet module install %s --force" % mod)
@@ -85,6 +109,6 @@ class PuppetConfig(BaseConfig):
                             self.manifest))
         if r.failed:
             api.fail("Puppet execution failed. More information in logs: %s"
-                     % logfile, do_abort=True)
+                     % logfile, stop_on_error=True)
         else:
             api.info("Puppet execution ended successfully.")

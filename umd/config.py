@@ -22,10 +22,15 @@ class ConfigDict(dict):
 
     def set(self):
         self.__setitem__("repository_url", "")
-        self.__setitem__("umd_release",
-                         self.defaults["umd_release"][system.distro_version])
-        self.__setitem__("igtf_repo",
-                         self.defaults["igtf_repo"][system.distname])
+        self.__setitem__(
+            "umd_release",
+            self.defaults["umd_release"][system.distro_version])
+        self.__setitem__(
+            "puppet_release",
+            self.defaults["puppet_release"][system.distro_version])
+        self.__setitem__(
+            "igtf_repo",
+            self.defaults["igtf_repo"][system.distname])
         self.__setitem__("yaim_path", self.defaults["yaim"]["path"])
         self.__setitem__("puppet_path", self.defaults["puppet"]["path"])
         self.__setitem__("log_path", self.defaults["base"]["log_path"])
