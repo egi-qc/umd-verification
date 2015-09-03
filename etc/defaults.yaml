@@ -15,6 +15,7 @@ umd_release:
 
 puppet_release:
     redhat5: "https://yum.puppetlabs.com/puppetlabs-release-el-5.noarch.rpm" 
+    redhat6: "https://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm" 
 
 igtf_repo:
     redhat: "http://repository.egi.eu/sw/production/cas/1/current/repo-files/EGI-trustanchors.repo" 

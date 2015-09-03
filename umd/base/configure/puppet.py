@@ -30,13 +30,14 @@ class PuppetConfig(BaseConfig):
         self.module_from_repository = utils.to_list(module_from_repository)
         self.module_path = utils.to_list(module_path)
 
-    def v3_workaround(self):
-        # 1) Include hiera functions in Puppet environment
+    def _v3_workaround(self):
+        # Include hiera functions in Puppet environment
         utils.install("rubygems")
         utils.runcmd(("gem install hiera-puppet --install-dir "
                       "/etc/puppet/modules"))
         utils.runcmd("mv /etc/puppet/modules/gems/* /etc/puppet/modules/")
-        # 2) Hiera variables
+
+    def _set_hiera(self):
         if self.hiera_data:
             with open("/etc/puppet/hiera.yaml", 'w') as f:
                 f.write("""
@@ -64,7 +65,7 @@ class PuppetConfig(BaseConfig):
         puppet_version = utils.runcmd("facter -p puppetversion")
         if puppet_version and (version.StrictVersion(puppet_version)
            < version.StrictVersion("3.0")):
-            # self.v3_workaround()
+            # self._v3_workaround()
             pkg_url = config.CFG["puppet_release"]
             pkg_loc = "/tmp/puppet-release.rpm"
             r = utils.runcmd("wget %s -O %s" % (pkg_url, pkg_loc))
@@ -86,6 +87,7 @@ class PuppetConfig(BaseConfig):
 
             utils.install("puppet")
 
+        # Install modules from puppetforge/local
         for mod in self.module_from_puppetforge:
             r = utils.runcmd("puppet module install %s --force" % mod)
             if r.failed:
@@ -99,6 +101,9 @@ class PuppetConfig(BaseConfig):
                 module_loc.append(dirname)
         if module_loc:
             self.module_path.append(*module_loc)
+
+        # Hiera environment
+        self._set_hiera()
 
         logfile = os.path.join(config.CFG["log_path"], "puppet.log")
 
