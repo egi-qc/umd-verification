@@ -12,6 +12,7 @@ Basic `fab` usage
 ^^^^^^^^^^^^^^^^^
 * To *list* the available UMD product deployments (*commands* term in Fabric):
   .. code:: bash
+
     # fab -l
     Available commands:
 
@@ -22,6 +23,7 @@ Basic `fab` usage
 
 * To *run* the deployment:
   .. code:: bash
+
     # fab argus:installation_type=install,repository_url=..
 
 
