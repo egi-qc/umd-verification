@@ -4,8 +4,8 @@ Overview
 
 Getting Started
 ---------------
-Since this tool uses Python's `Fabric <http://www.fabfile.org/>`_ library,
-just use `fab` command to make the deployments.
+This tool uses Python's `Fabric <http://www.fabfile.org/>`_ library, just use
+`fab` command to make the deployments.
 
 
 Basic `fab` usage
@@ -25,6 +25,6 @@ Basic `fab` usage
     # fab argus:installation_type=install,repository_url=..
 
 
-Therefore the argument passing format works like 
-``fab <command>:<arg1>=<value1>,<arg2>=<value2>,..<argN>=<valueN>, where the
+Therefore the argument passing format works like
+``fab <command>:<arg1>=<value1>,<arg2>=<value2>,..<argN>=<valueN>``, where the
 available arguments ..

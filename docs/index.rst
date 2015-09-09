@@ -9,10 +9,10 @@ Welcome to umd-verification's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
     overview
-
+    args
 
 Indices and tables
 ==================
