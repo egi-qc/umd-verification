@@ -23,6 +23,7 @@ Basic `fab` usage
     (..)
 
 * To *run* the deployment:
+
   .. code:: bash
 
     # fab argus:installation_type=install,repository_url=..
