@@ -8,6 +8,17 @@ from umd import system
 from umd import utils
 
 
+hiera_config = """
+---
+:backends:
+  - yaml
+:yaml:
+  :datadir: /etc/puppet/hieradata
+:hierarchy:
+  - global
+"""
+
+
 class PuppetConfig(BaseConfig):
     def __init__(self,
                  manifest,
@@ -40,15 +51,7 @@ class PuppetConfig(BaseConfig):
     def _set_hiera(self):
         if self.hiera_data:
             with open("/etc/puppet/hiera.yaml", 'w') as f:
-                f.write("""
-                ---
-                :backends:
-                  - yaml
-                :yaml:
-                  :datadir: /etc/puppet/hieradata
-                :hierarchy:
-                  - global
-                """)
+                f.write(hiera_config)
             utils.runcmd("mkdir /etc/puppet/hieradata")
             utils.runcmd("cp %s /etc/puppet/hieradata/global.yaml"
                          % self.hiera_data)
@@ -112,8 +115,8 @@ class PuppetConfig(BaseConfig):
                          % (logfile,
                             ':'.join(self.module_path),
                             self.manifest))
-        if r.failed:
+        if r.return_code in [0, 2]:
+            api.info("Puppet execution ended successfully.")
+        else:
             api.fail("Puppet execution failed. More information in logs: %s"
                      % logfile, stop_on_error=True)
-        else:
-            api.info("Puppet execution ended successfully.")
