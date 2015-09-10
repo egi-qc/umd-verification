@@ -80,16 +80,21 @@ def runcmd(cmd,
             get_error_msg: return the formatted error message.
             stderr_to_stdout: redirect standard error to standard output.
     """
+    def _run():
+        with fabric_api.settings(warn_only=True):
+            with fabric_api.shell_env(LC_ALL="en_US.UTF-8",
+                                      LANG="en_US.UTF-8"):
+                r = fabric_api.local(cmd, capture=True)
+        return r
+
     if stderr_to_stdout:
         cmd = ' '.join([cmd, "2>&1"])
 
     if chdir:
         with fabric.context_managers.lcd(chdir):
-            with fabric_api.settings(warn_only=True):
-                r = fabric_api.local(cmd, capture=True)
+            r = _run()
     else:
-        with fabric_api.settings(warn_only=True):
-            r = fabric_api.local(cmd, capture=True)
+        r = _run()
 
     logs = []
     if logfile:
