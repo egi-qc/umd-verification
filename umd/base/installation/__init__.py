@@ -42,8 +42,14 @@ class Install(object):
                                  % self.pkgtool.get_extension(),
                                  do_abort=True)
 
+    def _check(self):
+        if not self.metapkg:
+            api.fail("No metapackage selected", stop_on_error=True)
+
     def run(self, **kwargs):
         """Runs UMD installation."""
+        self._check()
+
         # Handle installation type
         installation_type = config.CFG["installation_type"]
         if installation_type == "update":
