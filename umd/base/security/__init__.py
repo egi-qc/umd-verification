@@ -45,6 +45,7 @@ class Security(object):
                          "qc_sec_5")
 
         r = qc_step.runcmd(("find / -not \\( -path \"/proc\" -prune \\) "
+                            "-not \\( -path \"/sys\" -prune \\) "
                             "-type f -perm -002 -exec ls -l {} \;"),
                            fail_check=False)
         if r:

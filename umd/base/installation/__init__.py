@@ -86,19 +86,20 @@ class Install(object):
 
             for pkg in pkgs_to_download:
                 pkg_id, pkg_url = pkg
-                pkg_base = os.path.basename(pkg_url)
-                pkg_loc = os.path.join("/tmp", pkg_base)
-                if qc_step.runcmd("wget %s -O %s" % (pkg_url, pkg_loc)):
-                    api.info("%s release package fetched from %s."
-                             % (pkg_id, pkg_url))
+                if pkg_url:
+                    pkg_base = os.path.basename(pkg_url)
+                    pkg_loc = os.path.join("/tmp", pkg_base)
+                    if qc_step.runcmd("wget %s -O %s" % (pkg_url, pkg_loc)):
+                        api.info("%s release package fetched from %s."
+                                 % (pkg_id, pkg_url))
 
-                r = qc_step.runcmd(self.pkgtool.install(pkg_loc))
-                if r.failed:
-                    qc_step.print_result("FAIL",
-                                         "Error while installing %s release."
-                                         % pkg_id)
-                else:
-                    api.info("%s release package installed." % pkg_id)
+                    r = qc_step.runcmd(self.pkgtool.install(pkg_loc))
+                    if r.failed:
+                        qc_step.print_result("FAIL",
+                                             ("Error while installing %s "
+                                              "release.") % pkg_id)
+                    else:
+                        api.info("%s release package installed." % pkg_id)
 
             for pkg in pkgs_additional:
                 r = qc_step.runcmd(self.pkgtool.install(pkg))
