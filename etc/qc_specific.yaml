@@ -16,10 +16,14 @@ argus-ees:
 
 bdii:
     qc_func_1:
-        - test: "bin/bdii/check_bdii_entries"
-          description: "Check BDII entries."
+        - test: "bin/bdii/client-test.sh"
+          description: "glue-validator check."
           user: "umd"
-          args: "-H localhost -b Mds-Vo-Name=GRID-SITE,O=Grid -p 2170 -c 40:1 -w 20:1"
+          args: "glue-validator"
+        - test: "bin/bdii/client-test.sh"
+          description: "ldapsearch check."
+          user: "umd"
+          args: "ldapsearch"
 
 ca:
     qc_func_1:

@@ -2,6 +2,7 @@ from umd import base
 from umd.base.configure.puppet import PuppetConfig
 from umd.base.configure.yaim import YaimConfig
 from umd import config
+from umd import system
 from umd import utils
 
 
@@ -10,7 +11,8 @@ class BDIIDeploy(base.Deploy):
         config.CFG["cfgtool"].run()
 
     def pre_validate(self):
-        utils.install("nagios-plugins-bdii")
+        if system.distname in ["redhat", "centos"]:
+            utils.install("openldap-clients")
 
 
 bdii_site_yaim = BDIIDeploy(

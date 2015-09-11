@@ -52,7 +52,8 @@ class PuppetConfig(BaseConfig):
         if self.hiera_data:
             with open("/etc/puppet/hiera.yaml", 'w') as f:
                 f.write(hiera_config)
-            utils.runcmd("mkdir /etc/puppet/hieradata")
+            if not os.path.exists("/etc/puppet/hieradata"):
+                utils.runcmd("mkdir /etc/puppet/hieradata")
             utils.runcmd("cp %s /etc/puppet/hieradata/global.yaml"
                          % self.hiera_data)
 

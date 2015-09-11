@@ -22,6 +22,7 @@ class Install(object):
         qc_step.runcmd("rm -rf %s/*" % download_dir, fail_check=False)
         qc_step.runcmd("wget -P %s -r --no-parent -R*.html* %s"
                        % (download_dir, url),
+                       fail_check=False,
                        stop_on_error=False)
         repofiles = []
         for path in os.walk(download_dir):
