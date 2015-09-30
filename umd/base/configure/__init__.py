@@ -15,5 +15,7 @@ class BaseConfig(object):
 
     def run(self):
         self.pre_config()
-        self.config()
+        r = self.config()
         self.post_config()
+
+        return r

@@ -122,6 +122,9 @@ class PuppetConfig(BaseConfig):
         elif r.return_code == 2:
             api.info(("Puppet execution ended successfully (some warnings "
                       "though, check logs)"))
+            r.failed = False
         else:
             api.fail("Puppet execution failed. More information in logs: %s"
-                     % logfile, stop_on_error=True)
+                     % logfile)
+            r.failed = True
+        return r

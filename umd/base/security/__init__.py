@@ -37,7 +37,7 @@ class Security(object):
                                          ("Product services can manage SHA-2 "
                                           "certs."))
             else:
-                qc_step.print_result("WARN",
+                qc_step.print_result("WARNING",
                                      ("SHA-2 management not tested: "
                                       "configuration tool not defined."))
         else:

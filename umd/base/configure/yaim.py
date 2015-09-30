@@ -1,6 +1,5 @@
 import tempfile
 
-from fabric import api as fabric_api
 from fabric import context_managers
 
 from umd import api
@@ -40,17 +39,14 @@ class YaimConfig(BaseConfig):
             api.info(("Creating temporary file '%s' with "
                       "content: %s" % (f.name, f.readlines())))
 
-            # NOTE(orviz) Cannot use 'capture=True': execution gets
-            # stalled (defunct)
             with context_managers.lcd(config.CFG["yaim_path"]):
-                abort_exception_default = fabric_api.env.abort_exception
-                fabric_api.env.abort_exception = exception.ConfigException
-                try:
-                    fabric_api.local("/opt/glite/yaim/bin/yaim -c -s %s -n %s"
-                                     % (f.name, " -n ".join(self.nodetype)))
-                except exception.ConfigException:
-                    fabric_api.abort(api.fail(("YAIM execution failed. Check "
-                                               "the logs at '/opt/glite/yaim/"
-                                               "log/yaimlog'.")))
+                r = utils.runcmd("/opt/glite/yaim/bin/yaim -c -s %s -n %s"
+                                 % (f.name, " -n ".join(self.nodetype)))
+
+            if r.failed:
+                api.fail(("YAIM execution failed. Check "
+                          "the logs at '/opt/glite/yaim/log/yaimlog'."))
+            else:
                 api.info("YAIM configuration ran successfully.")
-                fabric_api.env.abort_exception = abort_exception_default
+
+            return r
