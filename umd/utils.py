@@ -192,6 +192,9 @@ class Yum(object):
                     os.remove(f)
                     api.info("Existing repository '%s' removed." % f)
 
+    def add_repo_key(keylist):
+        raise NotImplementedError
+
 
 class Apt(object):
     def __init__(self):
@@ -247,6 +250,12 @@ class Apt(object):
                 d[pkg] = '-'.join([pkg, version])
         return d
 
+    def add_repo_key(self, keylist):
+        for key in keylist:
+            r = runcmd("wget -q -O - %s | apt-key add -" % key)
+            if r.failed:
+                api.fail("Could not add key '%s'" % key)
+
 
 class PkgTool(object):
     def __init__(self):
@@ -273,6 +282,9 @@ class PkgTool(object):
     def get_repos(self):
         return self.client.get_repos()
 
+    def add_repo_key(self, key):
+        return self.client.add_repo_key(key)
+
     def enable_repo(self, repolist):
         if not os.path.exists(self.client.path):
             os.makedirs(self.client.path)
@@ -289,9 +301,11 @@ class PkgTool(object):
     def remove_repo(self, repolist):
         return self.client.remove_repo(to_list(repolist))
 
-    def install(self, pkgs, enable_repo=[]):
+    def install(self, pkgs, enable_repo=[], key_repo=[]):
         if enable_repo:
             self.enable_repo(enable_repo)
+            self.add_repo_key(to_list(key_repo))
+            self.refresh()
         return self._exec(action="install", pkgs=pkgs)
 
     def refresh(self):
@@ -307,9 +321,10 @@ class PkgTool(object):
         try:
             if pkgs:
                 pkgs = to_list(pkgs)
-                return self.client.run(action, self.dryrun, pkgs=pkgs)
+                cmd = self.client.run(action, self.dryrun, pkgs=pkgs)
             else:
-                return self.client.run(action, self.dryrun)
+                cmd = self.client.run(action, self.dryrun)
+            return runcmd(cmd)
         except KeyError:
             raise exception.InstallException("'%s' OS not supported"
                                              % system.distname)
@@ -367,25 +382,6 @@ def show_exec_banner():
         print(u'\u2514' + u'\u2500' * 72)
 
 
-def check_input():
-    """Performs a list of checks based on input parameters."""
-    # 1) Type of installation
-    if config.CFG["installation_type"]:
-        api.info("Installation type: %s" % config.CFG["installation_type"])
-    else:
-        api.fail(("Need to provide the type of installation to be performed: "
-                  "(install, upgrade)"), do_abort=True)
-    # 2) Verification repository URL
-    if not config.CFG["repository_url"]:
-        api.warn("No verification repository URL provided.")
-    # 3) Metapackage
-    if config.CFG["metapkg"]:
-        msg = "Metapackage/s selected: %s" % ''.join([
-            "\n\t+ %s" % mpkg for mpkg in config.CFG["metapkg"]])
-        api.info(msg)
-    print(u'\u2500' * 73)
-
-
 def get_class_attrs(obj):
     """Retuns a list of the class attributes for a given object."""
     return dict([(attr, getattr(obj, attr))
@@ -395,10 +391,10 @@ def get_class_attrs(obj):
                  if not attr.startswith('__')])
 
 
-def install(pkgs, enable_repo=[]):
+def install(pkgs, enable_repo=[], key_repo=[]):
     """Shortcut for package installations."""
     pkgtool = PkgTool()
-    return runcmd(pkgtool.install(pkgs, enable_repo))
+    return pkgtool.install(pkgs, enable_repo, key_repo)
 
 
 def get_repos():

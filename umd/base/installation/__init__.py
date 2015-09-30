@@ -39,8 +39,10 @@ class Install(object):
 
         else:
             qc_step.print_result("FAIL",
-                                 "Could not find any valid '%s' filename."
-                                 % self.pkgtool.get_extension(),
+                                 ("Could not find any valid %s "
+                                  "('%s') file in the remote repository URL")
+                                 % (system.distname,
+                                    self.pkgtool.get_extension()),
                                  do_abort=True)
 
     def _check(self):
@@ -83,8 +85,7 @@ class Install(object):
                 pkgs_additional.append("yum-priorities")
 
             # Installation/upgrade workflow
-            r = qc_step.runcmd(self.pkgtool.remove(pkgs_to_purge),
-                               stop_on_error=False)
+            r = self.pkgtool.remove(pkgs_to_purge)
             if r.failed:
                 api.info("Could not delete %s release packages." % msg_purge)
 
@@ -100,7 +101,7 @@ class Install(object):
                         api.info("%s release package fetched from %s."
                                  % (pkg_id, pkg_url))
 
-                    r = qc_step.runcmd(self.pkgtool.install(pkg_loc))
+                    r = self.pkgtool.install(pkg_loc)
                     if r.failed:
                         qc_step.print_result("FAIL",
                                              ("Error while installing %s "
@@ -109,7 +110,7 @@ class Install(object):
                         api.info("%s release package installed." % pkg_id)
 
             for pkg in pkgs_additional:
-                r = qc_step.runcmd(self.pkgtool.install(pkg))
+                r = self.pkgtool.install(pkg)
                 if r.failed:
                     api.info("Error while installing '%s'." % pkg)
                 else:
@@ -123,8 +124,12 @@ class Install(object):
         if installation_type == "update":
             if config.CFG["repository_url"]:
                 # 1) Install base (production) version
-                r = qc_step.runcmd(self.pkgtool.install(self.metapkg))
-                if not r.failed:
+                r = self.pkgtool.install(self.metapkg)
+                if r.failed:
+                    api.fail(("Could not install base (production) version of "
+                              "metapackage '%s'" % self.metapkg),
+                             stop_on_error=True)
+                else:
                     api.info("UMD product/s '%s' production version installed."
                              % self.metapkg)
 
@@ -133,14 +138,14 @@ class Install(object):
                     self._enable_verification_repo(qc_step, url)
 
                 # 3) Refresh
-                qc_step.runcmd(self.pkgtool.refresh())
+                self.pkgtool.refresh()
 
             # 4) Update
             api.info("Using repositories: %s" % self.pkgtool.get_repos())
-            r = qc_step.runcmd(self.pkgtool.update(),
-                               fail_check=True,
-                               stop_on_error=False,
-                               get_error_msg=True)
+            r = self.pkgtool.update()
+            if r.failed:
+                api.fail("Metapackage '%s' update failed." % self.metapkg,
+                         stop_on_error=True)
             d = self.pkgtool.get_pkglist(r)
 
         elif installation_type == "install":
@@ -149,14 +154,14 @@ class Install(object):
                 self._enable_verification_repo(qc_step, url)
 
             # 2) Refresh
-            qc_step.runcmd(self.pkgtool.refresh())
+            self.pkgtool.refresh()
 
             # 3) Install verification version
             api.info("Using repositories: %s" % self.pkgtool.get_repos())
-            r = qc_step.runcmd(self.pkgtool.install(self.metapkg),
-                               fail_check=True,
-                               stop_on_error=False,
-                               get_error_msg=True)
+            r = self.pkgtool.install(self.metapkg)
+            if r.failed:
+                api.fail("Metapackage '%s' installation failed.",
+                         stop_on_error=True)
             d = self.pkgtool.get_pkglist(r)
 
             # NOTE(orviz): missing WARNING case
