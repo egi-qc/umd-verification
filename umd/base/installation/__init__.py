@@ -65,8 +65,12 @@ class Install(object):
                                     "qc_inst_1")
 
         repo_config = True
-        if "ignore_repo_config" in kwargs.keys():
+        if "ignore_repos" in kwargs.keys():
             repo_config = False
+
+        verification_repo_config = True
+        if "ignore_verification_repos" in kwargs.keys():
+            verification_repo_config = False
 
         if repo_config:
             # Distribution-based settings
@@ -134,8 +138,9 @@ class Install(object):
                              % self.metapkg)
 
                 # 2) Enable verification repository
-                for url in config.CFG["repository_url"]:
-                    self._enable_verification_repo(qc_step, url)
+                if verification_repo_config:
+                    for url in config.CFG["repository_url"]:
+                        self._enable_verification_repo(qc_step, url)
 
                 # 3) Refresh
                 self.pkgtool.refresh()
@@ -150,8 +155,9 @@ class Install(object):
 
         elif installation_type == "install":
             # 1) Enable verification repository
-            for url in config.CFG["repository_url"]:
-                self._enable_verification_repo(qc_step, url)
+            if verification_repo_config:
+                for url in config.CFG["repository_url"]:
+                    self._enable_verification_repo(qc_step, url)
 
             # 2) Refresh
             self.pkgtool.refresh()
