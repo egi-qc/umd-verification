@@ -13,6 +13,7 @@ Contents:
 
     overview
     args
+    tests
 
 Indices and tables
 ==================
