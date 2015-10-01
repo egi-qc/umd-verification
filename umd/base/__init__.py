@@ -140,10 +140,11 @@ class Deploy(tasks.Task):
         # Certification Authority
         if self.need_cert:
             r = utils.install("ca-policy-egi-core",
-                              enable_repo=config.CFG["igtf_repo"])
+                              enable_repo=config.CFG["igtf_repo"],
+                              key_repo=config.CFG["igtf_repo_key"])
             if r.failed:
                 api.fail("Could not install 'ca-policy-egi-core' package.",
-                         do_abort=True)
+                         stop_on_error=True)
 
             config.CFG["ca"] = butils.OwnCA(
                 domain_comp_country="es",
