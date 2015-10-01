@@ -19,7 +19,7 @@ class CADeploy(base.Deploy):
             utils.runcmd("wget -q -O - %s | apt-key add -"
                          % os.path.join(config.CFG["repository_url"][0],
                                         "GPG-KEY-EUGridPMA-RPM-3"))
-        elif system.distname in ["redhat"]:
+        elif system.distname in ["centos", "redhat"]:
             repo = ["EGI-trustanchors", "LCG-trustanchors"]
 
         utils.remove_repo(repo)
