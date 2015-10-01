@@ -49,9 +49,11 @@ class ConfigDict(dict):
         # Strong validations first
         # UMD release
         if not self.__getitem__("umd_release"):
-            api.fail("UMD release package not provided for '%s' distribution"
-                     % system.distname,
-                     stop_on_error=True)
+            # FIXME(orviz) centos7 does not have UMD release package
+            if system.distname not in ["centos"]:
+                api.fail(("UMD release package not provided for '%s' "
+                          "distribution" % system.distname),
+                         stop_on_error=True)
         # Configuration management: Puppet
         from umd.base.configure.puppet import PuppetConfig
         if isinstance(self.__getitem__("cfgtool"), PuppetConfig):

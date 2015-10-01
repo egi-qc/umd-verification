@@ -166,7 +166,8 @@ class Install(object):
             api.info("Using repositories: %s" % self.pkgtool.get_repos())
             r = self.pkgtool.install(self.metapkg)
             if r.failed:
-                api.fail("Metapackage '%s' installation failed.",
+                api.fail("Metapackage '%s' installation failed."
+                         % self.metapkg,
                          stop_on_error=True)
             d = self.pkgtool.get_pkglist(r)
 
