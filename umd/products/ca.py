@@ -43,8 +43,11 @@ class CADeploy(base.Deploy):
 
     def _install(self, **kwargs):
         # Part of the above workaround
-        kwargs.update({"ignore_repos": True,
-                       "ignore_verification_repos": True})
+        if system.distname in ["debian", "ubuntu"]:
+            kwargs.update({"ignore_repos": True,
+                           "ignore_verification_repos": True})
+        else:
+            kwargs.update({"ignore_repos": True})
 
         self.pre_install()
         Install().run(**kwargs)
