@@ -382,25 +382,6 @@ def show_exec_banner():
         print(u'\u2514' + u'\u2500' * 72)
 
 
-def check_input():
-    """Performs a list of checks based on input parameters."""
-    # 1) Type of installation
-    if config.CFG["installation_type"]:
-        api.info("Installation type: %s" % config.CFG["installation_type"])
-    else:
-        api.fail(("Need to provide the type of installation to be performed: "
-                  "(install, upgrade)"), do_abort=True)
-    # 2) Verification repository URL
-    if not config.CFG["repository_url"]:
-        api.warn("No verification repository URL provided.")
-    # 3) Metapackage
-    if config.CFG["metapkg"]:
-        msg = "Metapackage/s selected: %s" % ''.join([
-            "\n\t+ %s" % mpkg for mpkg in config.CFG["metapkg"]])
-        api.info(msg)
-    print(u'\u2500' * 73)
-
-
 def get_class_attrs(obj):
     """Retuns a list of the class attributes for a given object."""
     return dict([(attr, getattr(obj, attr))
