@@ -68,6 +68,7 @@ class ConfigDict(dict):
         # Type of installation
         if not self.__getitem__("installation_type"):
             api.warn("No installation type provided: performing installation.")
+            self.__setitem__("installation_type", "install")
         # Verification repository URL
         v = self.__getitem__("repository_url")
         if not v:

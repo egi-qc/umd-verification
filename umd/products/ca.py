@@ -42,7 +42,9 @@ class CADeploy(base.Deploy):
                 utils.runcmd("apt-add-repository '%s'" % repodeb)
 
     def _install(self, **kwargs):
-        kwargs.update({"ignore_repo_config": True})
+        # Part of the above workaround
+        kwargs.update({"ignore_repos": True,
+                       "ignore_verification_repos": True})
 
         self.pre_install()
         Install().run(**kwargs)
