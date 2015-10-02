@@ -81,9 +81,10 @@ def runcmd(cmd,
             stderr_to_stdout: redirect standard error to standard output.
     """
     def _run():
+        env_d = dict(config.CFG["qc_envvars"].items()
+                     + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")])
         with fabric_api.settings(warn_only=True):
-            with fabric_api.shell_env(LC_ALL="en_US.UTF-8",
-                                      LANG="en_US.UTF-8"):
+            with fabric_api.shell_env(**env_d):
                 r = fabric_api.local(cmd, capture=True)
         return r
 
