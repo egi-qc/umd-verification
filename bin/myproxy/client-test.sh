@@ -8,14 +8,24 @@ set -x
 ##              echo $MYPROXY_PASSWD | myproxy-init -S -l $MYPROXY_USER -s $MYPROXY_SERVER -m $VO
 ##
 
-# ops.vo.ibergrid.eu configuration
-mkdir -p ~/.voms
-cat > ~/.voms/vomses << EOF 
-"ops.vo.ibergrid.eu" "ibergrid-voms.ifca.es" "40001" "/DC=es/DC=irisgrid/O=ifca/CN=host/ibergrid-voms.ifca.es" "ops.vo.ibergrid.eu"
-"ops.vo.ibergrid.eu" "voms01.ncg.ingrid.pt" "40001" "/C=PT/O=LIPCA/O=LIP/OU=Lisboa/CN=voms01.ncg.ingrid.pt" "ops.vo.ibergrid.eu"
-EOF
+: ${VO:=ops.vo.ibergrid.eu}
 
-VO=ops.vo.ibergrid.eu
+case $VO in
+    ops.vo.ibergrid.eu)
+        vomses_conf='ops.vo.ibergrid.eu" "ibergrid-voms.ifca.es" "40001" "/DC=es/DC=irisgrid/O=ifca/CN=host/ibergrid-voms.ifca.es" "ops.vo.ibergrid.eu"\n"ops.vo.ibergrid.eu" "voms01.ncg.ingrid.pt" "40001" "/C=PT/O=LIPCA/O=LIP/OU=Lisboa/CN=voms01.ncg.ingrid.pt" "ops.vo.ibergrid.eu"'
+        ;;
+    dteam)
+        vomses_conf='"dteam" "voms.hellasgrid.gr" "15004" "/C=GR/O=HellasGrid/OU=hellasgrid.gr/CN=voms.hellasgrid.gr" "dteam"\n"dteam" "voms2.hellasgrid.gr" "15004" "/C=GR/O=HellasGrid/OU=hellasgrid.gr/CN=voms2.hellasgrid.gr" "dteam"'
+        ;;
+    *) 
+        echo "VO $VO not supported"
+        exit -1
+        ;;
+esac
+        
+mkdir -p ~/.voms
+echo -e $vomses_conf > ~/.voms/vomses
+
 MYPROXY_PASSWD_OTHER=test.change.passwd
 
 
