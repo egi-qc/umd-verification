@@ -97,6 +97,6 @@ if __name__ == '__main__':
     try:
         r = ctx.filecopy(params, source, dest)
         print("Copy succeeded!")
-    except Exception as e:
+    except Exception, e:  # NOQA
         print("Copy failed: %s" % str(e))
         sys.exit(1)
