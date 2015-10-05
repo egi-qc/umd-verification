@@ -19,7 +19,7 @@ if __name__ == '__main__':
     try:
         replicas = ctx.getxattr(surl, 'user.replicas')
         print(replicas)
-    except gfal2.GError as e:
+    except gfal2.GError, e:  # NOQA
         print("Could not get the replicas:")
         print("\t", e.message)
         print("\t Code", e.code)

@@ -23,7 +23,7 @@ if __name__ == '__main__':
         while status == 0:
             status = ctx.bring_online_poll(surl, token)
         print("File brought online!")
-    except gfal2.GError as e:
+    except gfal2.GError, e:  # NOQA
         print("Could not bring the file online:")
         print("\t", e.message)
         print("\t Code", e.code)
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     try:
         ctx.release(surl, token)
         print("File released!")
-    except gfal2.GError as e:
+    except gfal2.GError, e:  # NOQA
         print("Could not release the file:")
         print("\t", e.message)
         print("\t Code", e.code)
