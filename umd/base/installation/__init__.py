@@ -88,7 +88,7 @@ class Install(object):
                                             config.CFG["epel_release"]))
                 pkgs_additional.append("yum-priorities")
 
-            # Installation/upgrade workflow
+            # Remove any trace of UMD (and external) repository files
             r = self.pkgtool.remove(pkgs_to_purge)
             if r.failed:
                 api.info("Could not delete %s release packages." % msg_purge)
@@ -96,6 +96,10 @@ class Install(object):
             if qc_step.runcmd("/bin/rm -f %s" % " ".join(paths_to_purge)):
                 api.info("Purged any previous %s repository file." % msg_purge)
 
+            # Import repository keys
+            self.pkgtool.add_repo_key(config.CFG["repo_keys"])
+
+            # Install UMD (and external) realease packages
             for pkg in pkgs_to_download:
                 pkg_id, pkg_url = pkg
                 if pkg_url:

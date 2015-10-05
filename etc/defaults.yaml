@@ -29,6 +29,10 @@ igtf_repo_key:
     debian: "https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3"
     ubuntu: "https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3"
 
+repo_keys:
+    redhat: 
+        - "http://repository.egi.eu/sw/production/umd/UMD-RPM-PGP-KEY"
+
 yaim:
     path: "etc/yaim"
 
