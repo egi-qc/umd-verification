@@ -19,3 +19,12 @@ ui_myproxy = base.Deploy(
         nodetype="UI",
         siteinfo=["site-info-UI.def"]),
     qc_specific_id="myproxy-client")
+
+ui_gfal = base.Deploy(
+    name="ui-gfal",
+    doc="GFAL2 verfication on UI.",
+    metapkg=["emi-ui", "gfal2", "gfal2-python", "gfal2-util", "srm-ifce"],
+    cfgtool=YaimConfig(
+        nodetype="UI",
+        siteinfo=["site-info-UI.def"]),
+    qc_specific_id="myproxy-client")
