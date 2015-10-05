@@ -1,9 +1,7 @@
-
 import collections
 import os
 import pwd
 
-from fabric import api as fabric_api
 import yaml
 
 from umd import api
@@ -16,9 +14,6 @@ QC_SPECIFIC_FILE = "etc/qc_specific.yaml"
 
 
 class Validate(object):
-    def __init__(self):
-        self.qc_envvars = butils.get_qc_envvars()
-
     def _is_executable(self, f):
         """File executable check."""
         is_executable = False
@@ -86,14 +81,13 @@ class Validate(object):
                          % f)
             else:
                 self._handle_user(qc_step, user)
-                with fabric_api.shell_env(**self.qc_envvars):
-                    r = qc_step.runcmd(cmd,
-                                       fail_check=False,
-                                       stderr_to_stdout=True)
-                    if r.failed:
-                        failed_checks.append(cmd)
-                    else:
-                        api.info("Command '%s' ran successfully" % cmd)
+                r = qc_step.runcmd(cmd,
+                                   fail_check=False,
+                                   stderr_to_stdout=True)
+                if r.failed:
+                    failed_checks.append(cmd)
+                else:
+                    api.info("Command '%s' ran successfully" % cmd)
 
         return failed_checks
 
@@ -138,7 +132,9 @@ class Validate(object):
 
     @butils.qcstep_request
     def run(self, steps, *args, **kwargs):
+        config.CFG["qc_envvars"] = butils.get_qc_envvars()
         qc_specific_id = config.CFG["qc_specific_id"]
+
         if qc_specific_id:
             try:
                 with open(QC_SPECIFIC_FILE) as f:
