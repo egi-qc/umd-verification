@@ -27,4 +27,4 @@ ui_gfal = base.Deploy(
     cfgtool=YaimConfig(
         nodetype="UI",
         siteinfo=["site-info-UI.def"]),
-    qc_specific_id="myproxy-client")
+    qc_specific_id="ui")
