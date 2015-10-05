@@ -39,6 +39,9 @@ class ConfigDict(dict):
             "igtf_repo_key",
             self.defaults["igtf_repo_key"][system.distname])
         self.__setitem__(
+            "repo_keys",
+            self.defaults["repo_keys"][system.distname])
+        self.__setitem__(
             "puppet_release",
             self.defaults["puppet_release"][system.distro_version])
         self.__setitem__(

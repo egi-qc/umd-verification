@@ -193,8 +193,13 @@ class Yum(object):
                     os.remove(f)
                     api.info("Existing repository '%s' removed." % f)
 
-    def add_repo_key(keylist):
-        raise NotImplementedError
+    def add_repo_key(self, keylist):
+        for key in keylist:
+            r = runcmd("rpm --import %s" % key)
+            if r.failed:
+                api.fail("Could not add key '%s'" % key)
+            else:
+                api.info("Repository key added: %s" % key)
 
 
 class Apt(object):
@@ -256,6 +261,8 @@ class Apt(object):
             r = runcmd("wget -q -O - %s | apt-key add -" % key)
             if r.failed:
                 api.fail("Could not add key '%s'" % key)
+            else:
+                api.info("Repository key added: %s" % key)
 
 
 class PkgTool(object):
