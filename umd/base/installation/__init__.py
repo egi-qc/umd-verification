@@ -101,15 +101,17 @@ class Install(object):
                 if pkg_url:
                     pkg_base = os.path.basename(pkg_url)
                     pkg_loc = os.path.join("/tmp", pkg_base)
-                    if qc_step.runcmd("wget %s -O %s" % (pkg_url, pkg_loc)):
-                        api.info("%s release package fetched from %s."
-                                 % (pkg_id, pkg_url))
+                    qc_step.runcmd("wget %s -O %s" % (pkg_url, pkg_loc),
+                                   stop_on_error=True)
+                    api.info("%s release package fetched from %s." % (pkg_id,
+                                                                      pkg_url))
 
                     r = self.pkgtool.install(pkg_loc)
                     if r.failed:
                         qc_step.print_result("FAIL",
                                              ("Error while installing %s "
-                                              "release.") % pkg_id)
+                                              "release.") % pkg_id,
+                                             do_abort=True)
                     else:
                         api.info("%s release package installed." % pkg_id)
 

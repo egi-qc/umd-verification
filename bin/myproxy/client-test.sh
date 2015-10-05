@@ -66,5 +66,5 @@ else
     retrieve $MYPROXY_PASSWD
     info
 
-    destroy
+    #destroy
 fi
