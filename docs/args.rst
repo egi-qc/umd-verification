@@ -1,8 +1,11 @@
-
-.. _argument-passing-label:
 Argument passing
 ================
 
+UMD product verification can be customized by providing arguments at different
+stages. The current available arguments and the way to pass them to the tool
+are explained below:
+
+.. _runtime-args-ref:
 
 Runtime args
 ------------
@@ -13,29 +16,37 @@ runtime arguments are:
 
 :installation_type: Type of installation.
 
-                - Additional info: available options:
+                - Available options:
 
                     :install: from scratch installation, launches
                         `QC_DIST_1 <http://egi-qc.github.io/#INSTALLATION>`_.
                     :update: update from last production version, launches
                         `QC_UPGRADE_1 <http://egi-qc.github.io/#INSTALLATION>`_.
 
+                - Default value: ``install``
+
 :repository_url: Repository path with the verification content.
 
-                - Additional info: multiple values are allowed by prefixing
-                  with `repository_url`.
+                - Multiple values are allowed by prefixing with `repository_url`.
+
+                  .. code:: bash
+
+                     fab repository_url=<URL1>,repository_url_2=<URL2>,repository_url_other=<URL3>,..
+
+                - Arguments passed with equal names will overwrite the value.
 
 :umd_release: Package URL with the UMD release.
-                - Default value: *required*.
 
-:epel_release: Package URL with the EPEL release (RPM file).
-
-                - Additional info: only available for RedHat-based
-                  distributions.
+                - Value must contain a URL pointing to a valid UMD release
+                  package.
+                - **Required** value located in the default
+                  configuration file (see :ref:`static-args-ref`).
 
 :igtf_repo: Repository for the IGTF release.
 
-                - Default value: *required*.
+                - Value must contain a URL pointing to a valid repository file.
+                - **Required** value located in the default
+                  configuration file (see :ref:`static-args-ref`).
 
 :yaim_path: Path pointing to YAIM configuration files.
 
@@ -47,19 +58,39 @@ runtime arguments are:
 
 :qcenv_*: Pass environment variables needed by the QC specific checks.
 
-                - Additional info: environment variable name to be exported
-                  is the name given after the underscore '_' symbol. The
-                  variable's value is the `fab` argument's value. E.g.:
-                  - ``qcenv_FOO=bar`` will set ``FOO=bar``.
+                - The name of the environment variable to be exported
+                  is the name given after the underscore '_' symbol.
+                  Accordingly, the variable's value is the `fab` argument's
+                  value.
+
+                  .. code:: bash
+
+                     fab qcenv_FOO=bar,..
+
+                  This example will set ``FOO=bar`` in the testing environment.
 
 :qc_step: Run a given set of Quality Criteria steps.
 
-                - Additional info: multiple values are allowed by prefixing
-                  with `qc_step`.
+                - Multiple values are allowed by prefixing with `qc_step`.
+
+                  .. code:: bash
+
+                     fab qc_step=QC_FUNC_1,qc_step_2=QC_DIST_1,..
+
+                - Arguments passed with equal names will overwrite the value.
 
 :umdnsu_url: URL (hostname:port) to interface with `umdnsu` service running
              in the SAM-Nagios instance.
 
+:epel_release: Package URL with the EPEL release (RPM file).
+
+                - Distro-specific: only available for RedHat-based
+                  distributions.
+                - Value must contain an URL pointing to a valid EPEL release
+                  package.
+
+
+.. _static-args-ref:
 
 Static args
 -----------
@@ -75,12 +106,13 @@ little. Currently supported runtime arguments (and their YAML formatted
 equivalent) are:
 
 :base\:log_path: ``log_path`` argument.
-:epel_release\:<distro_version (e.g. redhat5)>: ``epel_release`` argument.
 :umd_release\:<distro_version (e.g. redhat5)>: ``umd_release`` argument.
 :igtf_repo\:<distname (e.g. redhat)>: ``igtf_repo``.
 :yaim\:path: ``yaim_path``.
 :nagios\:umdnsu_url: ``umdnsu_url``.
+:epel_release\:<distro_version (e.g. redhat5)>: ``epel_release`` argument.
 
+.. _instantiation-args-ref:
 
 Instantiation args
 ------------------
