@@ -1,5 +1,5 @@
 bdii::params::siteurls:
-    - ldap://%{::fqdn}:2170/mds-vo-name=resource,o=grid
+    - "BDII ldap://%{::fqdn}:2170/mds-vo-name=resource,o=grid"
 bdii::params::sitename: "GRID-SITE"
 bdii::params::sitebdiihost: "%{::fqdn}"
 bdii::params::sitedesc: "UMD Verification Testbed"
