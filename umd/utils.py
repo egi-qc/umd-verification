@@ -143,23 +143,25 @@ class Yum(object):
     def get_pkglist(self, r):
         """Gets the list of packages being installed parsing yum output."""
         d = {}
-        for line in filter(None, r.stdout.split('=')):
-            if line.startswith("\nInstalling:\n"):
-                for line2 in line.split('\n'):
-                    try:
-                        name, arch, version, repo, size, unit = line2.split()
+        try:
+            lines = r.split('\n')
+            for line in lines[lines.index("Installed:"):]:
+                if line.startswith(' '):
+                    for pkg in map(None, *([iter(line.split())] * 2)):
+                        name, version = pkg
+                        name, arch = name.rsplit('.', 1)
+                        version = version.split(':')[-1]
                         d[name] = '.'.join(['-'.join([name, version]), arch])
-                    except ValueError:
-                        pass
-
-        # YUM: last version installed
-        for line in r.stdout.split('\n'):
-            m = re.search("Package (.+) already installed and latest version",
-                          line)
-            if m:
-                all = ' '.join(m.groups())
-                name = re.search("([a-zA-Z0-9-_]+)-\d+.+", all).groups()[0]
-                d[name] = ' '.join([all, "(already installed)"])
+        except ValueError:
+            # YUM: last version installed
+            for line in r.split('\n'):
+                m = re.search(("Package (.+) already installed and latest "
+                               "version"), line)
+                if m:
+                    all = ' '.join(m.groups())
+                    pattern = "([a-zA-Z0-9-_]+)-\d+.+"
+                    name = re.search(pattern, all).groups()[0]
+                    d[name] = ' '.join([all, "(already installed)"])
 
         return d
 
