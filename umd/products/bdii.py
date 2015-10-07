@@ -11,8 +11,13 @@ class BDIIDeploy(base.Deploy):
         config.CFG["cfgtool"].run()
 
     def pre_validate(self):
+        # 1. LDAP utils installation
         if system.distname in ["redhat", "centos"]:
             utils.install("openldap-clients")
+
+        # 2. Decrease BDII_BREATHE_TIMEOUT (for validation tests)
+        utils.runcmd(("sed -i 's/BDII_BREATHE_TIME=.*/BDII_BREATHE_TIME=10/g' "
+                      "/etc/bdii/bdii.conf && /etc/init.d/bdii restart"))
 
 
 bdii_site_yaim = BDIIDeploy(
