@@ -43,7 +43,7 @@ Retrieves a proxy with VOMS extension from a MyProxy server.
 `bin/srm/client-test.sh`
 ------------------------
 
-Performs data management checks with several clients.
+Performs data management checks.
 
 - Accepted arguments:
 
@@ -57,9 +57,10 @@ Performs data management checks with several clients.
 
 - Environment variables:
 
-  - ``SE_ENDPOINT`` *optional*
+  - ``SRM_HOST`` *optional*
+  - ``SRM_ENDPOINT`` *optional*
 
-  points to the SRM URL following the format `srm://<srm_enpoint>/<srm_vo_path>`
+  points to the SRM URL following the format `srm://<srm_host>/<srm_vo_path>`
 
   .. code:: bash
 
