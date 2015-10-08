@@ -115,9 +115,13 @@ class PuppetConfig(BaseConfig):
                           "--detail-exitcodes")
                          % (logfile,
                             ':'.join(self.module_path),
-                            self.manifest))
-        if r.return_code in [0, 2]:
+                            self.manifest),
+                         fail_check=False)
+        if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
+        elif r.return_code == 2:
+            api.info(("Puppet execution ended successfully (some warnings "
+                      "though, check logs)"))
         else:
             api.fail("Puppet execution failed. More information in logs: %s"
                      % logfile, stop_on_error=True)
