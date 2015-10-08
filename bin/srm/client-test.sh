@@ -6,23 +6,43 @@
 ##      #2 Client to be tested.
 ##          - Valid values: lcg-util, dcache-client, gfal2-python, gfal2-util
 
+
+function get_vo_path {
+    # Arguments
+    #   #1 SRM hostname
+    #   #2 VO name
+
+    VO_PATH=`ldapsearch -LLL -x -h topbdii.core.ibergrid.eu -p 2170 -b o=grid  "(|(&(GlueChunkKey=GlueSEUniqueID=$1)(|(GlueSAAccessControlBaseRule=$2)(GlueSAAccessControlBaseRule=VO:$2)))(&(GlueChunkKey=GlueSEUniqueID=$1)(|(GlueVOInfoAccessControlBaseRule=$2)(GlueVOInfoAccessControlBaseRule=VO:$2))) (&(GlueServiceUniqueID=*://%s*)(GlueServiceVersion=2.*)(GlueServiceType=srm*)))" GlueVOInfoPath | grep GlueVOInfoPath`
+    VO_PATH=${VO_PATH#*: }
+    echo $VO_PATH
+}
+
+
 [ $# -ne 2 ] && echo -e "Invalid arguments.\n\tUsage: `basename "$0"` [localhost|storm|dpm|dcache] [lcg-util|dcache-client|gfal2-python|gfal2-util]" && exit 1
 
 VO=`voms-proxy-info -vo`
 EXTRA_OPTS=
 case $1 in
-    localhost) 
-	    SRM_ENDPOINT="srm://`hostname -f`:8444/srm/managerv2?SFN=/ops.vo.ibergrid.eu"
+    localhost)
+        SRM_HOST=`hostname -f`
+        VO_PATH=$(get_vo_path $SRM_HOST $VO)
+	    SRM_ENDPOINT="srm://${SRM_HOST}:8444/srm/managerv2?SFN=/ops.vo.ibergrid.eu"
 	    EXTRA_OPTS="-b"
         ;;
     storm) 
-        : ${SRM_ENDPOINT:="srm://srm01.ncg.ingrid.pt:8444/srm/managerv2?SFN=/ibergrid/ops"}
+        : ${SRM_HOST:=srm01.ncg.ingrid.pt}
+        VO_PATH=$(get_vo_path $SRM_HOST $VO)
+        : ${SRM_ENDPOINT:="srm://${SRM_HOST}:8444/srm/managerv2?SFN=${VO_PATH}"}
         ;;
     dpm)
-        : ${SRM_ENDPOINT:="srm://lcg-srm.ecm.ub.es/dpm/ecm.ub.es/home/ops.vo.ibergrid.eu"}
+        : ${SRM_HOST:=lcg-srm.ecm.ub.es}
+        VO_PATH=$(get_vo_path $SRM_HOST $VO)
+        : ${SRM_ENDPOINT:="srm://${SRM_HOST}/${VO_PATH}"}
         ;;
     dcache) 
-        : ${SRM_ENDPOINT:="srm://srm.ciemat.es:8443/srm/managerv2?SFN=//pnfs/ciemat.es/data/iberops"}
+        : ${SRM_HOST:=srm.ciemat.es}
+        VO_PATH=$(get_vo_path $SRM_HOST $VO)
+        : ${SRM_ENDPOINT:="srm://${SRM_HOST}:8443/srm/managerv2?SFN=/${VO_PATH}"}
         ;;
     *)
         echo "Not a valid tag for an SRM endpoint: $1" && exit 1
@@ -30,9 +50,9 @@ case $1 in
 esac
 
 echo "== Summary =="
-echo "\t* Type of SRM endpoint: $1"
-echo "\t* Client to be tested: $2"
-echo "\t* SRM endpoint: $SRM_ENDPOINT"
+echo -e "\t* Type of SRM endpoint: $1"
+echo -e "\t* Client to be tested: $2"
+echo -e "\t* SRM endpoint: $SRM_ENDPOINT"
 
 FILE=`mktemp`
 FILE2=`mktemp`
