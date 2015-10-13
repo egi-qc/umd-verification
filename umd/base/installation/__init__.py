@@ -13,19 +13,19 @@ class Install(object):
     def __init__(self):
         self.pkgtool = utils.PkgTool()
         self.metapkg = config.CFG["metapkg"]
+        self.download_dir = "/tmp/repofiles"
 
     def _enable_verification_repo(self,
                                   qc_step,
-                                  url,
-                                  download_dir="/tmp/repofiles"):
+                                  url):
         """Downloads the repofiles found in the given URL."""
-        qc_step.runcmd("rm -rf %s/*" % download_dir, fail_check=False)
+        qc_step.runcmd("rm -rf %s/*" % self.download_dir, fail_check=False)
         qc_step.runcmd("wget -P %s -r --no-parent -R*.html* %s"
-                       % (download_dir, url),
+                       % (self.download_dir, url),
                        fail_check=False,
                        stop_on_error=False)
         repofiles = []
-        for path in os.walk(download_dir):
+        for path in os.walk(self.download_dir):
             if path[2] and path[0].find(self.pkgtool.get_repodir()) != -1:
                 for f in path[2]:
                     if f.endswith(self.pkgtool.get_extension()):
@@ -44,6 +44,47 @@ class Install(object):
                                  % (system.distname,
                                     self.pkgtool.get_extension()),
                                  do_abort=True)
+
+    def _get_pkgs_from_verification_repo(self):
+        d = {}
+        for root, dirs, files in os.walk(self.download_dir):
+            for file in files:
+                if file.endswith(self.pkgtool.get_pkg_extension()):
+                    name, version = self.pkgtool.get_pkg_version(
+                        os.path.join(root, file),
+                        check_installed=False).items()[0]
+                    d[name] = '-'.join([name, version])
+        return d
+
+    def _show_pkg_version(self, d_pkg):
+        """Shows installed version of packages from the verification repo.
+
+        :d_pkg: dict containing installed package specs (name, version).
+        """
+        d = self._get_pkgs_from_verification_repo()
+
+        for name, pkg in d.items():
+            try:
+                installed_pkg = d_pkg["name"]
+                if pkg == installed_pkg:
+                    api.info("Package '%s' installed version: '%s'" % (name,
+                                                                       pkg))
+                else:
+                    api.info(("Package '%s' installed version (%s) does not "
+                              "match verification repository version: %s"
+                              % (name, installed_pkg, pkg)))
+            except KeyError:
+                _pkgs = self.pkgtool.get_pkg_version(name,
+                                                     check_installed=True)
+                if _pkgs:
+                    for _name, _pkg in _pkgs.items():
+                        if not isinstance(_pkg, list):
+                            _pkg = [_pkg]
+                        for _p in _pkg:
+                            api.info("'%s' installed version: '%s'" % (_name,
+                                                                       _p))
+                else:
+                    api.info("'%s' not installed" % name)
 
     def _check(self):
         if not self.metapkg:
@@ -183,6 +224,9 @@ class Install(object):
                                               "not implemented."
                                               % installation_type))
 
+        # Show package version
+        self._show_pkg_version(d)
+
         is_ok = True
         # r.stderr
         if r.failed:
@@ -201,7 +245,7 @@ class Install(object):
             if self.metapkg:
                 for pkg in self.metapkg:
                     try:
-                        api.info("Package '%s' installed version: %s."
+                        api.info("Metapackage '%s' installed version: %s."
                                  % (pkg, d[pkg]))
                     except KeyError:
                         api.fail("Package '%s' could not be installed." % pkg)
