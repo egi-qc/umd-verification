@@ -121,6 +121,7 @@ class Yum(object):
     def __init__(self):
         self.path = "/etc/yum.repos.d/"
         self.extension = ".repo"
+        self.pkg_extension = ".rpm"
         self.repodir = "repofiles"
 
     def run(self, action, dryrun, pkgs=None):
@@ -203,11 +204,39 @@ class Yum(object):
             else:
                 api.info("Repository key added: %s" % key)
 
+    def get_pkg_version(self, rpmfile, check_installed=True):
+        """Extracts name&version from RPM file. Returns a (name, version) dict
+
+        :rpmfile: absolute path poiting to a RPM file
+        :check_installed: True if the package is already installed
+        """
+        d = {}
+        opts = "-q"
+        if not check_installed:
+            opts = "-qp"
+        r = runcmd(("rpm %s --queryformat '%%{NAME} %%{VERSION}-%%{RELEASE}"
+                    ".%%{ARCH}\\n' %s" % (opts, rpmfile)),
+                   fail_check=False)
+        if not r.failed:
+            for pkg in r.split('\n'):
+                name, version = pkg.split()
+                if name in d.keys():
+                    try:
+                        d[name].append(version)
+                    except AttributeError:
+                        l = [d[name], version]
+                        d[name] = l
+                else:
+                    d[name] = version
+
+        return d
+
 
 class Apt(object):
     def __init__(self):
         self.path = "/etc/apt/sources.list.d/"
         self.extension = ".list"
+        self.pkg_extension = ".deb"
         # FIXME this is not right
         self.repodir = "repo-files"
 
@@ -266,6 +295,9 @@ class Apt(object):
             else:
                 api.info("Repository key added: %s" % key)
 
+    def get_pkg_version(self):
+        raise NotImplementedError
+
 
 class PkgTool(object):
     def __init__(self):
@@ -282,6 +314,9 @@ class PkgTool(object):
 
     def get_extension(self):
         return self.client.extension
+
+    def get_pkg_extension(self):
+        return self.client.pkg_extension
 
     def get_repodir(self):
         return self.client.repodir
@@ -338,6 +373,9 @@ class PkgTool(object):
         except KeyError:
             raise exception.InstallException("'%s' OS not supported"
                                              % system.distname)
+
+    def get_pkg_version(self, pkgfile, check_installed=True):
+        return self.client.get_pkg_version(pkgfile, check_installed)
 
 
 def show_exec_banner():
