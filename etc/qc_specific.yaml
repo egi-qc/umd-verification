@@ -107,3 +107,18 @@ gridftp:
         - test: "bin/gridftp/client-test.sh"
           description: "GridFTP transfer check using globus-url-copy."
           user: "root"
+
+gram5:
+    qc_func_1:
+        - test: "bin/gram5/jobs-test.sh"
+          description: "gram5 client tests (fork-poll)"
+          user: "umd"
+          args: "jobmanager-fork-poll"
+        - test: "bin/gram5/jobs-test.sh"
+          description: "gram5 client tests (pbs-poll)"
+          user: "umd"
+          args: "jobmanager-pbs-poll"
+        - test: "bin/gram5/jobs-test.sh"
+          description: "gram5 client tests (pbs-seg)"
+          user: "umd"
+          args: "jobmanager-pbs-seg"

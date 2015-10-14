@@ -6,6 +6,7 @@ from umd.products.ca import *       # NOQA
 from umd.products.creamce import *  # NOQA
 from umd.products.glexec import *   # NOQA
 from umd.products.globus import *   # NOQA
+from umd.products.gram5 import *    # NOQA
 from umd.products.myproxy import *  # NOQA
 from umd.products.rc import *       # NOQA
 from umd.products.storm import *    # NOQA
