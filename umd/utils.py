@@ -349,7 +349,8 @@ class PkgTool(object):
     def install(self, pkgs, enable_repo=[], key_repo=[]):
         if enable_repo:
             self.enable_repo(enable_repo)
-            self.add_repo_key(to_list(key_repo))
+            if key_repo:
+                self.add_repo_key(to_list(key_repo))
             self.refresh()
         return self._exec(action="install", pkgs=pkgs)
 
