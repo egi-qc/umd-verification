@@ -138,7 +138,8 @@ class Install(object):
                 api.info("Purged any previous %s repository file." % msg_purge)
 
             # Import repository keys
-            self.pkgtool.add_repo_key(config.CFG["repo_keys"])
+            if config.CFG["repo_keys"]:
+                self.pkgtool.add_repo_key(config.CFG["repo_keys"])
 
             # Install UMD (and external) realease packages
             for pkg in pkgs_to_download:

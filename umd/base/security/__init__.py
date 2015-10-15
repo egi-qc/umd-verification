@@ -25,16 +25,21 @@ class Security(object):
                 key_prv="/etc/grid-security/hostkey.pem",
                 key_pub="/etc/grid-security/hostcert.pem")
 
-            r = self.cfgtool.run()
-            if r and r.failed:
-                qc_step.print_result("FAIL",
-                                     "YAIM configuration failed with SHA-2 "
-                                     "certs.",
-                                     do_abort=True)
+            if self.cfgtool:
+                r = self.cfgtool.run()
+                if r.failed:
+                    qc_step.print_result("FAIL",
+                                         ("Configuration failed with SHA-2 "
+                                          "certs"),
+                                         do_abort=True)
+                else:
+                    qc_step.print_result("OK",
+                                         ("Product services can manage SHA-2 "
+                                          "certs."))
             else:
-                qc_step.print_result("OK",
-                                     "Product services can manage SHA-2 "
-                                     "certs.")
+                qc_step.print_result("WARNING",
+                                     ("SHA-2 management not tested: "
+                                      "configuration tool not defined."))
         else:
             qc_step.print_result("NA", "Product does not need certificates.")
 
