@@ -7,6 +7,7 @@ import tempfile
 import fabric
 from fabric import api as fabric_api
 from fabric import colors
+import yaml
 
 from umd import api
 from umd import config
@@ -156,10 +157,10 @@ class Yum(object):
         except ValueError:
             # YUM: last version installed
             for line in r.split('\n'):
-                m = re.search(("Package (.+) already installed and latest "
-                               "version"), line)
+                m = re.search(("Package (matching ){0,1}(.+) already "
+                               "installed"), line)
                 if m:
-                    all = ' '.join(m.groups())
+                    all = m.groups()[-1]
                     pattern = "([a-zA-Z0-9-_]+)-\d+.+"
                     name = re.search(pattern, all).groups()[0]
                     d[name] = ' '.join([all, "(already installed)"])
@@ -494,3 +495,11 @@ def clone_repo(repotype, repourl):
         dirname = None
         os.rmdir(dirname)
     return dirname
+
+
+def load_from_hiera(fname):
+    """Returns a dictionary with the content of fname.
+
+    :fname: YAML filename to load.
+    """
+    return yaml.load(file("etc/puppet/%s" % fname, "r"))

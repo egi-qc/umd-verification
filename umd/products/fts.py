@@ -1,20 +1,21 @@
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
+from umd import config
 from umd import utils
 
 
 class FTSDeploy(base.Deploy):
     def pre_config(self):
-        db_name = utils.runcmd(("hiera -c /etc/puppet/hiera.yaml "
-                                "fts3_db_name"))
-        db_user = utils.runcmd(("hiera -c /etc/puppet/hiera.yaml "
-                                "fts3_db_username"))
-        db_pass = utils.runcmd(("hiera -c /etc/puppet/hiera.yaml "
-                                "fts3_db_password"))
+        hiera_config = utils.load_from_hiera(
+            config.CFG["cfgtool"].hiera_data)
+        db_name = hiera_config["fts3_db_name"]
+        db_user = hiera_config["fts3_db_username"]
+        db_pass = hiera_config["fts3_db_password"]
 
         # mysql
         utils.install("mysql-server")
         utils.runcmd("service mysqld start")
+        utils.runcmd("mysql -e \"drop database IF EXISTS ftsdb\"")
         utils.runcmd("mysql -e \"create database %s\"" % db_name)
         utils.runcmd("mysql ftsdb < /usr/share/fts-mysql/mysql-schema.sql")
         utils.runcmd(("mysql -e \"GRANT ALL ON %s.* TO %s@'localhost' "

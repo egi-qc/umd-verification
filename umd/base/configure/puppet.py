@@ -98,6 +98,11 @@ class PuppetConfig(BaseConfig):
                 api.fail("Error while installing module '%s'" % mod)
         self.module_path.append(*["/etc/puppet/modules"])
 
+        # FIXME (orviz) This is ugly - PATCHES
+        if "CERNOps-fts" in self.module_from_puppetforge:
+            utils.install("patch")
+            utils.runcmd("patch -p0 < etc/patches/CERNOps-fts.patch")
+
         module_loc = []
         for mod in self.module_from_repository:
             dirname = utils.clone_repo(*mod)
