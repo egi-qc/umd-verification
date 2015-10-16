@@ -1,0 +1,24 @@
+--- /etc/puppet/modules/fts/manifests/config.pp	2014-05-12 14:15:43.000000000 +0200
++++ /etc/puppet/modules/fts/manifests/config.pp.new	2015-10-15 16:00:35.084797273 +0200
+@@ -90,7 +90,7 @@
+                 "set PASSWORD ${msg_password}",
+                 "set USERNAME ${msg_username}"
+     ],
+-    notify  => [Service['fts-msg-bulk'],Service['fts-msg-cron']],
++    notify  => Service['fts-msg-bulk'],
+   }
+ 
+   fts3restconfig{'DEFAULT/debug':
+--- /etc/puppet/modules/fts/manifests/service.pp	2014-05-12 11:45:49.000000000 +0200
++++ /etc/puppet/modules/fts/manifests/service.pp.new	2015-10-15 16:00:45.730797289 +0200
+@@ -17,10 +17,6 @@
+     ensure => running,
+     enable => true,
+   }
+-  service{'fts-msg-cron':
+-    ensure => running,
+-    enable => true,
+-  }
+   service{'fts-bdii-cache-updater':
+     ensure => running,
+     enable => true,

@@ -50,10 +50,15 @@ class Install(object):
         for root, dirs, files in os.walk(self.download_dir):
             for file in files:
                 if file.endswith(self.pkgtool.get_pkg_extension()):
-                    name, version = self.pkgtool.get_pkg_version(
-                        os.path.join(root, file),
-                        check_installed=False).items()[0]
-                    d[name] = '-'.join([name, version])
+                    abspath = os.path.join(root, file)
+                    try:
+                        name, version = self.pkgtool.get_pkg_version(
+                            abspath,
+                            check_installed=False).items()[0]
+                        d[name] = '-'.join([name, version])
+                    except IndexError:
+                        api.fail("Malformed or empty package: %s" % abspath,
+                                 stop_on_error=True)
         return d
 
     def _show_pkg_version(self, d_pkg):
