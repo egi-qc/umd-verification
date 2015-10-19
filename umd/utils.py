@@ -123,7 +123,6 @@ class Yum(object):
         self.path = "/etc/yum.repos.d/"
         self.extension = ".repo"
         self.pkg_extension = ".rpm"
-        self.repodir = "repofiles"
 
     def run(self, action, dryrun, pkgs=None):
         opts = ''
@@ -238,8 +237,6 @@ class Apt(object):
         self.path = "/etc/apt/sources.list.d/"
         self.extension = ".list"
         self.pkg_extension = ".deb"
-        # FIXME this is not right
-        self.repodir = "repo-files"
 
     def run(self, action, dryrun, pkgs=None):
         if pkgs:
@@ -318,9 +315,6 @@ class PkgTool(object):
 
     def get_pkg_extension(self):
         return self.client.pkg_extension
-
-    def get_repodir(self):
-        return self.client.repodir
 
     def get_pkglist(self, r):
         return self.client.get_pkglist(r)
@@ -503,3 +497,17 @@ def load_from_hiera(fname):
     :fname: YAML filename to load.
     """
     return yaml.load(file("etc/puppet/%s" % fname, "r"))
+
+
+def find_extension_files(path, extension):
+    """Finds all ocurrences of a given file extension.
+
+    :path: Path where to look for
+    :extension: file extension
+    """
+    l = []
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            if f.endswith(extension):
+                l.append(os.path.join(root, f))
+    return l

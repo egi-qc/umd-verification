@@ -24,12 +24,9 @@ class Install(object):
                        % (self.download_dir, url),
                        fail_check=False,
                        stop_on_error=False)
-        repofiles = []
-        for path in os.walk(self.download_dir):
-            if path[2] and path[0].find(self.pkgtool.get_repodir()) != -1:
-                for f in path[2]:
-                    if f.endswith(self.pkgtool.get_extension()):
-                        repofiles.append(os.path.join(path[0], f))
+
+        repofiles = utils.find_extension_files(self.download_dir,
+                                               self.pkgtool.get_extension())
         if repofiles:
             repopath = self.pkgtool.get_path()
             for f in repofiles:
@@ -47,18 +44,18 @@ class Install(object):
 
     def _get_pkgs_from_verification_repo(self):
         d = {}
-        for root, dirs, files in os.walk(self.download_dir):
-            for file in files:
-                if file.endswith(self.pkgtool.get_pkg_extension()):
-                    abspath = os.path.join(root, file)
-                    try:
-                        name, version = self.pkgtool.get_pkg_version(
-                            abspath,
-                            check_installed=False).items()[0]
-                        d[name] = '-'.join([name, version])
-                    except IndexError:
-                        api.fail("Malformed or empty package: %s" % abspath,
-                                 stop_on_error=True)
+        pkg_files = utils.find_extension_files(
+            self.download_dir,
+            self.pkgtool.get_pkg_extension())
+        for f in pkg_files:
+            try:
+                name, version = self.pkgtool.get_pkg_version(
+                    f,
+                    check_installed=False).items()[0]
+                d[name] = '-'.join([name, version])
+            except IndexError:
+                api.fail("Malformed or empty package: %s" % f,
+                         stop_on_error=True)
         return d
 
     def _show_pkg_version(self, d_pkg):
