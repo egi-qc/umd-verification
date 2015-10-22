@@ -1,5 +1,6 @@
 import ldap
 
+from umd import api
 from umd.base.infomodel import utils as info_utils
 from umd.base import utils as butils
 from umd import config
@@ -10,27 +11,16 @@ from umd import utils
 
 def bdii_support(f):
     def _support(self, *args, **kwargs):
-        if f.func_name == "qc_info_1":
-            qc_step = butils.QCStep("QC_INFO_1",
-                                    "GlueSchema 1.3 Support",
-                                    "qc_info_1")
-        elif f.func_name == "qc_info_2":
-            qc_step = butils.QCStep("QC_INFO_2",
-                                    "GlueSchema 2.0 Support",
-                                    "qc_info_2")
-        elif f.func_name == "qc_info_3":
-            qc_step = butils.QCStep("QC_INFO_3",
-                                    "Middleware Version Information",
-                                    "qc_info_3")
-
         if self.has_infomodel:
             if self.cfgtool:
                 if not self.cfgtool.has_run:
-                    self.cfgtool.run(qc_step)
-            return f(self, qc_step, *args, **kwargs)
+                    r = self.cfgtool.run()
+                    if r.failed:
+                        api.fail("Fail while running configuration tool",
+                                 stop_on_error=True)
+            return f(self, *args, **kwargs)
 
-        qc_step.print_result("NA", ("Product does not publish information "
-                                    "through BDII."))
+        api.na("Product does not publish information through BDII.")
     return _support
 
 
@@ -44,45 +34,35 @@ class InfoModel(object):
         if system.distro_version == "redhat5":
             utils.install("openldap-clients")
 
-    def _run_validator(self, qc_step, glue_version):
-        # if self.has_infomodel:
-            if glue_version == "glue1":
-                cmd = ("glue-validator -H localhost -p 2170 -b o=grid "
-                       "-g glue1 -s general -v 3")
-                version = "1.3"
-            elif glue_version == "glue2":
-                cmd = ("glue-validator -H localhost -p 2170 -b o=glue "
-                       "-g glue2 -s general -v 3")
-                version = "2.0"
+    def _run_validator(self, glue_version, logfile):
+        if glue_version == "glue1":
+            cmd = ("glue-validator -H localhost -p 2170 -b o=grid "
+                   "-g glue1 -s general -v 3")
+            version = "1.3"
+        elif glue_version == "glue2":
+            cmd = ("glue-validator -H localhost -p 2170 -b o=glue "
+                   "-g glue2 -s general -v 3")
+            version = "2.0"
 
-            r = qc_step.runcmd(cmd, fail_check=False)
-            summary = info_utils.get_gluevalidator_summary(r)
-            if summary:
-                if summary["errors"] != '0':
-                    qc_step.print_result("FAIL",
-                                         ("Found %s errors while validating "
-                                          "GlueSchema v%s support"
-                                          % (summary["errors"]), version),
-                                         do_abort=True)
-                elif summary["warnings"] != '0':
-                    qc_step.print_result("WARNING",
-                                         ("Found %s warnings while validating "
-                                          "GlueSchema v%s support"
-                                          % (summary["warnings"], version)))
-                else:
-                    qc_step.print_result("OK",
-                                         ("Found no errors or warnings while "
-                                          "validating GlueSchema v%s support"
-                                          % version))
+        r = utils.runcmd(cmd, log_to_file=logfile)
+        summary = info_utils.get_gluevalidator_summary(r)
+        if summary:
+            if summary["errors"] != '0':
+                api.fail(("Found %s errors while validating GlueSchema "
+                          "v%s support" % (summary["errors"], version)),
+                         logfile=r.logfile)
+            elif summary["warnings"] != '0':
+                api.warn(("Found %s warnings while validating GlueSchema "
+                          "v%s support" % (summary["warnings"], version)))
             else:
-                raise exception.InfoModelException(("Cannot parse "
-                                                    "glue-validator output: %s"
-                                                    % r))
-        # else:
-        #     qc_step.print_result("NA", ("Product does not publish "
-        #                                 "information through BDII."))
+                api.ok(("Found no errors or warnings while validating "
+                        "GlueSchema v%s support" % version))
+        else:
+            raise exception.InfoModelException(("Cannot parse "
+                                                "glue-validator output: %s"
+                                                % r))
 
-    def _run_version_check(self, qc_step):
+    def _run_version_check(self, logfile):
         conn = ldap.initialize("ldap://localhost:2170")
         try:
             ldap_result = conn.search_s(
@@ -93,7 +73,7 @@ class InfoModel(object):
                     "GLUE2EndpointImplementationVersion",
                     "GLUE2EntityOtherInfo"])
 
-            utils.to_file(info_utils.ldifize(ldap_result), qc_step.logfile)
+            utils.to_file(info_utils.ldifize(ldap_result), logfile)
 
             for dn, attrs in ldap_result:
                 try:
@@ -115,24 +95,27 @@ class InfoModel(object):
         finally:
             conn.unbind_s()
 
+    @butils.qcstep("QC_INFO_1", "GlueSchema 1.3 Support")
     @bdii_support
-    def qc_info_1(self, qc_step):
+    def qc_info_1(self):
         """GlueSchema 1.3 Support."""
-        self._run_validator(qc_step, "glue1")
+        self._run_validator("glue1", logfile="qc_info_1")
 
+    @butils.qcstep("QC_INFO_2", "GlueSchema 2.0 Support")
     @bdii_support
-    def qc_info_2(self, qc_step):
+    def qc_info_2(self):
         """GlueSchema 2.0 Support."""
-        self._run_validator(qc_step, "glue2")
+        self._run_validator("glue2", logfile="qc_info_2")
 
+    @butils.qcstep("QC_INFO_3", "Middleware Version Information")
     @bdii_support
-    def qc_info_3(self, qc_step):
+    def qc_info_3(self):
         """Middleware Version Information."""
-        r, msg = self._run_version_check(qc_step)
+        r, msg = self._run_version_check(logfile="qc_info_3")
         if r:
-            qc_step.print_result("OK", msg)
+            api.ok(msg)
         else:
-            qc_step.print_result("WARNING", msg)
+            api.warn(msg)
 
     @butils.qcstep_request
     def run(self, steps, *args, **kwargs):

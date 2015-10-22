@@ -2,9 +2,9 @@ import inspect
 import os
 import os.path
 import re
+import shutil
 import tempfile
 
-import fabric
 from fabric import api as fabric_api
 from fabric import colors
 import yaml
@@ -28,9 +28,12 @@ def to_file(r, logfile):
     """Writes Fabric capture result to the given file."""
     def _write(fname, msg):
         dirname = os.path.dirname(fname)
+        if not dirname:
+            dirname = config.CFG["log_path"]
         if not os.path.exists(dirname):
             os.makedirs(dirname)
             api.info("Log directory '%s' has been created." % dirname)
+        fname = os.path.join(dirname, fname)
         with open(fname, 'a') as f:
             f.write(msg)
             f.flush()
@@ -53,68 +56,28 @@ def to_file(r, logfile):
     return l
 
 
-def format_error_msg(logs, cmd=None):
-    msg_l = []
-    if logs:
-        msg_l.append("See more information in logs (%s)." % ','.join(logs))
-    if cmd:
-        msg_l.append("Error while executing command '%s'." % cmd)
+def filelog(f):
+    """Decorator method to write command's output to file."""
+    def _log(*args, **kwargs):
+        logfile = kwargs.pop("log_to_file", None)
+        r = f(*args, **kwargs)
+        if logfile:
+            r.logfile = to_file(r, logfile)
+        return r
+    return _log
 
-    return ' '.join(msg_l)
 
-
-def runcmd(cmd,
-           chdir=None,
-           fail_check=True,
-           stop_on_error=False,
-           logfile=None,
-           get_error_msg=False,
-           stderr_to_stdout=False):
+@filelog
+def runcmd(cmd):
     """Runs a generic command.
 
-            cmd: command to execute.
-            chdir: local directory to run the command from.
-            fail_check: boolean that indicates if the workflow must be
-                interrupted in case of failure.
-            stop_on_error: whether abort or not in case of failure.
-            logfile: file to log the command execution.
-            get_error_msg: return the formatted error message.
-            stderr_to_stdout: redirect standard error to standard output.
+    :cmd: command to execute
     """
-    def _run():
-        env_d = dict(config.CFG["qc_envvars"].items()
-                     + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")])
-        with fabric_api.settings(warn_only=True):
-            with fabric_api.shell_env(**env_d):
-                r = fabric_api.local(cmd, capture=True)
-        return r
-
-    if stderr_to_stdout:
-        cmd = ' '.join([cmd, "2>&1"])
-
-    if chdir:
-        with fabric.context_managers.lcd(chdir):
-            r = _run()
-    else:
-        r = _run()
-
-    logs = []
-    if logfile:
-        logs = to_file(r, logfile)
-    if logs:
-        r.logfile = logs
-
-    if fail_check and r.failed:
-        msg = format_error_msg(logs, cmd)
-        if stop_on_error:
-            fabric_api.abort(api.fail(msg))
-        else:
-            api.fail(msg)
-        if get_error_msg:
-            # if not msg:
-            #     debug("No message was created for command '%s'" % cmd)
-            r.msgerror = msg
-
+    env_d = dict(config.CFG["qc_envvars"].items()
+                 + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")])
+    with fabric_api.settings(warn_only=True):
+        with fabric_api.shell_env(**env_d):
+            r = fabric_api.local(cmd, capture=True)
     return r
 
 
@@ -199,6 +162,7 @@ class Yum(object):
     def add_repo_key(self, keylist):
         for key in keylist:
             r = runcmd("rpm --import %s" % key)
+
             if r.failed:
                 api.fail("Could not add key '%s'" % key)
             else:
@@ -215,8 +179,7 @@ class Yum(object):
         if not check_installed:
             opts = "-qp"
         r = runcmd(("rpm %s --queryformat '%%{NAME} %%{VERSION}-%%{RELEASE}"
-                    ".%%{ARCH}\\n' %s" % (opts, rpmfile)),
-                   fail_check=False)
+                    ".%%{ARCH}\\n' %s" % (opts, rpmfile)))
         if not r.failed:
             for pkg in r.split('\n'):
                 name, version = pkg.split()
@@ -341,6 +304,7 @@ class PkgTool(object):
     def remove_repo(self, repolist):
         return self.client.remove_repo(to_list(repolist))
 
+    @filelog
     def install(self, pkgs, enable_repo=[], key_repo=[]):
         if enable_repo:
             self.enable_repo(enable_repo)
@@ -349,12 +313,15 @@ class PkgTool(object):
             self.refresh()
         return self._exec(action="install", pkgs=pkgs)
 
+    @filelog
     def refresh(self):
         return self._exec(action="refresh")
 
+    @filelog
     def remove(self, pkgs):
         return self._exec(action="remove", pkgs=pkgs)
 
+    @filelog
     def update(self):
         return self._exec(action="update")
 
@@ -435,6 +402,7 @@ def get_class_attrs(obj):
                  if not attr.startswith('__')])
 
 
+@filelog
 def install(pkgs, enable_repo=[], key_repo=[]):
     """Shortcut for package installations."""
     pkgtool = PkgTool()
@@ -511,3 +479,9 @@ def find_extension_files(path, extension):
             if f.endswith(extension):
                 l.append(os.path.join(root, f))
     return l
+
+
+def remove_logs():
+    """Creates a new execution log directory."""
+    if os.path.exists(config.CFG["log_path"]):
+        shutil.rmtree(config.CFG["log_path"])

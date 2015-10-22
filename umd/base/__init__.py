@@ -1,4 +1,3 @@
-from fabric import api as fabric_api
 from fabric import tasks
 
 from umd import api
@@ -152,6 +151,8 @@ class Deploy(tasks.Task):
                 trusted_ca_dir="/etc/grid-security/certificates")
 
         # Workflow
+        utils.remove_logs()
+
         if config.CFG["qc_step"]:
             for step in config.CFG["qc_step"]:
                 k, v = (step.rsplit('_', 1)[0], step)
@@ -163,8 +164,8 @@ class Deploy(tasks.Task):
                         "QC_INFO": self._infomodel,
                         "QC_FUNC": self._validate}
                 except KeyError:
-                    fabric_api.abort(api.fail(("%s step not found in the "
-                                               "Quality Criteria" % k)))
+                    api.fail("%s step not found in the Quality Criteria" % k,
+                             stop_on_error=True)
 
                 step_mappings[k](**{"qc_step": v})
         else:

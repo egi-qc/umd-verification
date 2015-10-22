@@ -57,13 +57,15 @@ class PuppetConfig(BaseConfig):
             utils.runcmd("cp %s /etc/puppet/hieradata/global.yaml"
                          % self.hiera_data)
 
-    def config(self):
+    def config(self, logfile=None):
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
         if self.hiera_data:
             self.hiera_data = os.path.join(config.CFG["puppet_path"],
                                            self.hiera_data)
 
-        utils.install("puppet")
+        r = utils.install("puppet", log_to_file=logfile)
+        if r.failed:
+            api.fail("Puppet installation failed", stop_on_error=True)
 
         # Puppet versions <3 workarounds
         puppet_version = utils.runcmd("facter -p puppetversion")
@@ -120,8 +122,7 @@ class PuppetConfig(BaseConfig):
                           "--detail-exitcodes")
                          % (logfile,
                             ':'.join(self.module_path),
-                            self.manifest),
-                         fail_check=False)
+                            self.manifest))
         if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
         elif r.return_code == 2:

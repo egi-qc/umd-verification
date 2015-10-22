@@ -1,3 +1,4 @@
+from umd import api
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
 from umd.base.configure.yaim import YaimConfig
@@ -8,7 +9,10 @@ from umd import utils
 
 class BDIIDeploy(base.Deploy):
     def post_install(self):
-        config.CFG["cfgtool"].run()
+        r = config.CFG["cfgtool"].run()
+        if r.failed:
+            api.fail("Error while running the configuration tool",
+                     stop_on_error=True)
 
     def pre_validate(self):
         # 1. LDAP utils installation

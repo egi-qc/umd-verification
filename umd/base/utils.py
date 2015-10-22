@@ -1,6 +1,6 @@
+import functools
 import os
 import os.path
-import sys
 
 import fabric
 from fabric import colors
@@ -27,76 +27,22 @@ def qcstep_request(f):
     return _request
 
 
+def qcstep(id, description):
+    """Decorator method that prints QC step header."""
+    def _qcstep(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            print("[[%s: %s]]" % (colors.blue(id),
+                                  colors.blue(description)))
+            return f(*args, **kwargs)
+        return wrapper
+    return _qcstep
+
+
 def get_qc_envvars():
     """Returns a dict with the bash environment variables found in conf."""
     return dict([(k.split("qcenv_")[1], v)
                  for k, v in config.CFG.items() if k.startswith("qcenv")])
-
-
-class QCStep(object):
-    """Manages all the common functions that are used in a QC step."""
-    def __init__(self, id, description, logfile):
-        self.id = id
-        self.description = description
-        self.logfile = os.path.join(config.CFG["log_path"], logfile)
-        self.logs = []
-
-        self._print_header()
-        self._remove_last_logfile()
-
-    def _print_header(self):
-        """Prints a QC header with the id and description."""
-        print("[[%s: %s]]" % (colors.blue(self.id),
-                              colors.blue(self.description)))
-
-    def _remove_last_logfile(self):
-        for stdtype in ("stdout", "stderr"):
-            _fname = '.'.join([self.logfile, stdtype])
-            if os.path.exists(_fname):
-                os.remove(_fname)
-
-    def print_result(self, level, msg, do_abort=False):
-        """Prints the final result of the current QC step."""
-        level_color = {
-            "FAIL": colors.red,
-            "NA": colors.green,
-            "OK": colors.green,
-            "WARNING": colors.yellow,
-        }
-
-        msg = "[%s] %s." % (level_color[level](level), msg)
-        if do_abort:
-            msg = ' '.join([msg, utils.format_error_msg(self.logs)])
-            print(msg)
-            sys.exit(1)
-        else:
-            print(msg)
-
-    def runcmd(self,
-               cmd,
-               chdir=None,
-               fail_check=True,
-               stop_on_error=True,
-               log_to_file=True,
-               get_error_msg=False,
-               stderr_to_stdout=False):
-        logfile = None
-        if log_to_file:
-            logfile = self.logfile
-
-        r = utils.runcmd(cmd,
-                         chdir=chdir,
-                         fail_check=fail_check,
-                         stop_on_error=stop_on_error,
-                         logfile=logfile,
-                         get_error_msg=get_error_msg,
-                         stderr_to_stdout=stderr_to_stdout)
-        try:
-            self.logs = r.logfile
-        except AttributeError:
-            pass
-
-        return r
 
 
 class OwnCACert(object):
