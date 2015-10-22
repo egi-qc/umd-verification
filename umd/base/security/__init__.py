@@ -1,7 +1,8 @@
+from umd import api
 from umd.base.security import utils as sec_utils
-from umd.base.utils import QCStep
-from umd.base.utils import qcstep_request
+from umd.base import utils as butils
 from umd import config
+from umd import utils
 
 
 class Security(object):
@@ -13,12 +14,9 @@ class Security(object):
         #   'known_worldwritable_filelist': already-known world writable files
         self.exceptions = config.CFG["exceptions"]
 
+    @butils.qcstep("QC_SEC_2", "SHA-2 Certificates Support")
     def qc_sec_2(self):
         """SHA-2 Certificates Support."""
-        qc_step = QCStep("QC_SEC_2",
-                         "SHA-2 Certificates Support",
-                         "qc_sec_2")
-
         if self.need_cert:
             config.CFG["cert"] = self.ca.issue_cert(
                 hash="2048",
@@ -28,31 +26,26 @@ class Security(object):
             if self.cfgtool:
                 r = self.cfgtool.run()
                 if r.failed:
-                    qc_step.print_result("FAIL",
-                                         ("Configuration failed with SHA-2 "
-                                          "certs"),
-                                         do_abort=True)
+                    api.fail("Configuration failed with SHA-2 certs",
+                             stop_on_error=True)
                 else:
-                    qc_step.print_result("OK",
-                                         ("Product services can manage SHA-2 "
-                                          "certs."))
+                    api.ok("Product services can manage SHA-2 certs.")
             else:
-                qc_step.print_result("WARNING",
-                                     ("SHA-2 management not tested: "
-                                      "configuration tool not defined."))
+                api.warn(("SHA-2 management not tested: configuration tool "
+                          "not defined."),
+                         logfile=r.logfile)
         else:
-            qc_step.print_result("NA", "Product does not need certificates.")
+            api.na("Product does not need certificates.")
 
+    @butils.qcstep("QC_SEC_5", "World Writable Files")
     def qc_sec_5(self):
         """World Writable Files check."""
-        qc_step = QCStep("QC_SEC_5",
-                         "World Writable Files",
-                         "qc_sec_5")
+        _logfile = "qc_sec_5"
 
-        r = qc_step.runcmd(("find / -not \\( -path \"/proc\" -prune \\) "
-                            "-not \\( -path \"/sys\" -prune \\) "
-                            "-type f -perm -002 -exec ls -l {} \;"),
-                           fail_check=False)
+        r = utils.runcmd(("find / -not \\( -path \"/proc\" -prune \\) "
+                          "-not \\( -path \"/sys\" -prune \\) "
+                          "-type f -perm -002 -exec ls -l {} \;"),
+                         log_to_file=_logfile)
         if r:
             ww_filelist = sec_utils.get_filelist_from_find(r)
             try:
@@ -61,17 +54,13 @@ class Security(object):
             except KeyError:
                 known_ww_filelist = []
             if set(ww_filelist).difference(set(known_ww_filelist)):
-                qc_step.print_result("FAIL",
-                                     "Found %s world-writable file/s."
-                                     % len(ww_filelist),
-                                     do_abort=True)
+                api.fail("Found %s world-writable file/s." % len(ww_filelist),
+                         logfile=r.logfile)
             else:
-                qc_step.print_result("WARNING",
-                                     ("Found world-writable file/s "
-                                      "required for operation."))
+                api.warn("Found world-writable file/s required for operation.",
+                         logfile=r.logfile)
         else:
-            qc_step.print_result("OK",
-                                 "Found no world-writable file.")
+            api.ok("Found no world-writable file.")
 
         # if self.pkgtool.os == "sl5":
         #     pkg_wwf_files = local(("rpm -qalv | egrep '^[-d]([-r][-w][-xs])"
@@ -80,7 +69,7 @@ class Security(object):
         #         print(yellow("Detected package world-writable files:\n%s"
         #                      % pkg_wwf_files))
 
-    @qcstep_request
+    @butils.qcstep_request
     def run(self, steps, *args, **kwargs):
         if steps:
             for method in steps:

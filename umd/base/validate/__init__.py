@@ -7,6 +7,7 @@ import yaml
 from umd import api
 from umd.base import utils as butils
 from umd import config
+from umd import utils
 
 
 # FIXME Move to defaults.yaml
@@ -30,13 +31,14 @@ class Validate(object):
                 l.append(os.path.join(root, f))
         return l
 
-    def _handle_user(self, qc_step, user):
+    def _handle_user(self, user, logfile):
         """Assures that the given user exists (creates it if needed)."""
         try:
             pwd.getpwnam(user)
         except KeyError:
             if user:
-                qc_step.runcmd("useradd -m %s" % user)
+                utils.runcmd("useradd -m %s" % user,
+                             log_to_file=logfile)
 
     def _get_checklist(self, cfg):
         """Returns a 4-item (description, user, filename, args) list."""
@@ -65,7 +67,7 @@ class Validate(object):
 
         return checklist
 
-    def _run_checks(self, qc_step, cfg):
+    def _run_checks(self, cfg, logfile):
         """Runs the checks received."""
         failed_checks = []
         for check in self._get_checklist(cfg):
@@ -80,10 +82,8 @@ class Validate(object):
                 api.info("Could not run check '%s': file is not executable"
                          % f)
             else:
-                self._handle_user(qc_step, user)
-                r = qc_step.runcmd(cmd,
-                                   fail_check=False,
-                                   stderr_to_stdout=True)
+                self._handle_user(user, logfile)
+                r = utils.runcmd(cmd, log_to_file=logfile)
                 if r.failed:
                     failed_checks.append(cmd)
                 else:
@@ -91,44 +91,29 @@ class Validate(object):
 
         return failed_checks
 
+    @butils.qcstep("QC_FUNC_1", "Basic Funcionality Test.")
     def qc_func_1(self, cfg):
         """Basic Funcionality Test."""
-        qc_step = butils.QCStep("QC_FUNC_1",
-                                "Basic Funcionality Test.",
-                                "qc_func_1")
-
         if cfg:
-            failed_checks = self._run_checks(qc_step, cfg)
+            failed_checks = self._run_checks(cfg, logfile="qc_func_1")
             if failed_checks:
-                qc_step.print_result("FAIL",
-                                     "Probes '%s' failed to run."
-                                     % failed_checks)
+                api.fail("Probes '%s' failed to run." % failed_checks)
             else:
-                qc_step.print_result("OK",
-                                     ("Basic functionality probes ran "
-                                      "successfully."))
+                api.ok("Basic functionality probes ran successfully.")
         else:
-            qc_step.print_result("NA",
-                                 "No definition found for QC_FUNC_1.")
+            api.na("No definition found for QC_FUNC_1.")
 
+    @butils.qcstep("QC_FUNC_2", "New features/bug fixes testing.")
     def qc_func_2(self, cfg):
         """New features/bug fixes testing."""
-        qc_step = butils.QCStep("QC_FUNC_2",
-                                "New features/bug fixes testing.",
-                                "qc_func_2")
-
         if cfg:
-            failed_checks = self._run_checks(qc_step, cfg)
+            failed_checks = self._run_checks(cfg, logfile="qc_func_2")
             if failed_checks:
-                qc_step.print_result("FAIL",
-                                     "Probes '%s' failed to run."
-                                     % failed_checks)
+                api.fail("Probes '%s' failed to run." % failed_checks)
             else:
-                qc_step.print_result("OK",
-                                     "Fix/features probes ran successfully.")
+                api.ok("Fix/features probes ran successfully.")
         else:
-            qc_step.print_result("NA",
-                                 "No definition found for QC_FUNC_2.")
+            api.na("No definition found for QC_FUNC_2.")
 
     @butils.qcstep_request
     def run(self, steps, *args, **kwargs):

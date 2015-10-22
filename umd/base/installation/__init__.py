@@ -14,16 +14,15 @@ class Install(object):
         self.pkgtool = utils.PkgTool()
         self.metapkg = config.CFG["metapkg"]
         self.download_dir = "/tmp/repofiles"
+        self.repo_config = True
+        self.verification_repo_config = True
 
-    def _enable_verification_repo(self,
-                                  qc_step,
-                                  url):
+    def _enable_verification_repo(self, url, logfile):
         """Downloads the repofiles found in the given URL."""
-        qc_step.runcmd("rm -rf %s/*" % self.download_dir, fail_check=False)
-        qc_step.runcmd("wget -P %s -r --no-parent -R*.html* %s"
-                       % (self.download_dir, url),
-                       fail_check=False,
-                       stop_on_error=False)
+        utils.runcmd("rm -rf %s/*" % self.download_dir)
+        r = utils.runcmd("wget -P %s -r --no-parent -R*.html* %s"
+                         % (self.download_dir, url),
+                         log_to_file=logfile)
 
         repofiles = utils.find_extension_files(self.download_dir,
                                                self.pkgtool.get_extension())
@@ -35,12 +34,11 @@ class Install(object):
                 api.info("Verification repository '%s' enabled." % repofile)
 
         else:
-            qc_step.print_result("FAIL",
-                                 ("Could not find any valid %s "
-                                  "('%s') file in the remote repository URL")
-                                 % (system.distname,
-                                    self.pkgtool.get_extension()),
-                                 do_abort=True)
+            api.fail(("Could not find any valid %s ('%s') file in the remote "
+                     "repository URL") % (system.distname,
+                                          self.pkgtool.get_extension()),
+                     logfile=r.logfile,
+                     stop_on_error=True)
 
     def _get_pkgs_from_verification_repo(self):
         d = {}
@@ -92,148 +90,72 @@ class Install(object):
         if not self.metapkg:
             api.fail("No metapackage selected", stop_on_error=True)
 
-    def run(self, **kwargs):
-        """Runs UMD installation."""
-        self._check()
+    def _config_repo(self, logfile):
+        # Distribution-based settings
+        repopath = self.pkgtool.client.path
+        msg_purge = "UMD"
+        paths_to_purge = ["%s/UMD-*" % repopath]
+        pkgs_to_purge = ["umd-release*"]
+        pkgs_to_download = [("UMD", config.CFG["umd_release"])]
+        pkgs_additional = []
+        if system.distname == "redhat":
+            msg_purge = " ".join(["EPEL and/or", msg_purge])
+            paths_to_purge.insert(0, "%s/epel-*" % repopath)
+            pkgs_to_purge.insert(0, "epel-release*")
+            pkgs_to_download.insert(0, ("EPEL",
+                                        config.CFG["epel_release"]))
+            pkgs_additional.append("yum-priorities")
 
-        # Handle installation type
-        installation_type = config.CFG["installation_type"]
-        if installation_type == "update":
-            qc_step = butils.QCStep("QC_UPGRADE_1",
-                                    "Upgrade",
-                                    "qc_upgrade_1")
-        elif installation_type == "install":
-            qc_step = butils.QCStep("QC_DIST_1",
-                                    "Binary Distribution",
-                                    "qc_inst_1")
+        # Remove any trace of UMD (and external) repository files
+        r = self.pkgtool.remove(pkgs_to_purge)
+        if r.failed:
+            api.info("Could not delete %s release packages." % msg_purge)
 
-        repo_config = True
-        if "ignore_repos" in kwargs.keys():
-            repo_config = False
+        if utils.runcmd("/bin/rm -f %s" % " ".join(paths_to_purge)):
+            api.info("Purged any previous %s repository file." % msg_purge)
 
-        verification_repo_config = True
-        if "ignore_verification_repos" in kwargs.keys():
-            verification_repo_config = False
+        # Import repository keys
+        if config.CFG["repo_keys"]:
+            self.pkgtool.add_repo_key(config.CFG["repo_keys"])
 
-        if repo_config:
-            # Distribution-based settings
-            repopath = self.pkgtool.client.path
-            msg_purge = "UMD"
-            paths_to_purge = ["%s/UMD-*" % repopath]
-            pkgs_to_purge = ["umd-release*"]
-            pkgs_to_download = [("UMD", config.CFG["umd_release"])]
-            pkgs_additional = []
-            if system.distname == "redhat":
-                msg_purge = " ".join(["EPEL and/or", msg_purge])
-                paths_to_purge.insert(0, "%s/epel-*" % repopath)
-                pkgs_to_purge.insert(0, "epel-release*")
-                pkgs_to_download.insert(0, ("EPEL",
-                                            config.CFG["epel_release"]))
-                pkgs_additional.append("yum-priorities")
-
-            # Remove any trace of UMD (and external) repository files
-            r = self.pkgtool.remove(pkgs_to_purge)
-            if r.failed:
-                api.info("Could not delete %s release packages." % msg_purge)
-
-            if qc_step.runcmd("/bin/rm -f %s" % " ".join(paths_to_purge)):
-                api.info("Purged any previous %s repository file." % msg_purge)
-
-            # Import repository keys
-            if config.CFG["repo_keys"]:
-                self.pkgtool.add_repo_key(config.CFG["repo_keys"])
-
-            # Install UMD (and external) realease packages
-            for pkg in pkgs_to_download:
-                pkg_id, pkg_url = pkg
-                if pkg_url:
-                    pkg_base = os.path.basename(pkg_url)
-                    pkg_loc = os.path.join("/tmp", pkg_base)
-                    qc_step.runcmd("wget %s -O %s" % (pkg_url, pkg_loc),
-                                   stop_on_error=True)
-                    api.info("%s release package fetched from %s." % (pkg_id,
-                                                                      pkg_url))
-
-                    r = self.pkgtool.install(pkg_loc)
-                    if r.failed:
-                        qc_step.print_result("FAIL",
-                                             ("Error while installing %s "
-                                              "release.") % pkg_id,
-                                             do_abort=True)
-                    else:
-                        api.info("%s release package installed." % pkg_id)
-
-            for pkg in pkgs_additional:
-                r = self.pkgtool.install(pkg)
+        # Install UMD (and external) realease packages
+        for pkg in pkgs_to_download:
+            pkg_id, pkg_url = pkg
+            if pkg_url:
+                pkg_base = os.path.basename(pkg_url)
+                pkg_loc = os.path.join("/tmp", pkg_base)
+                r = utils.runcmd("wget %s -O %s" % (pkg_url, pkg_loc),
+                                 log_to_file=logfile)
                 if r.failed:
-                    api.info("Error while installing '%s'." % pkg)
-                else:
-                    api.info("'%s' requirement installed." % pkg)
-
-        if config.CFG["dryrun"]:
-            api.info(("Installation or upgrade process will be simulated "
-                      "(dryrun: ON)"))
-            self.pkgtool.dryrun = True
-
-        if installation_type == "update":
-            if config.CFG["repository_url"]:
-                # 1) Install base (production) version
-                r = self.pkgtool.install(self.metapkg)
-                if r.failed:
-                    api.fail(("Could not install base (production) version of "
-                              "metapackage '%s'" % self.metapkg),
+                    api.fail("Could not fetch %s release package from %s"
+                             % (pkg_id, pkg_url),
+                             logfile=r.logfile,
                              stop_on_error=True)
                 else:
-                    api.info("UMD product/s '%s' production version installed."
-                             % self.metapkg)
+                    api.info("%s release package fetched from %s"
+                             % (pkg_id, pkg_url))
 
-                # 2) Enable verification repository
-                if verification_repo_config:
-                    for url in config.CFG["repository_url"]:
-                        self._enable_verification_repo(qc_step, url)
+                r = self.pkgtool.install(pkg_loc, log_to_file=logfile)
+                if r.failed:
+                    api.fail("Error while installing %s release." % pkg_id,
+                             logfile=r.logfile,
+                             stop_on_error=True)
+                else:
+                    api.info("%s release package installed." % pkg_id)
 
-                # 3) Refresh
-                self.pkgtool.refresh()
-
-            # 4) Update
-            api.info("Using repositories: %s" % self.pkgtool.get_repos())
-            r = self.pkgtool.update()
+        for pkg in pkgs_additional:
+            r = self.pkgtool.install(pkg, log_to_file=logfile)
             if r.failed:
-                api.fail("Metapackage '%s' update failed." % self.metapkg,
-                         stop_on_error=True)
-            d = self.pkgtool.get_pkglist(r)
+                api.fail("Error while installing '%s'." % pkg,
+                         logfile=r.logfile)
+            else:
+                api.info("'%s' requirement installed." % pkg)
 
-        elif installation_type == "install":
-            # 1) Enable verification repository
-            if verification_repo_config:
-                for url in config.CFG["repository_url"]:
-                    self._enable_verification_repo(qc_step, url)
-
-            # 2) Refresh
-            self.pkgtool.refresh()
-
-            # 3) Install verification version
-            api.info("Using repositories: %s" % self.pkgtool.get_repos())
-            r = self.pkgtool.install(self.metapkg)
-            if r.failed:
-                api.fail("Metapackage '%s' installation failed."
-                         % self.metapkg,
-                         stop_on_error=True)
-            d = self.pkgtool.get_pkglist(r)
-
-            # NOTE(orviz): missing WARNING case
-        else:
-            raise exception.InstallException(("Installation type '%s' "
-                                              "not implemented."
-                                              % installation_type))
-
-        # Show package version
-        self._show_pkg_version(d)
-
+    def _handle_output_msg(self, r, d):
         is_ok = True
         # r.stderr
         if r.failed:
-            # FIXME (should be within YUM class) YUM's downloadonly
+            # NOTE (should be within YUM class) YUM's downloadonly
             # plugin returns 1 on success
             if r.stderr.find("--downloadonly specified") != -1:
                 is_ok = True
@@ -259,6 +181,95 @@ class Install(object):
                          % self.pkgtool.get_pkglist(r))
 
         if is_ok:
-            qc_step.print_result("OK", msgtext)
+            api.ok(msgtext)
         else:
-            qc_step.print_result("FAIL", msgtext, do_abort=True)
+            api.fail(msgtext, logfile=r.logfile, stop_on_error=True)
+
+    @butils.qcstep("QC_DIST_1", "Binary Distribution")
+    def qc_dist_1(self):
+        _logfile = "qc_inst_1"
+
+        if self.repo_config:
+            self._config_repo(logfile=_logfile)
+
+        # NOTE(orviz): missing WARNING case
+        # 1) Enable verification repository
+        if self.verification_repo_config:
+            for url in config.CFG["repository_url"]:
+                self._enable_verification_repo(url, logfile=_logfile)
+
+        # 2) Refresh
+        self.pkgtool.refresh()
+
+        # 3) Install verification version
+        api.info("Using repositories: %s" % self.pkgtool.get_repos())
+        r = self.pkgtool.install(self.metapkg, log_to_file=_logfile)
+        if r.failed:
+            r.msgerror = "Metapackage '%s' installation failed." % self.metapkg
+
+        return r, self.pkgtool.get_pkglist(r)
+
+    @butils.qcstep("QC_UPGRADE_1", "Upgrade")
+    def qc_upgrade_1(self):
+        _logfile = "qc_upgrade_1"
+
+        if self.repo_config:
+            self._config_repo(logfile=_logfile)
+
+        if config.CFG["repository_url"]:
+            # 1) Install base (production) version
+            r = self.pkgtool.install(self.metapkg, log_to_file=_logfile)
+            if r.failed:
+                api.fail(("Could not install base (production) version of "
+                          "metapackage '%s'" % self.metapkg),
+                         logfile=r.logfile,
+                         stop_on_error=True)
+            else:
+                api.info("UMD product/s '%s' production version installed."
+                         % self.metapkg)
+
+            # 2) Enable verification repository
+            if self.verification_repo_config:
+                for url in config.CFG["repository_url"]:
+                    self._enable_verification_repo(url, logfile=_logfile)
+
+            # 3) Refresh
+            self.pkgtool.refresh()
+
+        # 4) Update
+        api.info("Using repositories: %s" % self.pkgtool.get_repos())
+        r = self.pkgtool.update(log_to_file=_logfile)
+        if r.failed:
+            r.msgerror = "Metapackage '%s' update failed." % self.metapkg
+
+        return r, self.pkgtool.get_pkglist(r)
+
+    def run(self, **kwargs):
+        """Runs UMD installation."""
+        self._check()
+
+        if "ignore_repos" in kwargs.keys():
+            self.repo_config = False
+
+        if "ignore_verification_repos" in kwargs.keys():
+            self.verification_repo_config = False
+
+        if config.CFG["dryrun"]:
+            api.info(("Installation or upgrade process will be simulated "
+                      "(dryrun: ON)"))
+            self.pkgtool.dryrun = True
+
+        # Handle installation type
+        installation_type = config.CFG["installation_type"]
+        if installation_type == "update":
+            r, d = self.qc_upgrade_1()
+        elif installation_type == "install":
+            r, d = self.qc_dist_1()
+        else:
+            raise exception.InstallException(("Installation type '%s' "
+                                              "not implemented."))
+        # Show package version
+        self._show_pkg_version(d)
+
+        # Handle output logs
+        self._handle_output_msg(r, d)
