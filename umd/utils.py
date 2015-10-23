@@ -84,6 +84,7 @@ def runcmd(cmd):
 class Yum(object):
     def __init__(self):
         self.path = "/etc/yum.repos.d/"
+        self.config = "/etc/yum.conf"
         self.extension = ".repo"
         self.pkg_extension = ".rpm"
 
@@ -167,6 +168,13 @@ class Yum(object):
                 api.fail("Could not add key '%s'" % key)
             else:
                 api.info("Repository key added: %s" % key)
+
+    def handle_repo_ssl(self):
+        """Removes SSL verification for https repositories."""
+        r = runcmd("sed -i 's/^sslverify.*/sslverify=False/g' %s"
+                   % self.config)
+        if r.failed:
+            api.fail("Could not disable SSL in %s" % self.config)
 
     def get_pkg_version(self, rpmfile, check_installed=True):
         """Extracts name&version from RPM file. Returns a (name, version) dict
@@ -256,6 +264,9 @@ class Apt(object):
             else:
                 api.info("Repository key added: %s" % key)
 
+    def handle_repo_ssl(self):
+        raise NotImplementedError
+
     def get_pkg_version(self):
         raise NotImplementedError
 
@@ -303,6 +314,9 @@ class PkgTool(object):
 
     def remove_repo(self, repolist):
         return self.client.remove_repo(to_list(repolist))
+
+    def handle_repo_ssl(self):
+        return self.client.handle_repo_ssl()
 
     @filelog
     def install(self, pkgs, enable_repo=[], key_repo=[]):
