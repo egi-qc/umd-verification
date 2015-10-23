@@ -20,9 +20,17 @@ class Install(object):
     def _enable_verification_repo(self, url, logfile):
         """Downloads the repofiles found in the given URL."""
         utils.runcmd("rm -rf %s/*" % self.download_dir)
-        r = utils.runcmd("wget -P %s -r --no-parent -R*.html* %s"
-                         % (self.download_dir, url),
-                         log_to_file=logfile)
+
+        cmd = "wget -P %s -r --no-parent -R*.html* %s" % (self.download_dir,
+                                                          url)
+        if url.startswith("https"):
+            cmd = ' '.join([cmd, "--no-check-certificate"])
+            self.pkgtool.handle_repo_ssl()
+
+        r = utils.runcmd(cmd, log_to_file=logfile)
+        if r.failed:
+            api.fail("Could not fetch repository '%s'" % url,
+                     logfile=r.logfile)
 
         repofiles = utils.find_extension_files(self.download_dir,
                                                self.pkgtool.get_extension())
