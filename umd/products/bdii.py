@@ -41,4 +41,14 @@ bdii_site_puppet = BDIIDeploy(
         manifest="site_bdii.pp",
         hiera_data="bdii.yaml",
         module_from_puppetforge="CERNOps-bdii"),
-    qc_specific_id="bdii")
+    qc_specific_id="bdii-site")
+
+bdii_top_puppet = BDIIDeploy(
+    name="bdii-top-puppet",
+    doc="Top BDII deployment with Puppet.",
+    metapkg="emi-bdii-top",
+    cfgtool=PuppetConfig(
+        manifest="top_bdii.pp",
+        hiera_data="bdii.yaml",
+        module_from_puppetforge="CERNOps-bdii"),
+    qc_specific_id="bdii-top")
