@@ -14,16 +14,23 @@ argus-ees:
           description: "Check EES basic functionality."
           user: "umd"
 
-bdii:
+bdii-site:
     qc_func_1:
         - test: "bin/bdii/client-test.sh"
           description: "glue-validator check."
           user: "umd"
           args: "glue-validator"
         - test: "bin/bdii/client-test.sh"
-          description: "ldapsearch check."
+          description: "ldapsearch site BDII check."
           user: "umd"
-          args: "ldapsearch"
+          args: "ldapsearch-site-bdii"
+
+bdii-top:
+    qc_func_1:
+        - test: "bin/bdii/client-test.sh"
+          description: "ldapsearch top BDII check."
+          user: "umd"
+          args: "ldapsearch-top-bdii"
 
 ca:
     qc_func_1:

@@ -18,22 +18,41 @@ case $1 in
     glue-validator)
         glue-validator -H localhost -p 2170 -b o=grid -g glue1 -s general -v 3
         ;;
-    ldapsearch)
+    ldapsearch-site-bdii)
+        site_name=`. /etc/bdii/gip/glite-info-site-defaults.conf && echo $SITE_NAME`
+        cmd="ldapsearch -x -h localhost -p 2170 -b mds-vo-name=${site_name},o=grid"
         # 1. Sleep BDII_BREATHE_TIME seconds
         breathe_time=`. /etc/bdii/bdii.conf && echo $BDII_BREATHE_TIME`
         echo "Waiting $breathe_time seconds to check BDII health.."
         sleep $breathe_time
 
         # 2. 5 attempts to connect to bdii service
-        # FIXME (orviz) Site name is hardcoded
         for i in `seq 1 5` ; do 
-            ldapsearch -x -h localhost -p 2170 -b mds-vo-name=GRID-SITE,o=grid
+            set +e
+            $cmd 2>&1 > /dev/null
             [ $? -eq 0 ] && break
             echo "ldap not started..waiting for 2 seconds.." && sleep 2
         done
+        ;;
+    ldapsearch-top-bdii)
+        keep_trying=1
+        while [ $keep_trying -eq 1 ]; do
+            set +e 
+            ldap_proc_num="`ps aux|grep -c \"[l]dapsearch \"`"
+            set -e
+            if [ $ldap_proc_num -ne "0" ]; then
+                echo "Found $ldap_proc_num process running. Sleeping 1 minute.."
+                sleep 1m
+            else
+                sleep 10s
+                ldapsearch -x -h localhost -p 2170 -b o=grid 2>&1 > /dev/null
+                keep_trying=0
+            fi
+        done
+        
         ;;
     *)
         echo "No options or option not known"
         exit -1
         ;;
-    esac
+esac
