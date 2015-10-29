@@ -44,10 +44,10 @@ case $1 in
                 echo "Found $ldap_proc_num process running. Sleeping 1 minute.."
                 sleep 1m
             else
-                sleep 10s
-                ldapsearch -x -h localhost -p 2170 -b o=grid 2>&1 > /dev/null
+                sleep 1m
                 keep_trying=0
-            fi
+		ldapsearch -x -h localhost -p 2170 -b o=grid
+	    fi
         done
         
         ;;
