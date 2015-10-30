@@ -133,4 +133,7 @@ class PuppetConfig(BaseConfig):
             api.fail("Puppet execution failed. More information in logs: %s"
                      % logfile)
             r.failed = True
+
+        self.has_run = True
+
         return r

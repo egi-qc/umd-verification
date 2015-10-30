@@ -36,12 +36,13 @@ class InfoModel(object):
 
     def _run_validator(self, glue_version, logfile):
         if glue_version == "glue1":
-            cmd = ("glue-validator -H localhost -p 2170 -b o=grid "
-                   "-g glue1 -s general -v 3")
+            cmd = ("glue-validator -H localhost -p 2170 -b "
+                   "mds-vo-name=resource,o=grid -g glue1 -s "
+                   "general -v 3")
             version = "1.3"
         elif glue_version == "glue2":
-            cmd = ("glue-validator -H localhost -p 2170 -b o=glue "
-                   "-g glue2 -s general -v 3")
+            cmd = ("glue-validator -H localhost -p 2170 -b "
+                   "GLUE2GroupID=resource,o=glue -g glue2 -s general -v 3")
             version = "2.0"
 
         r = utils.runcmd(cmd, log_to_file=logfile)

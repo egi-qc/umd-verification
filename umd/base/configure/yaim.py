@@ -49,4 +49,6 @@ class YaimConfig(BaseConfig):
             else:
                 api.info("YAIM configuration ran successfully.")
 
+            self.has_run = True
+
             return r

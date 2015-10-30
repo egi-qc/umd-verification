@@ -47,6 +47,7 @@ bdii_top_puppet = BDIIDeploy(
     name="bdii-top-puppet",
     doc="Top BDII deployment with Puppet.",
     metapkg="emi-bdii-top",
+    has_infomodel=True,
     cfgtool=PuppetConfig(
         manifest="top_bdii.pp",
         hiera_data="bdii.yaml",
