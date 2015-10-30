@@ -37,6 +37,7 @@ bdii_site_puppet = BDIIDeploy(
     name="bdii-site-puppet",
     doc="Site BDII deployment with Puppet.",
     metapkg="emi-bdii-site",
+    has_infomodel=True,
     cfgtool=PuppetConfig(
         manifest="site_bdii.pp",
         hiera_data="bdii.yaml",
