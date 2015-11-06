@@ -1,5 +1,6 @@
 from fabric import state
 
+from umd.products.arc import *      # NOQA
 from umd.products.argus import *    # NOQA
 from umd.products.bdii import *     # NOQA
 from umd.products.ca import *       # NOQA

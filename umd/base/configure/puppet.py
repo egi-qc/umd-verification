@@ -2,6 +2,8 @@ from distutils import version
 import itertools
 import os.path
 
+import yaml
+
 from umd import api
 from umd.base.configure import BaseConfig
 from umd import config
@@ -23,13 +25,13 @@ hiera_config = """
 class PuppetConfig(BaseConfig):
     def __init__(self,
                  manifest,
-                 hiera_data=None,
+                 hiera_data=[],
                  module_from_puppetforge=[],
                  module_from_repository=[]):
         """Runs Puppet configurations.
 
         :manifest: Main ".pp" with the configuration to be applied.
-        :hiera_data: YAML file with hiera variables.
+        :hiera_data: YAML file/s with hiera variables.
         :module_from_puppetforge: list of modules to be installed
                                   (from PuppetForge).
         :module_from_repository: URL pointing to repository tarball/s.
@@ -48,12 +50,14 @@ class PuppetConfig(BaseConfig):
 
     def _set_hiera(self):
         if self.hiera_data:
-            with open("/etc/puppet/hiera.yaml", 'w') as f:
-                f.write(hiera_config)
             if not os.path.exists("/etc/puppet/hieradata"):
                 utils.runcmd("mkdir /etc/puppet/hieradata")
-            utils.runcmd("cp %s /etc/puppet/hieradata/global.yaml"
-                         % self.hiera_data)
+            d = yaml.safe_load(hiera_config)
+            for f in self.hiera_data:
+                utils.runcmd("cp etc/puppet/%s /etc/puppet/hieradata/" % f)
+                d[":hierarchy"].append(os.path.splitext(f)[0])
+            with open("/etc/puppet/hiera.yaml", 'w') as f:
+                yaml.dump(d, f)
 
     def _module_install(self, mod):
         if os.path.splitext(mod)[1]:
@@ -86,9 +90,6 @@ class PuppetConfig(BaseConfig):
 
     def config(self, logfile=None):
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
-        if self.hiera_data:
-            self.hiera_data = os.path.join(config.CFG["puppet_path"],
-                                           self.hiera_data)
 
         r = utils.install("puppet", log_to_file=logfile)
         if r.failed:
