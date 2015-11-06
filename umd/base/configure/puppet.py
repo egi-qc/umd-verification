@@ -1,4 +1,5 @@
 from distutils import version
+import itertools
 import os.path
 
 from umd import api
@@ -24,22 +25,19 @@ class PuppetConfig(BaseConfig):
                  manifest,
                  hiera_data=None,
                  module_from_puppetforge=[],
-                 module_from_repository=[],
-                 module_path=[]):
+                 module_from_repository=[]):
         """Runs Puppet configurations.
 
         :manifest: Main ".pp" with the configuration to be applied.
         :hiera_data: YAML file with hiera variables.
         :module_from_puppetforge: list of modules to be installed
                                   (from PuppetForge).
-        :module_from_repository: module (repotype, repourl) tuples.
-        :module_path: Extra Puppet module locations.
+        :module_from_repository: URL pointing to repository tarball/s.
         """
         self.manifest = manifest
         self.hiera_data = hiera_data
         self.module_from_puppetforge = utils.to_list(module_from_puppetforge)
         self.module_from_repository = utils.to_list(module_from_repository)
-        self.module_path = utils.to_list(module_path)
 
     def _v3_workaround(self):
         # Include hiera functions in Puppet environment
@@ -56,6 +54,35 @@ class PuppetConfig(BaseConfig):
                 utils.runcmd("mkdir /etc/puppet/hieradata")
             utils.runcmd("cp %s /etc/puppet/hieradata/global.yaml"
                          % self.hiera_data)
+
+    def _module_install(self, mod):
+        if os.path.splitext(mod)[1]:
+            dest = os.path.join("/tmp", os.path.basename(mod))
+            r = utils.runcmd("wget %s -O %s" % (mod, dest))
+            if r.failed:
+                api.fail("Could not download tarball '%s'" % mod,
+                         stop_on_error=True)
+            mod = dest
+        utils.runcmd("puppet module install %s" % mod)
+
+    def _run(self):
+        logfile = os.path.join(config.CFG["log_path"], "puppet.log")
+        module_path = utils.runcmd("puppet config print modulepath")
+
+        r = utils.runcmd(("puppet apply -l %s --modulepath %s %s "
+                          "--detail-exitcodes")
+                         % (logfile, module_path, self.manifest))
+        if r.return_code == 0:
+            api.info("Puppet execution ended successfully.")
+        elif r.return_code == 2:
+            api.info(("Puppet execution ended successfully (some warnings "
+                      "though, check logs)"))
+            r.failed = False
+        else:
+            api.fail("Puppet execution failed. More information in logs: %s"
+                     % logfile)
+            r.failed = True
+        return r
 
     def config(self, logfile=None):
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
@@ -93,47 +120,20 @@ class PuppetConfig(BaseConfig):
 
             utils.install("puppet")
 
-        # Install modules from puppetforge/local
-        for mod in self.module_from_puppetforge:
-            r = utils.runcmd("puppet module install %s --force" % mod)
-            if r.failed:
-                api.fail("Error while installing module '%s'" % mod)
-        self.module_path.append(*["/etc/puppet/modules"])
+        for module in itertools.chain(self.module_from_puppetforge,
+                                      self.module_from_repository):
+            self._module_install(module)
 
         # FIXME (orviz) This is ugly - PATCHES
         if "CERNOps-fts" in self.module_from_puppetforge:
             utils.install("patch")
             utils.runcmd("patch -p0 < etc/patches/CERNOps-fts.patch")
 
-        module_loc = []
-        for mod in self.module_from_repository:
-            dirname = utils.clone_repo(*mod)
-            if dirname:
-                module_loc.append(dirname)
-        if module_loc:
-            self.module_path.append(*module_loc)
-
         # Hiera environment
         self._set_hiera()
 
-        logfile = os.path.join(config.CFG["log_path"], "puppet.log")
-
-        r = utils.runcmd(("puppet apply -l %s --modulepath %s %s "
-                          "--detail-exitcodes")
-                         % (logfile,
-                            ':'.join(self.module_path),
-                            self.manifest))
-        if r.return_code == 0:
-            api.info("Puppet execution ended successfully.")
-        elif r.return_code == 2:
-            api.info(("Puppet execution ended successfully (some warnings "
-                      "though, check logs)"))
-            r.failed = False
-        else:
-            api.fail("Puppet execution failed. More information in logs: %s"
-                     % logfile)
-            r.failed = True
-
+        # Run Puppet
+        r = self._run()
         self.has_run = True
 
         return r
