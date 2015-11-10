@@ -89,6 +89,10 @@ runtime arguments are:
                 - Value must contain an URL pointing to a valid EPEL release
                   package.
 
+:hostcert: Public key server certificate.
+
+:hostkey: Private key server certificate.
+
 
 .. _static-args-ref:
 
