@@ -95,27 +95,20 @@ class Deploy(tasks.Task):
     def run(self, **kwargs):
         """Takes over base deployment.
 
-            installation_type
-                Type of installation: 'install' (from scratch) or 'update'.
-            repository_url
-                Repository path with the verification content.
-                Could pass multiple values by prefixing with 'repository_url'.
-            epel_release
-                Package URL with the EPEL release.
-            umd_release
-                Package URL with the UMD release.
-            igtf_repo
-                Repository for the IGTF release.
-            yaim_path
-                Path pointing to YAIM configuration files.
-            log_path
-                Path to store logs produced during the execution.
-            qcenv_*
-                Pass environment variables needed by the QC specific checks.
-            qc_step
-                Run a given set of Quality Criteria steps.
-                Works exactly as 'repository_url' i.e. to pass more than one
-                QC step to run, prefix it as 'qc_step'.
+        :installation_type: Type of installation ('install', 'update').
+        :repository_url: Repository path with the verification content. Could
+            pass multiple values by prefixing with 'repository_url'.
+        :epel_release: Package URL with the EPEL release.
+        :umd_release: Package URL with the UMD release.
+        :igtf_repo: Repository for the IGTF release.
+        :yaim_path: Path pointing to YAIM configuration files.
+        :log_path: Path to store logs produced during the execution.
+        :qcenv_*: Pass environment variables needed by the QC specific checks.
+        :qc_step: Run a given set of Quality Criteria steps. Works exactly as
+            'repository_url' i.e. to pass more than one QC step to run, prefix
+            it as 'qc_step'.
+        :hostcert: Public key server certificate.
+        :hostkey: Private key server certificate.
         """
         # Get configuration parameters
         config.CFG.set_defaults()
@@ -134,7 +127,7 @@ class Deploy(tasks.Task):
             config.CFG["cfgtool"].pre_config = self.pre_config
             config.CFG["cfgtool"].post_config = self.post_config
 
-        # Certification Authority
+        # Certificate management
         if self.need_cert:
             r = utils.install("ca-policy-egi-core",
                               enable_repo=config.CFG["igtf_repo"],
@@ -143,12 +136,21 @@ class Deploy(tasks.Task):
                 api.fail("Could not install 'ca-policy-egi-core' package.",
                          stop_on_error=True)
 
-            config.CFG["ca"] = butils.OwnCA(
-                domain_comp_country="es",
-                domain_comp="UMDverification",
-                common_name="UMDVerificationOwnCA")
-            config.CFG["ca"].create(
-                trusted_ca_dir="/etc/grid-security/certificates")
+            if config.CFG["hostkey"] and config.CFG["hostcert"]:
+                api.info("Using provided host certificates")
+                utils.runcmd("cp %s /etc/grid-security/hostkey.pem"
+                             % config.CFG["hostkey"])
+                utils.runcmd("chmod 600 /etc/grid-security/hostkey.pem")
+                utils.runcmd("cp %s /etc/grid-security/hostcert.pem"
+                             % config.CFG["hostcert"])
+            else:
+                api.info("Generating own certificates")
+                config.CFG["ca"] = butils.OwnCA(
+                    domain_comp_country="es",
+                    domain_comp="UMDverification",
+                    common_name="UMDVerificationOwnCA")
+                config.CFG["ca"].create(
+                    trusted_ca_dir="/etc/grid-security/certificates")
 
         # Workflow
         utils.remove_logs()
