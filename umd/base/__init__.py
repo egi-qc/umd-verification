@@ -136,13 +136,14 @@ class Deploy(tasks.Task):
                 api.fail("Could not install 'ca-policy-egi-core' package.",
                          stop_on_error=True)
 
-            if config.CFG["hostkey"] and config.CFG["hostcert"]:
+            hostcert = config.CFG.get("hostcert", None)
+            hostkey = config.CFG.get("hostkey", None)
+            if hostkey and hostcert:
                 api.info("Using provided host certificates")
-                utils.runcmd("cp %s /etc/grid-security/hostkey.pem"
-                             % config.CFG["hostkey"])
+                utils.runcmd("cp %s /etc/grid-security/hostkey.pem" % hostkey)
                 utils.runcmd("chmod 600 /etc/grid-security/hostkey.pem")
                 utils.runcmd("cp %s /etc/grid-security/hostcert.pem"
-                             % config.CFG["hostcert"])
+                             % hostcert)
             else:
                 api.info("Generating own certificates")
                 config.CFG["ca"] = butils.OwnCA(

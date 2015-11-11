@@ -35,21 +35,25 @@ class {
         resource_longitude        => "-5.55",
         setup_RTEs                => true,
         use_argus                 => false,
-        #infosys_registration = {
-        #    'clustertouk1' => {
-        #      targethostname => 'index1.gridpp.rl.ac.uk',
-        #      targetport => '2135',
-        #      targetsuffix => 'Mds-Vo-Name=UK,o=grid',
-        #      regperiod => '120',},
+        infosys_registration => {
+            'clustertouk1' => {
+              targethostname => 'index1.$::{domain}',
+              targetport => '2170',
+              targetsuffix => 'Mds-Vo-Name=sitename,o=grid',
+              regperiod => '120',},
 
         #    'clustertouk2' => {
         #       targethostname => 'index2.gridpp.rl.ac.uk',
         #       targetport => '2135',
         #       targetsuffix => 'Mds-Vo-Name=UK,o=grid',
         #       regperiod => '120',}
-        #},
+        },
         #queue_defaults      = {
         #},
-        #queues              = {
-        #},
+        queues              => {
+            "batch" => {
+                "queue_name" => "batch",
+            }
+        },
+        lrms => "pbs",
 }
