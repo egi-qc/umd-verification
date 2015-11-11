@@ -20,6 +20,38 @@ class ArcCEDeploy(base.Deploy):
                 # FIXME(orviz) stop_on_error=True here??
                 api.fail("Could not install hwloc version 1.5-1")
 
+    def pre_validate(self):
+        # Change 'pbs' to 'pbs_server' in /etc/services
+        utils.runcmd(("sed -e 's/^pbs .*\/tcp/pbs_server 15001\/tcp/g' "
+                      "/etc/services"))
+        utils.runcmd(("sed -e 's/^pbs .*\/udp/pbs_server 15001\/udp/g' "
+                      "/etc/services"))
+
+        # Set FQDN in /etc/torque/server_name
+        fqdn = utils.runcmd("hostname -f")
+        utils.runcmd("echo %s > /etc/torque/server_name" % fqdn)
+
+        # Set nodes file
+        utils.runcmd("echo \"%s np=1\" > /var/lib/torque/server_priv/nodes"
+                     % fqdn)
+
+        # Start services
+        utils.runcmd("/etc/init.d/trqauthd start")
+        utils.runcmd("/etc/init.d/pbs_server start")
+        utils.runcmd("create-munge-key -f")
+        utils.runcmd("/etc/init.d/munge start")
+
+        # Torque configuration
+        utils.runcmd("qmgr -c \"set server acl_hosts = %s\"" % fqdn)
+        utils.runcmd("qmgr -c \"set server scheduling=true\"")
+        utils.runcmd("qmgr -c \"create queue batch queue_type=execution\"")
+        utils.runcmd("qmgr -c \"set queue batch started=true\"")
+        utils.runcmd("qmgr -c \"set queue batch enabled=true\"")
+        utils.runcmd("qmgr -c \"set queue batch resources_default.nodes=1\"")
+        utils.runcmd(("qmgr -c \"set queue batch resources_default.walltime="
+                      "3600\""))
+        utils.runcmd("qmgr -c \"set server default_queue=batch\"")
+
 
 arc_ce = ArcCEDeploy(
     name="arc-ce",

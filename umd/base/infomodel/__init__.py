@@ -76,6 +76,7 @@ class InfoModel(object):
 
             utils.to_file(info_utils.ldifize(ldap_result), logfile)
 
+            version_list = []
             for dn, attrs in ldap_result:
                 try:
                     version_list = attrs["GLUE2EndpointImplementationVersion"]
@@ -92,7 +93,7 @@ class InfoModel(object):
                 for version in version_list:
                     if not info_utils.validate_version(version):
                         return False, "Found a non-valid version: %s" % version
-            return True
+            return True, "Middleware versions found: %s" % version_list
         finally:
             conn.unbind_s()
 
