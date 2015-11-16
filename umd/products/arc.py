@@ -60,6 +60,7 @@ arc_ce = ArcCEDeploy(
              "emi-torque-server"],
     need_cert=True,
     has_infomodel=True,
+    info_port="2135",
     cfgtool=PuppetConfig(
         manifest="arc.pp",
         hiera_data=["arc.yaml",
