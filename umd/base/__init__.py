@@ -24,7 +24,8 @@ class Deploy(tasks.Task):
                  qc_specific_id=None,
                  qc_step=[],
                  exceptions={},
-                 dryrun=False):
+                 dryrun=False,
+                 info_port=None):
         """Arguments:
 
                 name: Fabric command name.
@@ -38,6 +39,8 @@ class Deploy(tasks.Task):
                     to be executed. The check definition must be included in
                     etc/qc_specific.yaml
                 exceptions: documented exceptions for a given UMD product.
+                dry_run: list commands, not run them
+                info_port: port where information model is published.
         """
         self.name = name
         if doc:
@@ -54,6 +57,7 @@ class Deploy(tasks.Task):
         self.qc_envvars = {}
         self.qc_step = qc_step
         self.dryrun = dryrun
+        self.info_port = info_port
 
     def pre_install(self):
         pass
