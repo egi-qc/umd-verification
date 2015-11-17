@@ -36,10 +36,10 @@ class ArcCEDeploy(base.Deploy):
                      % fqdn)
 
         # Start services
-        utils.runcmd("/etc/init.d/trqauthd start")
-        utils.runcmd("/etc/init.d/pbs_server start")
+        utils.runcmd("/etc/init.d/trqauthd restart")
+        utils.runcmd("/etc/init.d/pbs_server restart")
         utils.runcmd("create-munge-key -f")
-        utils.runcmd("/etc/init.d/munge start")
+        utils.runcmd("/etc/init.d/munge restart")
 
         # Torque configuration
         utils.runcmd("qmgr -c \"set server acl_hosts = %s\"" % fqdn)
