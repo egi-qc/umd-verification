@@ -1,3 +1,6 @@
+import os.path
+
+from fabric import operations as fabric_ops
 from fabric import tasks
 
 from umd import api
@@ -140,22 +143,39 @@ class Deploy(tasks.Task):
                 api.fail("Could not install 'ca-policy-egi-core' package.",
                          stop_on_error=True)
 
-            hostcert = config.CFG.get("hostcert", None)
-            hostkey = config.CFG.get("hostkey", None)
-            if hostkey and hostcert:
-                api.info("Using provided host certificates")
-                utils.runcmd("cp %s /etc/grid-security/hostkey.pem" % hostkey)
-                utils.runcmd("chmod 600 /etc/grid-security/hostkey.pem")
-                utils.runcmd("cp %s /etc/grid-security/hostcert.pem"
-                             % hostcert)
-            else:
-                api.info("Generating own certificates")
-                config.CFG["ca"] = butils.OwnCA(
-                    domain_comp_country="es",
-                    domain_comp="UMDverification",
-                    common_name="UMDVerificationOwnCA")
-                config.CFG["ca"].create(
-                    trusted_ca_dir="/etc/grid-security/certificates")
+            cert_path = "/etc/grid-security/hostcert.pem"
+            key_path = "/etc/grid-security/hostkey.pem"
+            generate_cert = False
+            if os.path.isfile(cert_path) and os.path.isfile(key_path):
+                r = fabric_ops.prompt(("Certificate already exists under "
+                                       "'/etc/grid-security'. Do you want to "
+                                       "overwrite them? (y/N)"))
+                if r.lower() == "y":
+                    generate_cert = True
+                    api.info("Overwriting already existant certificate")
+                else:
+                    api.info("Using already existant certificate")
+
+            if generate_cert:
+                hostcert = config.CFG.get("hostcert", None)
+                hostkey = config.CFG.get("hostkey", None)
+                if hostkey and hostcert:
+                    api.info("Using provided host certificates")
+                    utils.runcmd("cp %s %s" % (hostkey, key_path))
+                    utils.runcmd("chmod 600 %s" % key_path)
+                    utils.runcmd("cp %s %s" % (hostcert, cert_path))
+                else:
+                    api.info("Generating own certificates")
+                    config.CFG["ca"] = butils.OwnCA(
+                        domain_comp_country="es",
+                        domain_comp="UMDverification",
+                        common_name="UMDVerificationOwnCA")
+                    config.CFG["ca"].create(
+                        trusted_ca_dir="/etc/grid-security/certificates")
+                    config.CFG["cert"] = self.ca.issue_cert(
+                        hash="2048",
+                        key_prv=key_path,
+                        key_pub=cert_path)
 
         # Workflow
         utils.remove_logs()

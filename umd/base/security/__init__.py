@@ -18,11 +18,6 @@ class Security(object):
     def qc_sec_2(self):
         """SHA-2 Certificates Support."""
         if self.need_cert:
-            config.CFG["cert"] = self.ca.issue_cert(
-                hash="2048",
-                key_prv="/etc/grid-security/hostkey.pem",
-                key_pub="/etc/grid-security/hostcert.pem")
-
             if self.cfgtool:
                 r = self.cfgtool.run()
                 if r.failed:

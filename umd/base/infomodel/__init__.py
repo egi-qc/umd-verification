@@ -66,7 +66,8 @@ class InfoModel(object):
                                                 % r))
 
     def _run_version_check(self, logfile):
-        conn = ldap.initialize("ldap://localhost:2170")
+        port = config.CFG.get("info_port", "2170")
+        conn = ldap.initialize("ldap://localhost:%s" % port)
         try:
             ldap_result = conn.search_s(
                 "GLUE2GroupID=resource,o=glue",
