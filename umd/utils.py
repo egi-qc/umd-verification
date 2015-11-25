@@ -88,6 +88,22 @@ class Yum(object):
         self.extension = ".repo"
         self.pkg_extension = ".rpm"
 
+    def _validate_output(self, r):
+        """Checks the validity of the yum output message."""
+        has_failed = False
+        for line in r.split('\n'):
+            m = re.search("(.+): does not update installed package.", line)
+            if m:
+                has_failed = False
+
+            m = re.search("Package (matching ){0,1}(.+) already installed",
+                          line)
+        if has_failed:
+            r.failed = True
+        else:
+            r.failed = False
+        return r
+
     def run(self, action, dryrun, pkgs=None):
         opts = ''
         if dryrun:
@@ -101,15 +117,17 @@ class Yum(object):
             action = "makecache"
 
         if pkgs:
-            return "yum -y %s %s %s" % (opts, action, " ".join(pkgs))
+            r = runcmd("yum -y %s %s %s" % (opts, action, " ".join(pkgs)))
         else:
-            return "yum -y %s %s" % (opts, action)
+            r = runcmd("yum -y %s %s" % (opts, action))
+
+        return self._validate_output(r)
 
     def get_pkglist(self, r):
         """Gets the list of packages being installed parsing yum output."""
         d = {}
+        lines = r.split('\n')
         try:
-            lines = r.split('\n')
             for line in lines[lines.index("Installed:"):]:
                 if line.startswith(' '):
                     for pkg in map(None, *([iter(line.split())] * 2)):
@@ -118,15 +136,17 @@ class Yum(object):
                         version = version.split(':')[-1]
                         d[name] = '.'.join(['-'.join([name, version]), arch])
         except ValueError:
-            # YUM: last version installed
-            for line in r.split('\n'):
-                m = re.search(("Package (matching ){0,1}(.+) already "
-                               "installed"), line)
-                if m:
-                    all = m.groups()[-1]
-                    pattern = "([a-zA-Z0-9-_]+)-\d+.+"
-                    name = re.search(pattern, all).groups()[0]
-                    d[name] = ' '.join([all, "(already installed)"])
+            api.info("No new package installed.")
+
+        # Look for already installed packages
+        for line in r.split('\n'):
+            m = re.search(("Package (matching ){0,1}(.+) already "
+                           "installed"), line)
+            if m:
+                all = m.groups()[-1]
+                pattern = "([a-zA-Z0-9-_]+)-\d+.+"
+                name = re.search(pattern, all).groups()[0]
+                d[name] = ' '.join([all, "(already installed)"])
 
         return d
 
@@ -222,9 +242,11 @@ class Apt(object):
             action = "update"
 
         if pkgs:
-            return "apt-get -y %s %s %s" % (opts, action, " ".join(pkgs))
+            return runcmd("apt-get -y %s %s %s" % (opts,
+                                                   action,
+                                                   " ".join(pkgs)))
         else:
-            return "apt-get -y %s %s" % (opts, action)
+            return runcmd("apt-get -y %s %s" % (opts, action))
 
     def get_repos(self):
         """Gets the list of enabled repositories."""
@@ -343,10 +365,10 @@ class PkgTool(object):
         try:
             if pkgs:
                 pkgs = to_list(pkgs)
-                cmd = self.client.run(action, self.dryrun, pkgs=pkgs)
+                r = self.client.run(action, self.dryrun, pkgs=pkgs)
             else:
-                cmd = self.client.run(action, self.dryrun)
-            return runcmd(cmd)
+                r = self.client.run(action, self.dryrun)
+            return r
         except KeyError:
             raise exception.InstallException("'%s' OS not supported"
                                              % system.distname)

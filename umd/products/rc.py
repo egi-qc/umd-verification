@@ -1,16 +1,25 @@
+import itertools
 import os.path
 
 from umd import api
 from umd import base
 from umd import config
+from umd import products
 from umd import system
 
 
 class RCDeploy(base.Deploy):
-    # FIXME This should be obtained programatically
     def _get_metapkg_list(self):
         l = []
-        for pkg in ["dcache"]:
+
+        # FIXME The list of products should be gathered programatically
+        for pkg in itertools.chain(
+            products.storm.sl6.metapkg,
+            products.ui.ui_gfal.metapkg,
+            products.globus.gridftp.metapkg,
+            products.gram5.gram5.metapkg,
+            ["dcache"],
+        ):
             if isinstance(pkg, list):
                 l.extend(pkg)
             else:
@@ -38,4 +47,4 @@ rc = RCDeploy(
     name="release-candidate",
     doc="Release Candidate probe.",
     qc_step="QC_DIST_1",
-    dryrun=True)
+)
