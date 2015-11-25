@@ -113,6 +113,7 @@ class Install(object):
             pkgs_to_download.insert(0, ("EPEL",
                                         config.CFG["epel_release"]))
             pkgs_additional.append("yum-priorities")
+            pkgs_additional.append("yum-conf-slx%s" % system.version_major)
 
         # Remove any trace of UMD (and external) repository files
         r = self.pkgtool.remove(pkgs_to_purge)
