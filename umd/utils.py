@@ -73,7 +73,8 @@ def runcmd(cmd):
 
     :cmd: command to execute
     """
-    env_d = dict(config.CFG["qc_envvars"].items()
+    qc_envvars = config.CFG.get("qc_envvars", {})
+    env_d = dict(qc_envvars.items()
                  + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")])
     with fabric_api.settings(warn_only=True):
         with fabric_api.shell_env(**env_d):
@@ -479,6 +480,11 @@ def load_from_hiera(fname):
     :fname: YAML filename to load.
     """
     return yaml.load(file("etc/puppet/%s" % fname, "r"))
+
+
+def hiera(v):
+    """Find variable value through hiera."""
+    return runcmd("hiera -c /etc/puppet/hiera.yaml '%s'" % v)
 
 
 def find_extension_files(path, extension):

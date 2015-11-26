@@ -4,8 +4,65 @@ from umd.base.configure.puppet import PuppetConfig
 from umd import system
 from umd import utils
 
+grid_mapfile = """
+"/dteam/Role=pilot/Capability=NULL" umd
+"/dteam/Role=pilot" umd
+"/dteam/Role=NULL/Capability=NULL" umd
+"/dteam" umd
+"/dteam/*/Role=NULL/Capability=NULL" umd
+"/dteam/*" umd
+"/ops/Role=lcgadmin/Capability=NULL" umd
+"/ops/Role=lcgadmin" umd
+"/ops/Role=pilot/Capability=NULL" umd
+"/ops/Role=pilot" umd
+"/ops/Role=NULL/Capability=NULL" umd
+"/ops" umd
+"/ops/*/Role=NULL/Capability=NULL" umd
+"/ops/*" umd
+"/ops.vo.ibergrid.eu/Spain/Role=NULL/Capability=NULL" umd
+"/ops.vo.ibergrid.eu/Spain" umd
+"/ops.vo.ibergrid.eu/Portugal/Role=NULL/Capability=NULL" umd
+"/ops.vo.ibergrid.eu/Portugal" umd
+"/ops.vo.ibergrid.eu/Role=SW-Admin/Capability=NULL" umd
+"/ops.vo.ibergrid.eu/Role=SW-Admin" umd
+"/ops.vo.ibergrid.eu/Role=Production/Capability=NULL" umd
+"/ops.vo.ibergrid.eu/Role=Production" umd
+"/ops.vo.ibergrid.eu/Role=NULL/Capability=NULL" umd
+"/ops.vo.ibergrid.eu" umd
+"/ops.vo.ibergrid.eu/*/Role=NULL/Capability=NULL" umd
+"/ops.vo.ibergrid.eu/*" umd
+"""
+
 
 class ArcCEDeploy(base.Deploy):
+    fqdn = utils.runcmd("hostname -f")
+    scratchdir = utils.hiera("scratchdir")
+    sessiondir = utils.hiera("sessiondir")
+
+    def _set_control_access(self):
+        utils.runcmd("useradd -m umd")
+
+        # Generate grid-mapfile - FIXME(orviz) do it with `nordugridmap`
+        with open("/etc/grid-security/grid-mapfile", 'w') as f:
+            f.write(grid_mapfile)
+            f.flush()
+
+        # session & scratch dir
+        utils.runcmd("chown root:umd %s" % self.sessiondir)
+        utils.runcmd("mkdir %s" % self.scratchdir)
+        utils.runcmd("chmod 777 %s" % self.scratchdir)
+
+    def _set_arc_conf(self):
+        arc_conf = "/etc/arc.conf"
+        utils.runcmd(("sed -i 'arex_mount_point=.*/arex_mount_point=\"https://"
+                      "%s:443/arex\"/g' %s" % (self.fqdn, arc_conf)))
+        utils.runcmd("sed -i '/^sessiondir=.*/a scratchdir=\"%s\"' %s"
+                     % (self.scratchdir, arc_conf))
+        utils.runcmd(("sed -i 's/^defaultmemory=.*/defaultmemory=\"512\"/g' %s"
+                      % arc_conf))
+        utils.runcmd("sed -i 's/\(^.*#authplugin.*$\)/#\1/' %s" % arc_conf)
+        utils.runcmd("/etc/init.d/a-rex restart")
+
     def pre_install(self):
         if system.distro_version == "redhat6":
             api.info(("Installing hwloc version 1.5-1 required by "
@@ -20,29 +77,37 @@ class ArcCEDeploy(base.Deploy):
                 # FIXME(orviz) stop_on_error=True here??
                 api.fail("Could not install hwloc version 1.5-1")
 
+    def post_config(self):
+        self._set_control_access()
+        self._set_arc_conf()
+
     def pre_validate(self):
         # Change 'pbs' to 'pbs_server' in /etc/services
-        utils.runcmd(("sed -e 's/^pbs .*\/tcp/pbs_server 15001\/tcp/g' "
+        utils.runcmd(("sed -i 's/^pbs .*\/tcp/pbs_server 15001\/tcp/g' "
                       "/etc/services"))
-        utils.runcmd(("sed -e 's/^pbs .*\/udp/pbs_server 15001\/udp/g' "
+        utils.runcmd(("sed -i 's/^pbs .*\/udp/pbs_server 15001\/udp/g' "
                       "/etc/services"))
 
-        # Set FQDN in /etc/torque/server_name
-        fqdn = utils.runcmd("hostname -f")
-        utils.runcmd("echo %s > /etc/torque/server_name" % fqdn)
-
-        # Set nodes file
+        # Set pbs and maui parameters
+        utils.runcmd("echo %s > /etc/torque/server_name" % self.fqdn)
         utils.runcmd("echo \"%s np=1\" > /var/lib/torque/server_priv/nodes"
-                     % fqdn)
+                     % self.fqdn)
+        utils.runcmd("sed -i 's/localhost/%s/g' /var/spool/maui/maui.cfg"
+                     % self.fqdn)
+        utils.runcmd(("echo \"\$pbsserver %s\" > "
+                      "/var/lib/torque/mom_priv/config" % self.fqdn))
 
-        # Start services
+        # Start services - server
         utils.runcmd("/etc/init.d/trqauthd restart")
-        utils.runcmd("/etc/init.d/pbs_server restart")
+        utils.runcmd("/etc/init.d/pbs_server stop")
+        utils.runcmd("/etc/init.d/pbs_server start")
         utils.runcmd("create-munge-key -f")
         utils.runcmd("/etc/init.d/munge restart")
+        utils.runcmd("/etc/init.d/maui stop ; /etc/init.d/maui start")
+        utils.runcmd("/etc/init.d/pbs_mom stop ; /etc/init.d/pbs_mom start")
 
         # Torque configuration
-        utils.runcmd("qmgr -c \"set server acl_hosts = %s\"" % fqdn)
+        utils.runcmd("qmgr -c \"set server acl_hosts = %s\"" % self.fqdn)
         utils.runcmd("qmgr -c \"set server scheduling=true\"")
         utils.runcmd("qmgr -c \"create queue batch queue_type=execution\"")
         utils.runcmd("qmgr -c \"set queue batch started=true\"")
@@ -50,14 +115,20 @@ class ArcCEDeploy(base.Deploy):
         utils.runcmd("qmgr -c \"set queue batch resources_default.nodes=1\"")
         utils.runcmd(("qmgr -c \"set queue batch resources_default.walltime="
                       "3600\""))
+        utils.runcmd("qmgr -c \"set queue batch max_running = 1\"")
         utils.runcmd("qmgr -c \"set server default_queue=batch\"")
+
+        # Reload configuration
+        utils.runcmd("/etc/init.d/pbs_server stop")
+        utils.runcmd("/etc/init.d/pbs_server start")
 
 
 arc_ce = ArcCEDeploy(
     name="arc-ce",
     doc="ARC computing element server deployment.",
     metapkg=["nordugrid-arc-compute-element",
-             "emi-torque-server"],
+             "emi-torque-server",
+             "torque-mom"],
     need_cert=True,
     has_infomodel=True,
     info_port="2135",
