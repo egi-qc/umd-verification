@@ -1,1 +1,5 @@
 arc::params::host: "%{::fqdn}"
+
+sessiondir: 
+    - '/var/spool/arc/grid00'
+scratchdir: "/scratch" 
