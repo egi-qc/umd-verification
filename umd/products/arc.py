@@ -35,9 +35,10 @@ grid_mapfile = """
 
 
 class ArcCEDeploy(base.Deploy):
-    fqdn = utils.runcmd("hostname -f")
-    scratchdir = utils.hiera("scratchdir")
-    sessiondir = utils.hiera("sessiondir")
+    def __init__(self, *args, **kwargs):
+        self.fqdn = utils.runcmd("hostname -f")
+        self.scratchdir = utils.hiera("scratchdir")
+        self.sessiondir = utils.hiera("sessiondir")
 
     def _set_control_access(self):
         utils.runcmd("useradd -m umd")
