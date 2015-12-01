@@ -35,12 +35,7 @@ grid_mapfile = """
 
 
 class ArcCEDeploy(base.Deploy):
-    def __init__(self, *args, **kwargs):
-        self.fqdn = utils.runcmd("hostname -f")
-        self.scratchdir = utils.hiera("scratchdir")
-        self.sessiondir = utils.hiera("sessiondir")
-
-    def _set_control_access(self):
+    def _set_control_access(self, sessiondir, scratchdir):
         utils.runcmd("useradd -m umd")
 
         # Generate grid-mapfile - FIXME(orviz) do it with `nordugridmap`
@@ -49,17 +44,17 @@ class ArcCEDeploy(base.Deploy):
             f.flush()
 
         # session & scratch dir
-        utils.runcmd("chown root:umd %s" % self.sessiondir)
-        utils.runcmd("mkdir %s" % self.scratchdir)
-        utils.runcmd("chmod 777 %s" % self.scratchdir)
+        utils.runcmd("chown root:umd %s" % sessiondir)
+        utils.runcmd("mkdir %s" % scratchdir)
+        utils.runcmd("chmod 777 %s" % scratchdir)
 
-    def _set_arc_conf(self):
+    def _set_arc_conf(self, scratchdir):
         arc_conf = "/etc/arc.conf"
         # arex_mount_point (set, commented)
         utils.runcmd("sed -i '/arex_mount_point/s/#//g' %s" % arc_conf)
         # scratchdir (set)
         utils.runcmd("sed -i '/^sessiondir=.*/a scratchdir=\"%s\"' %s"
-                     % (self.scratchdir, arc_conf))
+                     % (scratchdir, arc_conf))
         # defaultmemory
         utils.runcmd(("sed -i 's/^defaultmemory=.*/defaultmemory=\"512\"/g' %s"
                       % arc_conf))
@@ -82,6 +77,8 @@ class ArcCEDeploy(base.Deploy):
                 api.fail("Could not install hwloc version 1.5-1")
 
     def _set_pbs(self):
+        fqdn = utils.runcmd("hostname -f")
+
         # Change 'pbs' to 'pbs_server' in /etc/services
         utils.runcmd(("sed -i 's/^pbs .*\/tcp/pbs_server 15001\/tcp/g' "
                       "/etc/services"))
@@ -89,13 +86,13 @@ class ArcCEDeploy(base.Deploy):
                       "/etc/services"))
 
         # Set pbs and maui parameters
-        utils.runcmd("echo %s > /etc/torque/server_name" % self.fqdn)
+        utils.runcmd("echo %s > /etc/torque/server_name" % fqdn)
         utils.runcmd("echo \"%s np=1\" > /var/lib/torque/server_priv/nodes"
-                     % self.fqdn)
+                     % fqdn)
         utils.runcmd("sed -i 's/localhost/%s/g' /var/spool/maui/maui.cfg"
-                     % self.fqdn)
+                     % fqdn)
         utils.runcmd(("echo \"\$pbsserver %s\" > "
-                      "/var/lib/torque/mom_priv/config" % self.fqdn))
+                      "/var/lib/torque/mom_priv/config" % fqdn))
 
         # Start services - server
         utils.runcmd("/etc/init.d/trqauthd restart")
@@ -107,7 +104,7 @@ class ArcCEDeploy(base.Deploy):
         utils.runcmd("/etc/init.d/pbs_mom stop ; /etc/init.d/pbs_mom start")
 
         # Torque configuration
-        utils.runcmd("qmgr -c \"set server acl_hosts = %s\"" % self.fqdn)
+        utils.runcmd("qmgr -c \"set server acl_hosts = %s\"" % fqdn)
         utils.runcmd("qmgr -c \"set server scheduling=true\"")
         utils.runcmd("qmgr -c \"create queue batch queue_type=execution\"")
         utils.runcmd("qmgr -c \"set queue batch started=true\"")
@@ -123,15 +120,18 @@ class ArcCEDeploy(base.Deploy):
         utils.runcmd("/etc/init.d/pbs_server start")
 
     def post_config(self):
-        self._set_control_access()
-        self._set_arc_conf()
+        scratchdir = utils.hiera("scratchdir")
+        sessiondir = utils.hiera("sessiondir")
+
+        self._set_control_access(sessiondir, scratchdir)
+        self._set_arc_conf(scratchdir)
         self._set_pbs()
 
     def pre_validate(self):
         utils.install(["myproxy", "nordugrid-arc-client"])
 
 
-arc_ce = ArcCEDeploy(
+arc_ce = ArcCEDeploy()
     name="arc-ce",
     doc="ARC computing element server deployment.",
     metapkg=["nordugrid-arc-compute-element",

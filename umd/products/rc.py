@@ -4,7 +4,7 @@ import os.path
 from umd import api
 from umd import base
 from umd import config
-from umd import products
+# from umd import products
 from umd import system
 
 
@@ -14,10 +14,10 @@ class RCDeploy(base.Deploy):
 
         # FIXME The list of products should be gathered programatically
         for pkg in itertools.chain(
-            products.storm.sl6.metapkg,
-            products.ui.ui_gfal.metapkg,
-            products.globus.gridftp.metapkg,
-            products.gram5.gram5.metapkg,
+            # products.storm.sl6.metapkg,
+            # products.ui.ui_gfal.metapkg,
+            # products.globus.gridftp.metapkg,
+            # products.gram5.gram5.metapkg,
             ["dcache"],
         ):
             if isinstance(pkg, list):
