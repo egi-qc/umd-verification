@@ -1,6 +1,7 @@
 from distutils import version
 import itertools
 import os.path
+import shutil
 
 import yaml
 
@@ -57,7 +58,8 @@ class PuppetConfig(BaseConfig):
                 utils.runcmd("cp etc/puppet/%s /etc/puppet/hieradata/" % f)
                 d[":hierarchy"].append(os.path.splitext(f)[0])
             with open("/etc/puppet/hiera.yaml", 'w') as f:
-                yaml.dump(d, f)
+                f.write(yaml.dump(d, default_flow_style=False))
+            shutil.copy("/etc/puppet/hiera.yaml", "/etc/hiera.yaml")
 
     def _module_install(self, mod):
         if os.path.splitext(mod)[1]:

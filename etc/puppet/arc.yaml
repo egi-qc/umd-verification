@@ -1,4 +1,5 @@
 arc::params::host: "%{::fqdn}"
+arc::params::arex_port: 443
 
 sessiondir: 
     - '/var/spool/arc/grid00'

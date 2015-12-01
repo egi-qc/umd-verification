@@ -8,7 +8,7 @@ set -x
 ##              echo $MYPROXY_PASSWD | myproxy-init -S -l $MYPROXY_USER -s $MYPROXY_SERVER -m $VO
 ##
 
-: ${VO:=ops.vo.ibergrid.eu}
+: ${VO:=dteam}
 
 case $VO in
     ops.vo.ibergrid.eu)
