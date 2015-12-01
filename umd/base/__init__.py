@@ -172,7 +172,7 @@ class Deploy(tasks.Task):
                         common_name="UMDVerificationOwnCA")
                     config.CFG["ca"].create(
                         trusted_ca_dir="/etc/grid-security/certificates")
-                    config.CFG["cert"] = self.ca.issue_cert(
+                    config.CFG["cert"] = config.CFG["ca"].issue_cert(
                         hash="2048",
                         key_prv=key_path,
                         key_pub=cert_path)
