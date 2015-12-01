@@ -1,5 +1,6 @@
 class {
     "arc_ce":
+        arex_port                 => hiera("arc::params::arex_port"),
         manage_repository         => no,
         authorized_vos            => [
             'ops',

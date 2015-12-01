@@ -54,12 +54,15 @@ class ArcCEDeploy(base.Deploy):
 
     def _set_arc_conf(self):
         arc_conf = "/etc/arc.conf"
-        utils.runcmd(("sed -i 'arex_mount_point=.*/arex_mount_point=\"https://"
-                      "%s:443/arex\"/g' %s" % (self.fqdn, arc_conf)))
+        # arex_mount_point (set, commented)
+        utils.runcmd("sed -i '/arex_mount_point/s/#//g' %s" % arc_conf)
+        # scratchdir (set)
         utils.runcmd("sed -i '/^sessiondir=.*/a scratchdir=\"%s\"' %s"
                      % (self.scratchdir, arc_conf))
+        # defaultmemory
         utils.runcmd(("sed -i 's/^defaultmemory=.*/defaultmemory=\"512\"/g' %s"
                       % arc_conf))
+        # authplugin (commented)
         utils.runcmd("sed -i 's/\(^.*#authplugin.*$\)/#\1/' %s" % arc_conf)
         utils.runcmd("/etc/init.d/a-rex restart")
 
@@ -77,11 +80,7 @@ class ArcCEDeploy(base.Deploy):
                 # FIXME(orviz) stop_on_error=True here??
                 api.fail("Could not install hwloc version 1.5-1")
 
-    def post_config(self):
-        self._set_control_access()
-        self._set_arc_conf()
-
-    def pre_validate(self):
+    def _set_pbs(self):
         # Change 'pbs' to 'pbs_server' in /etc/services
         utils.runcmd(("sed -i 's/^pbs .*\/tcp/pbs_server 15001\/tcp/g' "
                       "/etc/services"))
@@ -122,6 +121,14 @@ class ArcCEDeploy(base.Deploy):
         utils.runcmd("/etc/init.d/pbs_server stop")
         utils.runcmd("/etc/init.d/pbs_server start")
 
+    def post_config(self):
+        self._set_control_access()
+        self._set_arc_conf()
+        self._set_pbs()
+
+    def pre_validate(self):
+        utils.install(["myproxy", "nordugrid-arc-client"])
+
 
 arc_ce = ArcCEDeploy(
     name="arc-ce",
@@ -142,4 +149,5 @@ arc_ce = ArcCEDeploy(
                                  "puppetlabs-stdlib",
                                  "puppetlabs-concat",
                                  "CERNOps-fetchcrl"]),
+    qc_specific_id="arc",
 )
