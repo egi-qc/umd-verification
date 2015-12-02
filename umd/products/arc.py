@@ -131,7 +131,7 @@ class ArcCEDeploy(base.Deploy):
         utils.install(["myproxy", "nordugrid-arc-client"])
 
 
-arc_ce = ArcCEDeploy()
+arc_ce = ArcCEDeploy(
     name="arc-ce",
     doc="ARC computing element server deployment.",
     metapkg=["nordugrid-arc-compute-element",
