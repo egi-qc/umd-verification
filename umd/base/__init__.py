@@ -145,18 +145,19 @@ class Deploy(tasks.Task):
 
             cert_path = "/etc/grid-security/hostcert.pem"
             key_path = "/etc/grid-security/hostkey.pem"
-            generate_cert = False
+            do_cert = False
             if os.path.isfile(cert_path) and os.path.isfile(key_path):
                 r = fabric_ops.prompt(("Certificate already exists under "
                                        "'/etc/grid-security'. Do you want to "
                                        "overwrite them? (y/N)"))
                 if r.lower() == "y":
-                    generate_cert = True
+                    do_cert = True
                     api.info("Overwriting already existant certificate")
                 else:
                     api.info("Using already existant certificate")
 
-            if generate_cert:
+            cert_for_subject = None
+            if do_cert:
                 hostcert = config.CFG.get("hostcert", None)
                 hostkey = config.CFG.get("hostkey", None)
                 if hostkey and hostcert:
@@ -164,6 +165,7 @@ class Deploy(tasks.Task):
                     utils.runcmd("cp %s %s" % (hostkey, key_path))
                     utils.runcmd("chmod 600 %s" % key_path)
                     utils.runcmd("cp %s %s" % (hostcert, cert_path))
+                    cert_for_subject = hostcert
                 else:
                     api.info("Generating own certificates")
                     config.CFG["ca"] = butils.OwnCA(
@@ -176,6 +178,12 @@ class Deploy(tasks.Task):
                         hash="2048",
                         key_prv=key_path,
                         key_pub=cert_path)
+            else:
+                cert_for_subject = cert_path
+
+            if cert_for_subject:
+                subject = butils.get_subject(cert_for_subject)
+                config.CFG["cert"] = butils.OwnCACert(subject)
 
         # Workflow
         utils.remove_logs()

@@ -45,6 +45,11 @@ def get_qc_envvars():
                  for k, v in config.CFG.items() if k.startswith("qcenv")])
 
 
+def get_subject(hostcert):
+    return utils.runcmd(("openssl x509 -in %s -noout "
+                         "-subject" % hostcert)).split()[1]
+
+
 class OwnCACert(object):
     """Host certificate class."""
     def __init__(self, subject):
