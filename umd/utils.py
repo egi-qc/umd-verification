@@ -68,11 +68,13 @@ def filelog(f):
 
 
 @filelog
-def runcmd(cmd):
+def runcmd(cmd, stderr_to_stdout=False):
     """Runs a generic command.
 
     :cmd: command to execute
     """
+    if stderr_to_stdout:
+        cmd = ' '.join([cmd, "2>&1"])
     qc_envvars = config.CFG.get("qc_envvars", {})
     env_d = dict(qc_envvars.items()
                  + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")])

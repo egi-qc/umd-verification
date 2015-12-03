@@ -83,7 +83,9 @@ class Validate(object):
                          % f)
             else:
                 self._handle_user(user, logfile)
-                r = utils.runcmd(cmd, log_to_file=logfile)
+                r = utils.runcmd(cmd,
+                                 stderr_to_stdout=True,
+                                 log_to_file=logfile)
                 if r.failed:
                     failed_checks.append(cmd)
                 else:

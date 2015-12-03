@@ -145,15 +145,15 @@ class Deploy(tasks.Task):
 
             cert_path = "/etc/grid-security/hostcert.pem"
             key_path = "/etc/grid-security/hostkey.pem"
-            do_cert = False
+            do_cert = True
             if os.path.isfile(cert_path) and os.path.isfile(key_path):
                 r = fabric_ops.prompt(("Certificate already exists under "
                                        "'/etc/grid-security'. Do you want to "
                                        "overwrite them? (y/N)"))
                 if r.lower() == "y":
-                    do_cert = True
                     api.info("Overwriting already existant certificate")
                 else:
+                    do_cert = False
                     api.info("Using already existant certificate")
 
             cert_for_subject = None
