@@ -62,7 +62,7 @@ class PuppetConfig(BaseConfig):
             shutil.copy("/etc/puppet/hiera.yaml", "/etc/hiera.yaml")
 
     def _module_install(self, mod):
-        if os.path.splitext(mod)[1]:
+        if mod.startswith("http"):
             dest = os.path.join("/tmp", os.path.basename(mod))
             r = utils.runcmd("wget %s -O %s" % (mod, dest))
             if r.failed:

@@ -125,6 +125,17 @@ arc:
           description: "Check job submission."
           user: "umd"
 
+dpm:
+    qc_func_1:
+        - test: "bin/myproxy/client-test.sh"
+          description: "Retrieve myproxy for ops.vo.ibergrid.eu VO."
+          user: "umd"
+          args: "retrieve"
+        - test: "bin/srm/client-test.sh"
+          description: "lcg-util client check for DPM."
+          user: "umd"
+          args: "localhost lcg-util"
+
 gram5:
     qc_func_1:
         - test: "bin/gram5/jobs-test.sh"

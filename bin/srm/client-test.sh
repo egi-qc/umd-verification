@@ -6,13 +6,18 @@
 ##      #2 Client to be tested.
 ##          - Valid values: lcg-util, dcache-client, gfal2-python, gfal2-util
 
+#export LCG_GFAL_INFOSYS=topbdii.core.ibergrid.eu:2170
+: ${LCG_GFAL_INFOSYS:=topbdii.core.ibergrid.eu:2170}
+export LCG_GFAL_INFOSYS
+
+: ${SRM_PORT:=8444}
 
 function get_vo_path {
     # Arguments
     #   #1 SRM hostname
     #   #2 VO name
-
-    VO_PATH=`ldapsearch -LLL -x -h topbdii.core.ibergrid.eu -p 2170 -b o=grid  "(|(&(GlueChunkKey=GlueSEUniqueID=$1)(|(GlueSAAccessControlBaseRule=$2)(GlueSAAccessControlBaseRule=VO:$2)))(&(GlueChunkKey=GlueSEUniqueID=$1)(|(GlueVOInfoAccessControlBaseRule=$2)(GlueVOInfoAccessControlBaseRule=VO:$2))) (&(GlueServiceUniqueID=*://%s*)(GlueServiceVersion=2.*)(GlueServiceType=srm*)))" GlueVOInfoPath | grep GlueVOInfoPath`
+    #VO_PATH=`ldapsearch -LLL -x -h topbdii.core.ibergrid.eu -p 2170 -b o=grid  "(|(&(GlueChunkKey=GlueSEUniqueID=$1)(|(GlueSAAccessControlBaseRule=$2)(GlueSAAccessControlBaseRule=VO:$2)))(&(GlueChunkKey=GlueSEUniqueID=$1)(|(GlueVOInfoAccessControlBaseRule=$2)(GlueVOInfoAccessControlBaseRule=VO:$2))) (&(GlueServiceUniqueID=*://%s*)(GlueServiceVersion=2.*)(GlueServiceType=srm*)))" GlueVOInfoPath | grep GlueVOInfoPath`
+    VO_PATH=`ldapsearch -LLL -x -h $LCG_GFAL_INFOSYS -p 2170 -b o=grid  "(|(&(GlueChunkKey=GlueSEUniqueID=$1)(|(GlueSAAccessControlBaseRule=$2)(GlueSAAccessControlBaseRule=VO:$2)))(&(GlueChunkKey=GlueSEUniqueID=$1)(|(GlueVOInfoAccessControlBaseRule=$2)(GlueVOInfoAccessControlBaseRule=VO:$2))) (&(GlueServiceUniqueID=*://%s*)(GlueServiceVersion=2.*)(GlueServiceType=srm*)))" GlueVOInfoPath | grep GlueVOInfoPath`
     VO_PATH=${VO_PATH#*: }
     echo $VO_PATH
 }
@@ -26,7 +31,7 @@ case $1 in
     localhost)
         SRM_HOST=`hostname -f`
         VO_PATH=$(get_vo_path $SRM_HOST $VO)
-	    SRM_ENDPOINT="srm://${SRM_HOST}:8444/srm/managerv2?SFN=/ops.vo.ibergrid.eu"
+	    SRM_ENDPOINT="srm://${SRM_HOST}:${SRM_PORT}/srm/managerv2?SFN=/${VO_PATH}"
 	    EXTRA_OPTS="-b"
         ;;
     storm) 
@@ -65,8 +70,6 @@ $RANDOM
 EOF
 
 REMOTE_FILE=test_`date +%s`
-
-export LCG_GFAL_INFOSYS=topbdii.core.ibergrid.eu:2170
 
 set -x
 set -e

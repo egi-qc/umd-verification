@@ -28,7 +28,7 @@ class Deploy(tasks.Task):
                  qc_step=[],
                  exceptions={},
                  dryrun=False,
-                 info_port=None):
+                 info_port="2170"):
         """Arguments:
 
                 name: Fabric command name.
