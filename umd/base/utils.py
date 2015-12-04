@@ -1,6 +1,7 @@
 import functools
 import os
 import os.path
+import shutil
 
 import fabric
 from fabric import colors
@@ -9,6 +10,24 @@ from umd import api
 from umd import config
 from umd import system
 from umd import utils
+
+openssl_cnf = """
+[ ca ]
+default_ca = myca
+
+[ myca ]
+dir = ./
+new_certs_dir = $dir
+unique_subject = no
+certificate = $dir/ca.pem
+database = $dir/index.txt
+private_key = $dir/ca.key
+crlnumber = $dir/crlnumber
+serial = $dir/certserial
+default_days = 730
+default_md = sha1
+default_crl_days = 730
+"""
 
 
 def qcstep_request(f):
@@ -85,12 +104,22 @@ class OwnCA(object):
                           "'%s'" % subject))
             if trusted_ca_dir:
                 hash = utils.runcmd("openssl x509 -noout -hash -in ca.pem")
-                utils.runcmd("cp ca.pem %s"
-                             % os.path.join(trusted_ca_dir,
-                                            '.'.join([hash, '0'])))
-                with open(os.path.join(
+                # CA cert (.0)
+                ca_dest = os.path.join(trusted_ca_dir, '.'.join([hash, '0']))
+                shutil.copy("ca.pem", ca_dest)
+                # CRL cert (.r0)
+                with open("openssl.cnf", 'w') as f:
+                    f.write(openssl_cnf)
+                    f.flush()
+                utils.runcmd(("openssl ca -config openssl.cnf -gencrl "
+                              "-keyfile ca.key -cert ca.pem -out crl.pem"))
+                crl_dest = os.path.join(trusted_ca_dir, '.'.join([hash, 'r0']))
+                shutil.copy("crl.pem", crl_dest)
+                # signing_policy
+                signing_policy_dest = os.path.join(
                     trusted_ca_dir,
-                    '.'.join([hash, "signing_policy"])), 'w') as f:
+                    '.'.join([hash, "signing_policy"]))
+                with open(signing_policy_dest, 'w') as f:
                     f.writelines([
                         "access_id_CA\tX509\t'%s'\n" % subject,
                         "pos_rights\tglobus\tCA:sign\n",
