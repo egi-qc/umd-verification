@@ -1,7 +1,6 @@
 import functools
 import os
 import os.path
-import shutil
 
 import fabric
 from fabric import colors
@@ -106,15 +105,18 @@ class OwnCA(object):
                 hash = utils.runcmd("openssl x509 -noout -hash -in ca.pem")
                 # CA cert (.0)
                 ca_dest = os.path.join(trusted_ca_dir, '.'.join([hash, '0']))
-                shutil.copy("ca.pem", ca_dest)
+                utils.runcmd("cp ca.pem %s" % ca_dest)
                 # CRL cert (.r0)
-                with open("openssl.cnf", 'w') as f:
+                # FIXME(orviz) check why absolute path is needed here
+                with open(os.path.join(self.workspace,
+                                       "openssl.cnf"), 'w') as f:
                     f.write(openssl_cnf)
-                    f.flush()
+                utils.runcmd("echo \"01\" > crlnumber")
+                utils.runcmd("touch index.txt")
                 utils.runcmd(("openssl ca -config openssl.cnf -gencrl "
                               "-keyfile ca.key -cert ca.pem -out crl.pem"))
                 crl_dest = os.path.join(trusted_ca_dir, '.'.join([hash, 'r0']))
-                shutil.copy("crl.pem", crl_dest)
+                utils.runcmd("cp crl.pem %s" % crl_dest)
                 # signing_policy
                 signing_policy_dest = os.path.join(
                     trusted_ca_dir,
