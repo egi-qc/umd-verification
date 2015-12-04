@@ -1,9 +1,8 @@
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
 
-
-dpm = base.Deploy(
-    name="dpm",
+dpm_1_8_10 = base.Deploy(
+    name="dpm-1_8_10",
     doc="DPM deployment with Puppet.",
     metapkg=["emi-dpm_mysql", "emi-dpm_disk"],
     has_infomodel=True,
@@ -22,5 +21,5 @@ dpm = base.Deploy(
             "CERNOps-bdii",
             "CERNOps-fetchcrl",
             "erwbgy-limits "]),
-    # qc_specific_id="dpm"
+    qc_specific_id="dpm"
 )
