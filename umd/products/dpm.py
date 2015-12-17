@@ -3,7 +3,7 @@ from umd.base.configure.puppet import PuppetConfig
 
 dpm_1_8_10 = base.Deploy(
     name="dpm-1_8_10",
-    doc="DPM deployment with Puppet.",
+    doc="DPM 1.8.10 deployment with Puppet.",
     metapkg=["emi-dpm_mysql", "emi-dpm_disk"],
     has_infomodel=True,
     need_cert=True,
