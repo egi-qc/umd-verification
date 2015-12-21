@@ -261,7 +261,7 @@ class Apt(object):
 
         :repolist: list of repository names.
         """
-        install("software-properties-common")
+        self.run("install", False, pkgs=["software-properties-common"])
         available_repos = self.get_repos()
 
         for repo in repolist:
