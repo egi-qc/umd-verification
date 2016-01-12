@@ -192,6 +192,13 @@ class Yum(object):
             else:
                 api.info("Repository key added: %s" % key)
 
+    def add_repo(self, repo):
+        r = runcmd("wget %s -O %s" % (repo,
+                                      os.path.join(
+                                          self.path,
+                                          os.path.basename(repo))))
+        return r
+
     def handle_repo_ssl(self):
         """Removes SSL verification for https repositories."""
         r = runcmd("sed -i 's/^sslverify.*/sslverify=False/g' %s"
@@ -233,11 +240,9 @@ class Apt(object):
         self.pkg_extension = ".deb"
 
     def run(self, action, dryrun, pkgs=None):
-        if pkgs:
-            if os.path.exists(pkgs[0]):
-                return "dpkg -i %s" % " ".join(pkgs)
-
+        cmd = None
         opts = ''
+
         if dryrun:
             opts = "--dry-run"
 
@@ -245,11 +250,16 @@ class Apt(object):
             action = "update"
 
         if pkgs:
-            return runcmd("apt-get -y %s %s %s" % (opts,
-                                                   action,
-                                                   " ".join(pkgs)))
+            if os.path.exists(pkgs[0]):
+                cmd = "dpkg -i %s" % " ".join(pkgs)
+            else:
+                cmd = "apt-get -y %s %s %s" % (opts,
+                                               action,
+                                               " ".join(pkgs))
         else:
-            return runcmd("apt-get -y %s %s" % (opts, action))
+            cmd = "apt-get -y %s %s" % (opts, action)
+
+        return runcmd(cmd)
 
     def get_repos(self):
         """Gets the list of enabled repositories."""
@@ -267,19 +277,9 @@ class Apt(object):
         for repo in repolist:
             for available_repo in available_repos:
                 if available_repo.find(repo) != -1:
-                    runcmd("apt-add-repository -r '%s'" % available_repo)
+                    runcmd("apt-add-repository -y -r '%s'" % available_repo)
                     api.info("Existing repository removed: %s"
                              % available_repo)
-
-    def get_pkglist(self, r):
-        d = {}
-        for line in r.split('\n'):
-            m = re.search(("^Setting up ([a-zA-Z-]+) "
-                           "\((.+)\)"), line)
-            if m:
-                pkg, version = m.groups()
-                d[pkg] = '-'.join([pkg, version])
-        return d
 
     def add_repo_key(self, keylist):
         for key in keylist:
@@ -289,10 +289,40 @@ class Apt(object):
             else:
                 api.info("Repository key added: %s" % key)
 
-    def handle_repo_ssl(self):
-        raise NotImplementedError
+    def add_repo(self, repo):
+        self.run("install", False, pkgs=["software-properties-common"])
+        return runcmd("apt-add-repository -y '%s'" % repo)
 
-    def get_pkg_version(self):
+    def get_pkglist(self, r):
+        d = {}
+        for line in r.split('\n'):
+            for p in ["^Setting up ([a-zA-Z-]+) \((.+)\)",
+                      "([a-zA-Z0-9-]+) is already the newest version"]:
+                m = re.search(p, line)
+                if m:
+                    try:
+                        pkg, version = m.groups()
+                    except ValueError:  # no version available
+                        pkg = m.groups()[0]
+                        version = self.get_pkg_version(pkg)[pkg]
+                    d[pkg] = '-'.join([pkg, version])
+                    break
+        return d
+
+    def get_pkg_version(self, debfile, check_installed=True):
+        d = {}
+
+        if check_installed:
+            cmd = "dpkg-query"
+        else:
+            cmd = "dpkg-deb"
+        r = runcmd("%s -W %s" % (cmd, debfile))
+        if not r.failed:
+            name, version = r.split()
+            d[name] = version
+        return d
+
+    def handle_repo_ssl(self):
         raise NotImplementedError
 
 
@@ -327,15 +357,12 @@ class PkgTool(object):
     def enable_repo(self, repolist):
         if not os.path.exists(self.client.path):
             os.makedirs(self.client.path)
-        l = []
         for repo in to_list(repolist):
-            r = runcmd("wget %s -O %s" % (repo,
-                                          os.path.join(
-                                              self.client.path,
-                                              os.path.basename(repo))))
+            r = self.client.add_repo(repo)
             if r.failed:
-                l.append(repo)
-        return l
+                api.fail("Could not add repo '%s'" % repo)
+            else:
+                api.info("Repository '%s' added" % repo)
 
     def remove_repo(self, repolist):
         return self.client.remove_repo(to_list(repolist))
@@ -496,6 +523,11 @@ def clone_repo(repotype, repourl):
         dirname = None
         os.rmdir(dirname)
     return dirname
+
+
+def enable_repo(repo):
+    pkgtool = PkgTool()
+    return pkgtool.enable_repo(repo)
 
 
 def load_from_hiera(fname):

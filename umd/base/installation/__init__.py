@@ -178,6 +178,8 @@ class Install(object):
         if is_ok:
             if self.metapkg:
                 for pkg in self.metapkg:
+                    # APT can include specific versioning with '='
+                    pkg = pkg.split('=')[0]
                     try:
                         api.info("Metapackage '%s' installed version: %s."
                                  % (pkg, d[pkg]))

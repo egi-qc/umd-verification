@@ -1,19 +1,20 @@
 from fabric import state
 
-from umd.products.arc import *      # NOQA
-from umd.products.argus import *    # NOQA
-from umd.products.bdii import *     # NOQA
-from umd.products.ca import *       # NOQA
-from umd.products.creamce import *  # NOQA
-from umd.products.dpm import *      # NOQA
-from umd.products.fts import *      # NOQA
-from umd.products.glexec import *   # NOQA
-from umd.products.globus import *   # NOQA
-from umd.products.gram5 import *    # NOQA
-from umd.products.myproxy import *  # NOQA
-from umd.products.rc import *       # NOQA
-from umd.products.storm import *    # NOQA
-from umd.products.ui import *       # NOQA
+from umd.products.arc import *              # NOQA
+from umd.products.argus import *            # NOQA
+from umd.products.bdii import *             # NOQA
+from umd.products.ca import *               # NOQA
+from umd.products.creamce import *          # NOQA
+from umd.products.dpm import *              # NOQA
+from umd.products.fts import *              # NOQA
+from umd.products.glexec import *           # NOQA
+from umd.products.globus import *           # NOQA
+from umd.products.gram5 import *            # NOQA
+from umd.products.keystone_voms import *    # NOQA
+from umd.products.myproxy import *          # NOQA
+from umd.products.rc import *               # NOQA
+from umd.products.storm import *            # NOQA
+from umd.products.ui import *               # NOQA
 
 
 state.output.status = False
