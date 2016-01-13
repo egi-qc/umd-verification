@@ -7,6 +7,7 @@ import tempfile
 
 from fabric import api as fabric_api
 from fabric import colors
+import mock
 import yaml
 
 from umd import api
@@ -192,11 +193,29 @@ class Yum(object):
             else:
                 api.info("Repository key added: %s" % key)
 
-    def add_repo(self, repo):
-        r = runcmd("wget %s -O %s" % (repo,
-                                      os.path.join(
-                                          self.path,
-                                          os.path.basename(repo))))
+    def add_repo(self, repo, **kwargs):
+        if "name" in kwargs.keys():
+            name = kwargs["name"]
+            lrepo = ["[%s]" % name.replace(' ', '_'),
+                     "name=%s" % name,
+                     "baseurl=%s/$basearch/base" % repo,
+                     "protect=1",
+                     "enabled=1",
+                     "priority=1",
+                     "gpgcheck=0"]
+            fname = os.path.join(self.path,
+                                 name.replace(' ', '') + self.extension)
+            with open(fname, 'w') as f:
+                for line in lrepo:
+                    f.write(line + '\n')
+            r = mock.MagicMock()
+            r.failed = False
+
+        else:
+            r = runcmd("wget %s -O %s" % (repo,
+                                          os.path.join(
+                                              self.path,
+                                              os.path.basename(repo))))
         return r
 
     def handle_repo_ssl(self):
@@ -354,11 +373,11 @@ class PkgTool(object):
     def add_repo_key(self, key):
         return self.client.add_repo_key(key)
 
-    def enable_repo(self, repolist):
+    def enable_repo(self, repolist, **kwargs):
         if not os.path.exists(self.client.path):
             os.makedirs(self.client.path)
         for repo in to_list(repolist):
-            r = self.client.add_repo(repo)
+            r = self.client.add_repo(repo, **kwargs)
             if r.failed:
                 api.fail("Could not add repo '%s'" % repo)
             else:
@@ -525,9 +544,9 @@ def clone_repo(repotype, repourl):
     return dirname
 
 
-def enable_repo(repo):
+def enable_repo(repo, **kwargs):
     pkgtool = PkgTool()
-    return pkgtool.enable_repo(repo)
+    return pkgtool.enable_repo(repo, **kwargs)
 
 
 def load_from_hiera(fname):
