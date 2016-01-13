@@ -135,7 +135,7 @@ arc_ce = ArcCEDeploy(
     name="arc-ce",
     doc="ARC computing element server deployment.",
     metapkg=["nordugrid-arc-compute-element",
-             "emi-torque-server",
+             "torque-server",
              "torque-mom"],
     need_cert=True,
     has_infomodel=True,

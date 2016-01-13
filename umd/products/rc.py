@@ -1,4 +1,3 @@
-import itertools
 import os.path
 
 from umd import api
@@ -6,6 +5,7 @@ from umd import base
 from umd import config
 # from umd import products
 from umd import system
+from umd import utils
 
 
 class RCDeploy(base.Deploy):
@@ -13,14 +13,16 @@ class RCDeploy(base.Deploy):
         l = []
 
         # FIXME The list of products should be gathered programatically
-        for pkg in itertools.chain(
-            # products.storm.sl6.metapkg,
-            # products.ui.ui_gfal.metapkg,
-            # products.globus.gridftp.metapkg,
-            # products.gram5.gram5.metapkg,
-            ["dcache"],
-        ):
-            if isinstance(pkg, list):
+        for pkg in [
+            # products.bdii.bdii_site_puppet,
+            # products.bdii.bdii_top_puppet,
+            # products.fts.fts,
+            # products.arc.arc_ce,
+            ["dcache", "umd-release"],
+        ]:
+            if isinstance(pkg, base.Deploy):
+                l.extend(pkg.metapkg)
+            elif isinstance(pkg, list):
                 l.extend(pkg)
             else:
                 l.append(pkg)
@@ -31,16 +33,28 @@ class RCDeploy(base.Deploy):
 
     def pre_install(self):
         repo_id = {
+            "centos7": "centos7",
             "redhat6": "sl6",
             "redhat5": "sl5",
         }
+        # Manually add the RC repository
         config.CFG["repository_url"] = [os.path.join(
             config.CFG["repository_url"][0],
-            "repofiles/%s/" % repo_id[system.distro_version])]
-        api.info("Changing repository URL to %s"
-                 % config.CFG["repository_url"][0])
-
+            repo_id[system.distro_version])]
+        utils.enable_repo(config.CFG["repository_url"], name="UMD base RC")
+        # Add IGTF repository as well (some products have dependencies on it)
+        utils.enable_repo(config.CFG["igtf_repo"])
+        # Get all the (meta)packages to be installed
         config.CFG["metapkg"] = self._get_metapkg_list()
+
+    def _install(self, **kwargs):
+        kwargs.update({
+            "ignore_repos": True,
+            "ignore_verification_repos": True})
+
+        self.pre_install()
+        base.installation.Install().run(**kwargs)
+        self.post_install()
 
 
 rc = RCDeploy(
