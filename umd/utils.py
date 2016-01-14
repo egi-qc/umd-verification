@@ -154,6 +154,17 @@ class Yum(object):
 
         return d
 
+    def get_repo_from_pkg(self, pkglist):
+        d = {}
+        r = runcmd("yum -q list %s" % ' '.join(pkglist))
+        for line in r.split('\n'):
+            fields = line.split()
+            if len(fields) == 3:
+                pkg, version, repository = fields
+                pkg = pkg.split('.')[0]
+                d[pkg] = repository
+        return d
+
     def get_repos(self):
         l = []
         is_repo = False
@@ -285,6 +296,11 @@ class Apt(object):
         return runcmd(("grep -h ^deb /etc/apt/sources.list "
                        "/etc/apt/sources.list.d/*")).split('\n')
 
+    def get_repo_from_pkg(self, pkglist):
+        # NOTE(orviz) There is no easy way to know from which repository
+        # a package was installed
+        return {}
+
     def remove_repo(self, repolist):
         """Remove all the appearances of a list of repositories.
 
@@ -366,6 +382,10 @@ class PkgTool(object):
 
     def get_pkglist(self, r):
         return self.client.get_pkglist(r)
+
+    def get_repo_from_pkg(self, pkglist):
+        """Returns the repository from where the package was installed."""
+        return self.client.get_repo_from_pkg(to_list(pkglist))
 
     def get_repos(self):
         return self.client.get_repos()

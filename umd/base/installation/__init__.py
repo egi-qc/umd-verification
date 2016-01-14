@@ -177,12 +177,16 @@ class Install(object):
 
         if is_ok:
             if self.metapkg:
+                d_repos_from_pkg = self.pkgtool.get_repo_from_pkg(d.keys())
                 for pkg in self.metapkg:
                     # APT can include specific versioning with '='
                     pkg = pkg.split('=')[0]
                     try:
-                        api.info("Metapackage '%s' installed version: %s."
-                                 % (pkg, d[pkg]))
+                        if pkg in d_repos_from_pkg.keys():
+                            api.info(("Metapackage '%s' installed version: %s"
+                                      " - %s" % (pkg,
+                                                 d[pkg],
+                                                 d_repos_from_pkg[pkg])))
                     except KeyError:
                         api.fail("Package '%s' could not be installed." % pkg)
                         is_ok = False
@@ -217,7 +221,6 @@ class Install(object):
         r = self.pkgtool.install(self.metapkg, log_to_file=_logfile)
         if r.failed:
             r.msgerror = "Metapackage '%s' installation failed." % self.metapkg
-
         return r, self.pkgtool.get_pkglist(r)
 
     @butils.qcstep("QC_UPGRADE_1", "Upgrade")
