@@ -163,7 +163,7 @@ class Install(object):
     def _handle_output_msg(self, r, d):
         is_ok = True
         # r.stderr
-        if r.failed:
+        if r.failed or not r.succeeded:
             # NOTE (should be within YUM class) YUM's downloadonly
             # plugin returns 1 on success
             if r.stderr.find("--downloadonly specified") != -1:
@@ -218,10 +218,7 @@ class Install(object):
 
         # 3) Install verification version
         api.info("Using repositories: %s" % self.pkgtool.get_repos())
-        r = self.pkgtool.install(self.metapkg, log_to_file=_logfile)
-        if r.failed:
-            r.msgerror = "Metapackage '%s' installation failed." % self.metapkg
-        return r, self.pkgtool.get_pkglist(r)
+        return self.pkgtool.install(self.metapkg, log_to_file=_logfile)
 
     @butils.qcstep("QC_UPGRADE_1", "Upgrade")
     def qc_upgrade_1(self):
@@ -252,11 +249,7 @@ class Install(object):
 
         # 4) Update
         api.info("Using repositories: %s" % self.pkgtool.get_repos())
-        r = self.pkgtool.update(log_to_file=_logfile)
-        if r.failed:
-            r.msgerror = "Metapackage '%s' update failed." % self.metapkg
-
-        return r, self.pkgtool.get_pkglist(r)
+        return self.pkgtool.update(log_to_file=_logfile)
 
     def run(self, **kwargs):
         """Runs UMD installation."""
@@ -276,14 +269,21 @@ class Install(object):
         # Handle installation type
         installation_type = config.CFG["installation_type"]
         if installation_type == "update":
-            r, d = self.qc_upgrade_1()
+            r = self.qc_upgrade_1()
         elif installation_type == "install":
-            r, d = self.qc_dist_1()
+            r = self.qc_dist_1()
         else:
             raise exception.InstallException(("Installation type '%s' "
                                               "not implemented."))
-        # Show package version
-        self._show_pkg_version(d)
+        # Manage output
+        d = {}
+        if r.failed or not r.succeeded:
+            r.msgerror = "Metapackage '%s' installation failed." % self.metapkg
+        else:
+            # Get list of (name, version) installed packages
+            d = self.pkgtool.get_pkglist(r)
 
-        # Handle output logs
+            # Show package version
+            self._show_pkg_version(d)
+
         self._handle_output_msg(r, d)
