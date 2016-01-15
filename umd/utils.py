@@ -157,12 +157,15 @@ class Yum(object):
     def get_repo_from_pkg(self, pkglist):
         d = {}
         r = runcmd("yum -q list %s" % ' '.join(pkglist))
-        for line in r.split('\n'):
-            fields = line.split()
-            if len(fields) == 3:
-                pkg, version, repository = fields
-                pkg = pkg.split('.')[0]
-                d[pkg] = repository
+        if not r.failed:
+            for line in r.split('\n'):
+                fields = line.split()
+                if len(fields) == 3:
+                    pkg, version, repository = fields
+                    pkg = pkg.split('.')[0]
+                    d[pkg] = repository
+        else:
+            api.fail("Could not get package's repository information")
         return d
 
     def get_repos(self):
