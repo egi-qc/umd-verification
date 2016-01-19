@@ -6,6 +6,7 @@ from umd.products.bdii import *             # NOQA
 from umd.products.ca import *               # NOQA
 from umd.products.creamce import *          # NOQA
 from umd.products.dpm import *              # NOQA
+from umd.products.frontier_squid import *   # NOQA
 from umd.products.fts import *              # NOQA
 from umd.products.glexec import *           # NOQA
 from umd.products.globus import *           # NOQA

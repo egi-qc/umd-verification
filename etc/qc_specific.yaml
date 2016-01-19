@@ -150,3 +150,9 @@ gram5:
           description: "gram5 client tests (pbs-seg)"
           user: "umd"
           args: "jobmanager-pbs-seg"
+
+frontier-squid:
+    qc_func_1: 
+        - test: "bin/frontier-squid/fnget.sh"
+          description: "Frontier squid cache test."
+          user: "umd"
