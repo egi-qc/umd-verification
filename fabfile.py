@@ -1,21 +1,24 @@
 from fabric import state
 
-from umd.products.arc import *              # NOQA
-from umd.products.argus import *            # NOQA
-from umd.products.bdii import *             # NOQA
-from umd.products.ca import *               # NOQA
-from umd.products.creamce import *          # NOQA
-from umd.products.dpm import *              # NOQA
-from umd.products.frontier_squid import *   # NOQA
-from umd.products.fts import *              # NOQA
-from umd.products.glexec import *           # NOQA
-from umd.products.globus import *           # NOQA
-from umd.products.gram5 import *            # NOQA
-from umd.products.keystone_voms import *    # NOQA
-from umd.products.myproxy import *          # NOQA
-from umd.products.rc import *               # NOQA
-from umd.products.storm import *            # NOQA
-from umd.products.ui import *               # NOQA
+from umd.products.arc import arc_ce                         # NOQA
+from umd.products.argus import argus, ees                   # NOQA
+from umd.products.bdii import bdii_site_puppet              # NOQA
+from umd.products.bdii import bdii_site_yaim                # NOQA
+from umd.products.bdii import bdii_top_puppet               # NOQA
+from umd.products.ca import ca, crl                         # NOQA
+from umd.products.creamce import gridenginerized            # NOQA
+from umd.products.creamce import standalone                 # NOQA
+from umd.products.dpm import dpm_1_8_10                     # NOQA
+from umd.products.frontier_squid import frontier_squid      # NOQA
+from umd.products.fts import fts                            # NOQA
+from umd.products.glexec import glexec_wn                   # NOQA
+from umd.products.globus import gridftp                     # NOQA
+from umd.products.gram5 import gram5                        # NOQA
+from umd.products.keystone_voms import keystone_voms_juno   # NOQA
+from umd.products.myproxy import myproxy                    # NOQA
+from umd.products.rc import rc                              # NOQA
+from umd.products.storm import sl5, sl6                     # NOQA
+from umd.products.ui import ui, ui_myproxy, ui_gfal         # NOQA
 
 
 state.output.status = False
