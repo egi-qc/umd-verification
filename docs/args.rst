@@ -27,6 +27,8 @@ runtime arguments are:
 
 :repository_url: Repository path with the verification content.
 
+                - In YUM-based systems the URL MUST point to where ``repodata`` directory is located.
+
                 - Multiple values are allowed by prefixing with `repository_url`.
 
                   .. code:: bash
