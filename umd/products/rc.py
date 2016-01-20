@@ -1,10 +1,7 @@
-import os.path
-
 from umd import api
 from umd import base
 from umd import config
-# from umd import products
-from umd import system
+from umd import products
 from umd import utils
 
 
@@ -14,10 +11,11 @@ class RCDeploy(base.Deploy):
 
         # FIXME The list of products should be gathered programatically
         for pkg in [
-            # products.bdii.bdii_site_puppet,
-            # products.bdii.bdii_top_puppet,
-            # products.fts.fts,
-            # products.arc.arc_ce,
+            products.bdii.bdii_site_puppet,
+            products.bdii.bdii_top_puppet,
+            products.fts.fts,
+            products.arc.arc_ce,
+            products.dpm.dpm_1_8_10,
             ["dcache", "umd-release"],
         ]:
             if isinstance(pkg, base.Deploy):
