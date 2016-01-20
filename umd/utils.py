@@ -212,7 +212,7 @@ class Yum(object):
             name = kwargs["name"]
             lrepo = ["[%s]" % name.replace(' ', '_'),
                      "name=%s" % name,
-                     "baseurl=%s/$basearch/base" % repo,
+                     "baseurl=%s" % repo,
                      "protect=1",
                      "enabled=1",
                      "priority=1",
