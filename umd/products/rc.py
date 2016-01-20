@@ -32,15 +32,6 @@ class RCDeploy(base.Deploy):
         return l
 
     def pre_install(self):
-        repo_id = {
-            "centos7": "centos7",
-            "redhat6": "sl6",
-            "redhat5": "sl5",
-        }
-        # Manually add the RC repository
-        config.CFG["repository_url"] = [os.path.join(
-            config.CFG["repository_url"][0],
-            repo_id[system.distro_version])]
         utils.enable_repo(config.CFG["repository_url"], name="UMD base RC")
         # Add IGTF repository as well (some products have dependencies on it)
         utils.enable_repo(config.CFG["igtf_repo"])
