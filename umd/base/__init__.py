@@ -123,11 +123,10 @@ class Deploy(tasks.Task):
         config.CFG.update(kwargs)
 
         # Show configuration summary
-        utils.show_exec_banner()
+        utils.show_exec_banner_ascii()
 
         # Validate configuration
         config.CFG.validate()
-        print(u'\u2500' * 73)
 
         # Configuration tool
         if config.CFG["cfgtool"]:
