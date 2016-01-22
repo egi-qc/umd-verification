@@ -449,56 +449,96 @@ class PkgTool(object):
         return self.client.get_pkg_version(pkgfile, check_installed)
 
 
+def show_exec_banner_ascii():
+    """Displays execution banner (ascii)."""
+    cfg = config.CFG.copy()
+    basic_repo = ["umd_release", "igtf_repo"]
+    if system.distname in ["redhat", "centos"]:
+        basic_repo.append("epel_release")
+
+    print(u'\n')
+    print(colors.green(u'UMD verification tool').center(120))
+    print(u'=====================\n'.center(111))
+    print((u'%s: %s' % (colors.white(u'Quality criteria'),
+                        colors.blue(u'http://egi-qc.github.io'))).center(120))
+    print((u'%s: %s' % (
+        colors.white(u'Codebase'),
+        colors.blue(("https://github.com/egi-qc/"
+                     "umd-verification")))).center(120))
+    print(u'')
+    print(u'\t%s' % colors.white(u'Path locations'))
+    print(u'\t %s' % colors.white('|'))
+    for k in ["log_path", "yaim_path", "puppet_path"]:
+        v = cfg.pop(k)
+        leftjust = len(max(basic_repo, key=len)) + 5
+        print(u'\t %s %s %s' % (colors.white('|'), k.ljust(leftjust), v))
+    print(u'\t')
+    print(u'\t%s' % colors.white(u'Production repositories'))
+    print(u'\t %s' % colors.white('|'))
+    for repo in basic_repo:
+        v = cfg.pop(repo)
+        leftjust = len(max(basic_repo, key=len)) + 5
+        print(u'\t %s %s %s' % (colors.white('|'),
+                                repo.ljust(leftjust),
+                                colors.blue(v)))
+    print(u'\n\n')
+
+    api.info("Using the following verification repositories")
+    repos = to_list(cfg.pop("repository_url"))
+    for repo in repos:
+        print(u'\t+ %s' % colors.blue(repo))
+
+
 def show_exec_banner():
-        """Displays execution banner."""
-        cfg = config.CFG.copy()
+    """Displays execution banner."""
+    cfg = config.CFG.copy()
 
-        print(u'\n\u250C %s ' % colors.green(" UMD verification app")
-              + u'\u2500' * 49 + u'\u2510')
-        print(u'\u2502' + u' ' * 72 + u'\u2502')
-        print(u'\u2502%s %s' % ("Quality criteria:".rjust(25),
-              colors.blue("http://egi-qc.github.io"))
-              + u' ' * 23 + u'\u2502')
-        print(u'\u2502%s %s' % ("Codebase:".rjust(25),
-              colors.blue("https://github.com/egi-qc/umd-verification"))
-              + u' ' * 4 + u'\u2502')
-        print(u'\u2502' + u' ' * 72 + u'\u2502')
-        print(u'\u2502' + u' ' * 7 + u'\u2500' * 65 + u'\u2518')
+    print(u'\n\u250C %s ' % colors.green(" UMD verification app")
+          + u'\u2500' * 49 + u'\u2510')
+    print(u'\u2502' + u' ' * 72 + u'\u2502')
+    print(u'\u2502%s %s' % ("Quality criteria:".rjust(25),
+          colors.blue("http://egi-qc.github.io"))
+          + u' ' * 23 + u'\u2502')
+    print(u'\u2502%s %s' % ("Codebase:".rjust(25),
+          colors.blue("https://github.com/egi-qc/umd-verification"))
+          + u' ' * 4 + u'\u2502')
+    print(u'\u2502' + u' ' * 72 + u'\u2502')
+    print(u'\u2502' + u' ' * 7 + u'\u2500' * 65 + u'\u2518')
 
-        print(u'\u2502' + u' ' * 72)
-        if "repository_url" in cfg.keys() and cfg["repository_url"]:
-            print(u'\u2502 Verification repositories used:')
-            repos = to_list(cfg.pop("repository_url"))
-            for repo in repos:
-                print(u'\u2502\t%s' % colors.blue(repo))
+    print(u'\u2502' + u' ' * 72)
+    if "repository_url" in cfg.keys() and cfg["repository_url"]:
+        print(u'\u2502 Verification repositories used:')
+        repos = to_list(cfg.pop("repository_url"))
+        for repo in repos:
+            print(u'\u2502\t%s' % colors.blue(repo))
 
+    print(u'\u2502')
+    print(u'\u2502 Repository basic configuration:')
+    basic_repo = ["umd_release", "igtf_repo"]
+    if system.distname in ["redhat", "centos"]:
+        basic_repo.append("epel_release")
+    for k in basic_repo:
+        v = cfg.pop(k)
+        leftjust = len(max(basic_repo, key=len)) + 5
+        print(u'\u2502\t%s %s' % (k.ljust(leftjust), colors.blue(v)))
+
+    print(u'\u2502')
+    print(u'\u2502 Path locations:')
+    for k in ["log_path", "yaim_path", "puppet_path"]:
+        v = cfg.pop(k)
+        leftjust = len(max(basic_repo, key=len)) + 5
+        print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
+
+    if cfg["qc_envvars"]:
         print(u'\u2502')
-        print(u'\u2502 Repository basic configuration:')
-        basic_repo = ["umd_release", "igtf_repo"]
-        if system.distname in ["redhat", "centos"]:
-            basic_repo.append("epel_release")
-        for k in basic_repo:
-            v = cfg.pop(k)
-            leftjust = len(max(basic_repo, key=len)) + 5
-            print(u'\u2502\t%s %s' % (k.ljust(leftjust), colors.blue(v)))
-
-        print(u'\u2502')
-        print(u'\u2502 Path locations:')
-        for k in ["log_path", "yaim_path", "puppet_path"]:
-            v = cfg.pop(k)
-            leftjust = len(max(basic_repo, key=len)) + 5
+        print(u'\u2502 Local environment variables passed:')
+        leftjust = len(max(cfg["qc_envvars"], key=len)) + 5
+        for k, v in cfg["qc_envvars"].items():
+            cfg.pop("qcenv_%s" % k)
             print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
 
-        if cfg["qc_envvars"]:
-            print(u'\u2502')
-            print(u'\u2502 Local environment variables passed:')
-            leftjust = len(max(cfg["qc_envvars"], key=len)) + 5
-            for k, v in cfg["qc_envvars"].items():
-                cfg.pop("qcenv_%s" % k)
-                print(u'\u2502\t%s %s' % (k.ljust(leftjust), v))
-
-        print(u'\u2502')
-        print(u'\u2514' + u'\u2500' * 72)
+    print(u'\u2502')
+    print(u'\u2514' + u'\u2500' * 72)
 
 
 def get_class_attrs(obj):
