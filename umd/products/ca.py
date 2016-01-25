@@ -39,7 +39,7 @@ class CADeploy(base.Deploy):
                 source = "/etc/apt/sources.list.d/egi-igtf.list"
                 utils.runcmd("echo '%s' > %s" % (repodeb, source))
             else:
-                utils.add_repo(repo)
+                utils.enable_repo(repo)
 
     def _install(self, **kwargs):
         # Part of the above workaround
