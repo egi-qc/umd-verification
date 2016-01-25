@@ -28,15 +28,10 @@ class CADeploy(base.Deploy):
         if system.distname in ["debian", "ubuntu"]:
             # Just one repository is expected
             repo = config.CFG["repository_url"][0]
-            ca_version = urlparse.urlparse(repo).path.split("cas/")[-1]
-            ca_version = ''.join(ca_version.replace('/', '.', 1).replace('/',
-                                                                         '-'))
-            repo = os.path.join(repo, '-'.join(["ca-policy-egi-core",
-                                               ca_version]))
-            repodeb = "deb %s egi-igtf core" % repo
 
             if system.distro_version == "debian6":
                 source = "/etc/apt/sources.list.d/egi-igtf.list"
+                repodeb = "deb %s egi-igtf core" % repo
                 utils.runcmd("echo '%s' > %s" % (repodeb, source))
             else:
                 utils.enable_repo(repo)
