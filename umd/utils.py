@@ -395,7 +395,7 @@ class PkgTool(object):
         return self.client.get_repos()
 
     def add_repo_key(self, key):
-        return self.client.add_repo_key(key)
+        return self.client.add_repo_key(to_list(key))
 
     def enable_repo(self, repolist, **kwargs):
         if not os.path.exists(self.client.path):
@@ -612,9 +612,11 @@ def enable_repo(repo, **kwargs):
     pkgtool = PkgTool()
     return pkgtool.enable_repo(repo, **kwargs)
 
+
 def add_repo_key(keyurl):
     pkgtool = PkgTool()
     return pkgtool.add_repo_key(keyurl)
+
 
 def load_from_hiera(fname):
     """Returns a dictionary with the content of fname.

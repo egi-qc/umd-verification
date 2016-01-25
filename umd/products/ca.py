@@ -1,6 +1,3 @@
-import os.path
-import urlparse
-
 from umd import api
 from umd import base
 from umd.base.installation import Install
