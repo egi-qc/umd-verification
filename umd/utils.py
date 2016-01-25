@@ -81,7 +81,8 @@ def runcmd(cmd, stderr_to_stdout=False):
                  + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")])
     with fabric_api.settings(warn_only=True):
         with fabric_api.shell_env(**env_d):
-            r = fabric_api.local(cmd, capture=True)
+            # FIXME(orviz) use sudo fabric function
+            r = fabric_api.local("sudo " + cmd, capture=True)
     return r
 
 
