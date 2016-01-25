@@ -14,27 +14,22 @@ class CADeploy(base.Deploy):
         if not config.CFG["repository_url"]:
             api.fail("No CA verification URL was given.", stop_on_error=True)
 
-        if system.distname in ["debian", "ubuntu"]:
-            repo = "egi-igtf"
-            utils.runcmd("wget -q -O - %s | apt-key add -"
-                         % os.path.join(config.CFG["repository_url"][0],
-                                        "GPG-KEY-EUGridPMA-RPM-3"))
-        elif system.distname in ["centos", "redhat"]:
-            repo = ["EGI-trustanchors", "LCG-trustanchors"]
-
-        utils.remove_repo(repo)
-
-        # FIXME(orviz) workaround CA release with no Debian '.list' repofile
+        # NOTE(orviz) workaround CA release with no Debian '.list' repofile
         if system.distname in ["debian", "ubuntu"]:
             # Just one repository is expected
-            repo = config.CFG["repository_url"][0]
-            repodeb = "deb %s egi-igtf core" % repo
+            repo = "deb %s egi-igtf core" % config.CFG["repository_url"][0]
+            utils.remove_repo(repo)
+
+            utils.add_repo_key(config.CFG["igtf_repo_key"])
 
             if system.distro_version == "debian6":
                 source = "/etc/apt/sources.list.d/egi-igtf.list"
-                utils.runcmd("echo '%s' > %s" % (repodeb, source))
+                utils.runcmd("echo '%s' > %s" % (repo, source))
             else:
-                utils.enable_repo(repodeb)
+                utils.enable_repo(repo)
+        elif system.distname in ["centos", "redhat"]:
+            repo = ["EGI-trustanchors", "LCG-trustanchors"]
+            utils.remove_repo(repo)
 
     def _install(self, **kwargs):
         # Part of the above workaround

@@ -321,7 +321,8 @@ class Apt(object):
 
     def add_repo_key(self, keylist):
         for key in keylist:
-            r = runcmd("wget -q -O - %s | apt-key add -" % key)
+            runcmd("wget -q %s -O /tmp/key.key" % key)
+            r = runcmd("apt-key add /tmp/key.key")
             if r.failed:
                 api.fail("Could not add key '%s'" % key)
             else:
@@ -611,6 +612,9 @@ def enable_repo(repo, **kwargs):
     pkgtool = PkgTool()
     return pkgtool.enable_repo(repo, **kwargs)
 
+def add_repo_key(keyurl):
+    pkgtool = PkgTool()
+    return pkgtool.add_repo_key(keyurl)
 
 def load_from_hiera(fname):
     """Returns a dictionary with the content of fname.
