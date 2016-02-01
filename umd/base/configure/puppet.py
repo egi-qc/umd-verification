@@ -77,7 +77,9 @@ class PuppetConfig(BaseConfig):
 
         r = utils.runcmd(("puppet apply -l %s --modulepath %s %s "
                           "--detail-exitcodes")
-                         % (logfile, module_path, self.manifest))
+                         % (os.path.join(os.getcwd(), logfile),
+                            module_path,
+                            self.manifest))
         if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
         elif r.return_code == 2:
