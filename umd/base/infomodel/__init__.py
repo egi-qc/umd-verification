@@ -1,5 +1,7 @@
 import ldap
 
+import time
+
 from umd import api
 from umd.base.infomodel import utils as info_utils
 from umd.base import utils as butils
@@ -28,11 +30,20 @@ class InfoModel(object):
     def __init__(self):
         self.cfgtool = config.CFG["cfgtool"]
         self.has_infomodel = config.CFG["has_infomodel"]
+        self.attempt_no = 5
+        self.attempt_sleep = 60
 
         # NOTE(orviz): within a QCStep?
         utils.install("glue-validator")
         if system.distro_version == "redhat5":
             utils.install("openldap-clients")
+
+    def _set_breathe_time(self):
+        # FIXME(orviz) This should be handled by the Puppet module
+        breathe_time = 30
+        utils.runcmd(("sed -i 's/^BDII_BREATHE_TIME.*/BDII_BREATHE_TIME=%s/g' "
+                      "/etc/bdii/bdii.conf" % breathe_time))
+        utils.runcmd("/etc/init.d/bdii restart")
 
     def _run_validator(self, glue_version, logfile):
         port = config.CFG.get("info_port", "2170")
@@ -47,7 +58,19 @@ class InfoModel(object):
                    % port)
             version = "2.0"
 
-        r = utils.runcmd(cmd, log_to_file=logfile)
+        self._set_breathe_time()
+
+        slapd_working = False
+        for attempt in xrange(self.attempt_no):
+            r = utils.runcmd(cmd, log_to_file=logfile)
+            if not r.failed:
+                slapd_working = True
+                break
+            else:
+                time.sleep(self.attempt_sleep)
+        if not slapd_working:
+            api.fail("Could not connect to LDAP service.", stop_on_error=True)
+
         summary = info_utils.get_gluevalidator_summary(r)
         if summary:
             if summary["errors"] != '0':
