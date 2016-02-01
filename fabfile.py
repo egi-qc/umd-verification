@@ -1,7 +1,7 @@
 from fabric import state
 
 from umd.products.arc import arc_ce                         # NOQA
-from umd.products.argus import argus, ees                   # NOQA
+from umd.products.argus import argus, argus_yaim, ees       # NOQA
 from umd.products.bdii import bdii_site_puppet              # NOQA
 from umd.products.bdii import bdii_site_yaim                # NOQA
 from umd.products.bdii import bdii_top_puppet               # NOQA

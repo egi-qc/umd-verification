@@ -39,15 +39,17 @@ class PuppetConfig(BaseConfig):
         """
         self.manifest = manifest
         self.hiera_data = utils.to_list(hiera_data)
+        self.module_path = "/etc/puppet/modules"
         self.module_from_puppetforge = utils.to_list(module_from_puppetforge)
         self.module_from_repository = utils.to_list(module_from_repository)
 
     def _v3_workaround(self):
         # Include hiera functions in Puppet environment
         utils.install("rubygems")
-        utils.runcmd(("gem install hiera-puppet --install-dir "
-                      "/etc/puppet/modules"))
-        utils.runcmd("mv /etc/puppet/modules/gems/* /etc/puppet/modules/")
+        utils.runcmd("gem install hiera-puppet --install-dir %s"
+                     % self.module_path)
+        utils.runcmd("mv %s %s" % (os.path.join(self.module_path, "gems/*"),
+                                   self.module_path))
 
     def _set_hiera(self):
         if self.hiera_data:
@@ -69,7 +71,7 @@ class PuppetConfig(BaseConfig):
                 api.fail("Could not download tarball '%s'" % mod,
                          stop_on_error=True)
             mod = dest
-        utils.runcmd("puppet module install %s" % mod)
+        r = utils.runcmd("puppet module install %s" % mod)
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "puppet.log")
