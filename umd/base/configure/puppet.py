@@ -75,11 +75,10 @@ class PuppetConfig(BaseConfig):
         logfile = os.path.join(config.CFG["log_path"], "puppet.log")
         module_path = utils.runcmd("puppet config print modulepath")
 
-        r = utils.runcmd(("puppet apply -l %s --modulepath %s %s "
-                          "--detail-exitcodes")
-                         % (os.path.join(os.getcwd(), logfile),
-                            module_path,
-                            self.manifest))
+        cmd = "puppet apply --modulepath %s %s --detail-exitcodes" % (
+            module_path,
+            self.manifest)
+        r = utils.runcmd(cmd, log_to_file="qc_conf")
         if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
         elif r.return_code == 2:
