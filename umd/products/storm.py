@@ -3,6 +3,7 @@ import pwd
 from umd import api
 from umd import base
 from umd.base.configure.yaim import YaimConfig
+from umd import system
 from umd import utils
 
 
@@ -12,21 +13,20 @@ class StormDeploy(base.Deploy):
     pre_validate_pkgs = ["storm-srm-client", "uberftp", "curl", "myproxy",
                          "voms-clients", "lcg-util"]
 
-    def __init__(self, os="sl5"):
-        name = "-".join(["storm", os])
+    def __init__(self):
         metapkg = ["emi-storm-backend-mp", "emi-storm-frontend-mp",
                    "emi-storm-globus-gridftp-mp"]
         nodetype = ["se_storm_backend", "se_storm_frontend",
                     "se_storm_gridftp"]
-        if os == "sl5":
+        if system.distro_version == "redhat5":
             metapkg.append("emi-storm-gridhttps-mp")
             nodetype.append("se_storm_gridhttps")
             self.pre_validate_pkgs.append("python26-requests")
-        elif os == "sl6":
+        elif system.distro_version == "redhat6":
             metapkg.append("storm-webdav")
             nodetype.append("se_storm_webdav")
         super(StormDeploy, self).__init__(
-            name=name,
+            name="storm",
             need_cert=True,
             has_infomodel=True,
             metapkg=metapkg,
@@ -66,5 +66,4 @@ class StormDeploy(base.Deploy):
         api.info("END of PRE-validate actions.")
 
 
-sl5 = StormDeploy("sl5")
-sl6 = StormDeploy("sl6")
+storm = StormDeploy()

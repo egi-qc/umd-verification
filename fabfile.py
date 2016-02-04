@@ -17,7 +17,7 @@ from umd.products.gram5 import gram5                        # NOQA
 from umd.products.keystone_voms import keystone_voms_juno   # NOQA
 from umd.products.myproxy import myproxy                    # NOQA
 from umd.products.rc import rc                              # NOQA
-from umd.products.storm import sl5, sl6                     # NOQA
+from umd.products.storm import storm                        # NOQA
 from umd.products.ui import ui, ui_myproxy, ui_gfal         # NOQA
 
 
