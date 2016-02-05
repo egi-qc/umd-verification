@@ -32,7 +32,7 @@ class EESDeploy(base.Deploy):
 argus = ArgusDeploy(
     name="argus",
     doc="ARGUS server deployment using Puppet.",
-    metapkg="argus",
+    metapkg="emi-argus",
     need_cert=True,
     has_infomodel=True,
     cfgtool=PuppetConfig(
