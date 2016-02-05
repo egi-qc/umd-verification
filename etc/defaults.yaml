@@ -11,7 +11,7 @@ umd_release:
     redhat6:  "http://repository.egi.eu/sw/production/umd/3/sl6/x86_64/updates/umd-release-3.0.1-1.el6.noarch.rpm"
     debian6:  "http://repository.egi.eu/sw/production/umd/3/debian/dists/squeeze/main/binary-amd64/umd-release-3.0.0_all.deb" 
     ubuntu14: "http://repository.egi.eu/sw/production/umd/3/debian/dists/squeeze/main/binary-amd64/umd-release-3.0.0_all.deb" 
-    centos7:  "" 
+    centos7:  "http://repository.egi.eu/sw/production/umd/4/centos7/x86_64/base/umd-release-4.0.0-1.el7.noarch.rpm" 
 
 puppet_release:
     redhat5:  "https://yum.puppetlabs.com/puppetlabs-release-el-5.noarch.rpm" 
