@@ -9,7 +9,7 @@ class MyProxyDeploy(base.Deploy):
 
 
 myproxy = MyProxyDeploy(
-    name="myproxy",
+    name="emi-px",
     doc="MyProxy server deployment.",
     metapkg="myproxy",
     need_cert=True,
