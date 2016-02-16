@@ -155,4 +155,5 @@ frontier-squid:
     qc_func_1: 
         - test: "bin/frontier-squid/fnget.sh"
           description: "Frontier squid cache test."
+          source: "https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Testing_the_installation"
           user: "umd"
