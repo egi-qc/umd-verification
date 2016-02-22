@@ -122,11 +122,11 @@ class Deploy(tasks.Task):
         config.CFG.update(utils.get_class_attrs(self))
         config.CFG.update(kwargs)
 
-        # Show configuration summary
-        utils.show_exec_banner_ascii()
-
         # Validate configuration
         config.CFG.validate()
+
+        # Show configuration summary
+        utils.show_exec_banner_ascii()
 
         # Configuration tool
         if config.CFG["cfgtool"]:
