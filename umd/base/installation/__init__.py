@@ -104,7 +104,7 @@ class Install(object):
         msg_purge = "UMD"
         paths_to_purge = ["%s/UMD-*" % repopath]
         pkgs_to_purge = ["umd-release*"]
-        pkgs_to_download = [("UMD", config.CFG["umd_release"])]
+        pkgs_to_download = [("UMD", config.CFG["umd_release_pkg"])]
         pkgs_additional = []
         if system.distname == "redhat":
             msg_purge = " ".join(["EPEL and/or", msg_purge])
@@ -203,15 +203,17 @@ class Install(object):
     @butils.qcstep("QC_DIST_1", "Binary Distribution")
     def qc_dist_1(self):
         _logfile = "qc_inst_1"
+        repo = config.CFG.get("repository_url", [])
 
         if self.repo_config:
             self._config_repo(logfile=_logfile)
 
         # NOTE(orviz): missing WARNING case
         # 1) Enable verification repository
-        if self.verification_repo_config:
-            for url in config.CFG["repository_url"]:
-                self._enable_verification_repo(url, logfile=_logfile)
+        if repo:
+            if self.verification_repo_config:
+                for url in config.CFG["repository_url"]:
+                    self._enable_verification_repo(url, logfile=_logfile)
 
         # 2) Refresh
         self.pkgtool.refresh()
@@ -223,11 +225,12 @@ class Install(object):
     @butils.qcstep("QC_UPGRADE_1", "Upgrade")
     def qc_upgrade_1(self):
         _logfile = "qc_upgrade_1"
+        repo = config.CFG.get("repository_url", [])
 
         if self.repo_config:
             self._config_repo(logfile=_logfile)
 
-        if config.CFG["repository_url"]:
+        if repo:
             # 1) Install base (production) version
             r = self.pkgtool.install(self.metapkg, log_to_file=_logfile)
             if r.failed:
@@ -241,7 +244,7 @@ class Install(object):
 
             # 2) Enable verification repository
             if self.verification_repo_config:
-                for url in config.CFG["repository_url"]:
+                for url in repo:
                     self._enable_verification_repo(url, logfile=_logfile)
 
             # 3) Refresh

@@ -46,6 +46,9 @@ the format:
 The available runtime arguments are explained in :ref:`runtime-args-ref`
 section.
 
+Note that the only mandaatory parameter that is required at runtime is
+`umd_release`.
+
 
 Creating a new verification
 ---------------------------
