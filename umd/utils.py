@@ -454,7 +454,8 @@ class PkgTool(object):
 def show_exec_banner_ascii():
     """Displays execution banner (ascii)."""
     cfg = config.CFG.copy()
-    basic_repo = ["umd_release", "igtf_repo"]
+
+    basic_repo = ["umd_release_pkg", "igtf_repo"]
     if system.distname in ["redhat", "centos"]:
         basic_repo.append("epel_release")
 
@@ -485,10 +486,11 @@ def show_exec_banner_ascii():
                                 colors.blue(v)))
     print(u'\n\n')
 
-    api.info("Using the following verification repositories")
-    repos = to_list(cfg.pop("repository_url"))
-    for repo in repos:
-        print(u'\t+ %s' % colors.blue(repo))
+    if "repository_url" in cfg.keys():
+        api.info("Using the following UMD verification repositories")
+        repos = to_list(cfg.pop("repository_url"))
+        for repo in repos:
+            print(u'\t+ %s' % colors.blue(repo))
 
 
 def show_exec_banner():

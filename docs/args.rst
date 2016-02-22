@@ -14,16 +14,14 @@ Runtime arguments are given through `fab` argument list. Currently supported
 runtime arguments are:
 
 
-:installation_type: Type of installation.
+:umd_release: UMD release to be triggered.
 
                 - Available options:
+                    :3: UMD-3 release.
+                    :4: UMD-4 release.
 
-                    :install: from scratch installation, launches
-                        `QC_DIST_1 <http://egi-qc.github.io/#INSTALLATION>`_.
-                    :update: update from last production version, launches
-                        `QC_UPGRADE_1 <http://egi-qc.github.io/#INSTALLATION>`_.
-
-                - Default value: ``install``
+                - Default value: No default value, this parameter **is required**
+                  to be provided at runtime.
 
 :repository_url: Repository path with the verification content.
 
@@ -37,12 +35,16 @@ runtime arguments are:
 
                 - Arguments passed with equal names will overwrite the value.
 
-:umd_release: Package URL with the UMD release.
+:installation_type: Type of installation.
 
-                - Value must contain a URL pointing to a valid UMD release
-                  package.
-                - **Required** value located in the default
-                  configuration file (see :ref:`static-args-ref`).
+                - Available options:
+
+                    :install: from scratch installation, launches
+                        `QC_DIST_1 <http://egi-qc.github.io/#INSTALLATION>`_.
+                    :update: update from last production version, launches
+                        `QC_UPGRADE_1 <http://egi-qc.github.io/#INSTALLATION>`_.
+
+                - Default value: ``install``
 
 :igtf_repo: Repository for the IGTF release.
 

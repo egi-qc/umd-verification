@@ -30,9 +30,6 @@ class ConfigDict(dict):
         self.__setitem__("log_path", self.defaults["base"]["log_path"])
         self.__setitem__("umdnsu_url", self.defaults["nagios"]["umdnsu_url"])
         self.__setitem__(
-            "umd_release",
-            self.defaults["umd_release"][system.distro_version])
-        self.__setitem__(
             "igtf_repo",
             self.defaults["igtf_repo"][system.distname])
         self.__setitem__(
@@ -49,14 +46,18 @@ class ConfigDict(dict):
             self.defaults["epel_release"][system.distro_version])
 
     def validate(self):
-        # Strong validations first
-        # UMD release
-        if not self.__getitem__("umd_release"):
-            # FIXME(orviz) centos7 does not have UMD release package
-            if system.distname not in ["centos"]:
-                api.fail(("UMD release package not provided for '%s' "
-                          "distribution" % system.distname),
-                         stop_on_error=True)
+        # Strong validations first: (umd_release, repository_url)
+        v_umd_release = self.get("umd_release", None)
+        v_repo = self.get("repository_url", None)
+        if not v_umd_release:
+            api.fail(("Cannot start UMD deployment: neither 'umd_release' nor "
+                      "'repository_url' provided"), stop_on_error=True)
+        else:
+            api.info("Using UMD %s release repository" % v_umd_release)
+
+        if v_repo:
+            api.info("Using UMD verification repository: %s" % v_repo)
+
         # Configuration management: Puppet
         from umd.base.configure.puppet import PuppetConfig
         if isinstance(self.__getitem__("cfgtool"), PuppetConfig):
@@ -74,10 +75,6 @@ class ConfigDict(dict):
         if not self.__getitem__("installation_type"):
             api.warn("No installation type provided: performing installation.")
             self.__setitem__("installation_type", "install")
-        # Verification repository URL
-        v = self.__getitem__("repository_url")
-        if not v:
-            api.warn("No verification repository URL provided.")
         # Metapackage
         v = self.__getitem__("metapkg")
         if v:
@@ -90,13 +87,20 @@ class ConfigDict(dict):
         for k, v in d.items():
             if v:
                 append_arg = False
+                # Special treatments
                 if k.startswith("repository_url"):
                     item = "repository_url"
                     append_arg = True
                 elif k.startswith("qc_step"):
                     item = "qc_step"
                     append_arg = True
+                elif k.startswith("umd_release"):
+                    if not self.get("umd_release_pkg", None):
+                        pkg = self.defaults[(
+                            "umd_release")][int(v)][system.distro_version]
+                        d_tmp["umd_release_pkg"] = pkg
 
+                # Parameters that accept lists
                 if append_arg:
                     try:
                         l = d_tmp[item]
