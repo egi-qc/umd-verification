@@ -10,7 +10,6 @@ umd_release:
     3:
         redhat5:  "http://repository.egi.eu/sw/production/umd/3/sl5/x86_64/updates/umd-release-3.0.1-1.el5.noarch.rpm"
         redhat6:  "http://repository.egi.eu/sw/production/umd/3/sl6/x86_64/updates/umd-release-3.0.1-1.el6.noarch.rpm"
-        debian6:  "http://repository.egi.eu/sw/production/umd/3/debian/dists/squeeze/main/binary-amd64/umd-release-3.0.0_all.deb" 
     4:
         redhat6:  ""
         ubuntu14: ""
@@ -25,8 +24,7 @@ puppet_release:
 igtf_repo:
     redhat: "http://repository.egi.eu/sw/production/cas/1/current/repo-files/EGI-trustanchors.repo" 
     centos: "http://repository.egi.eu/sw/production/cas/1/current/repo-files/EGI-trustanchors.repo" 
-    debian: "http://repository.egi.eu/sw/production/cas/1/current/repo-files/egi-trustanchors.list"
-    ubuntu: "http://repository.egi.eu/sw/production/cas/1/current/repo-files/egi-trustanchors.list"
+    ubuntu: "deb http://repository.egi.eu/sw/production/cas/1/current egi-igtf core"
 
 igtf_repo_key:
     debian: "https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3"
@@ -35,6 +33,10 @@ igtf_repo_key:
 repo_keys:
     redhat: 
         - "http://repository.egi.eu/sw/production/umd/UMD-RPM-PGP-KEY"
+    debian:
+        - "http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY"
+    ubuntu:
+        - "http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY"
 
 yaim:
     path: "etc/yaim"

@@ -42,6 +42,8 @@ class PuppetConfig(BaseConfig):
         self.module_path = "/etc/puppet/modules"
         self.module_from_puppetforge = utils.to_list(module_from_puppetforge)
         self.module_from_repository = utils.to_list(module_from_repository)
+	print "@@@@@@@@@@@@@@@@ ", module_from_repository
+	print "@@@@@@@@@@@@ ", self.module_from_repository
 
     def _v3_workaround(self):
         # Include hiera functions in Puppet environment
@@ -64,14 +66,34 @@ class PuppetConfig(BaseConfig):
             shutil.copy("/etc/puppet/hiera.yaml", "/etc/hiera.yaml")
 
     def _module_install(self, mod):
+	mod_name = ''
+	from_repo = False
+	if len(mod) == 2:
+	    mod, mod_name = mod
         if mod.startswith("http"):
+	    from_repo = True
             dest = os.path.join("/tmp", os.path.basename(mod))
             r = utils.runcmd("wget %s -O %s" % (mod, dest))
             if r.failed:
                 api.fail("Could not download tarball '%s'" % mod,
                          stop_on_error=True)
             mod = dest
-        r = utils.runcmd("puppet module install %s" % mod)
+        r = utils.runcmd("puppet module install %s --force" % mod)
+	if r.failed and from_repo:
+	    r = self._module_install_from_tarball(mod, mod_name)
+	if r.failed:
+	    api.fail("Puppet module '%s' could not be installed" % mod)
+
+    def _module_install_from_tarball(self, tarball, mod_name=''):
+        """Installs a Puppet module tarball manually."""
+        root_dir = utils.runcmd("tar tzf %s | sed -e 's@/.*@@' | uniq" % tarball)
+	dest = os.path.join(self.module_path, root_dir)
+        
+	utils.runcmd("tar xvfz %s -C %s" % (tarball, self.module_path))
+	if mod_name:
+            return utils.runcmd("mv %s %s" % (
+		dest,
+		os.path.join(self.module_path, mod_name))) 
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "puppet.log")
