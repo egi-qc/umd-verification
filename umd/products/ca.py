@@ -1,3 +1,5 @@
+import os.path
+
 from umd import api
 from umd import base
 from umd.base.installation import Install
