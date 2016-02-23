@@ -87,6 +87,7 @@ class OwnCA(object):
         self.subject = "/DC=%s/DC=%s/CN=%s" % (self.domain_comp_country,
                                                self.domain_comp,
                                                self.common_name)
+        self.location = None
 
     def create(self, trusted_ca_dir=None):
         """Creates the CA public and private key.
@@ -106,6 +107,7 @@ class OwnCA(object):
                 # CA cert (.0)
                 ca_dest = os.path.join(trusted_ca_dir, '.'.join([hash, '0']))
                 utils.runcmd("cp ca.pem %s" % ca_dest)
+                self.location = ca_dest
                 # CRL cert (.r0)
                 # FIXME(orviz) check why absolute path is needed here
                 with open(os.path.join(self.workspace,
