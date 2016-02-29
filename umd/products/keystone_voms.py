@@ -1,57 +1,12 @@
 import os.path
 
+from umd import api
 from umd import base
 from umd import config
 from umd.base.configure.puppet import PuppetConfig
+from umd import config
 from umd.products import voms
 from umd import utils
-
-
-apache_conf = """
-Listen 5000
-WSGIDaemonProcess keystone user=keystone group=nogroup processes=8 threads=1
-<VirtualHost _default_:5000>
-    LogLevel     warn
-    ErrorLog    ${APACHE_LOG_DIR}/error.log
-    CustomLog   ${APACHE_LOG_DIR}/ssl_access.log combined
-
-    SSLEngine               on
-    SSLCertificateFile      /etc/grid-security/hostcert.pem
-    SSLCertificateKeyFile   /etc/grid-security/hostkey.pem
-    SSLCACertificatePath    /etc/grid-security/certificates
-    SSLCARevocationPath     /etc/grid-security/certificates
-    SSLVerifyClient         optional
-    SSLVerifyDepth          10
-    SSLProtocol             all -SSLv2
-    SSLCipherSuite          ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW
-    SSLOptions              +StdEnvVars +ExportCertData
-
-    WSGIScriptAlias /  /usr/lib/cgi-bin/keystone/main
-    WSGIProcessGroup keystone
-</VirtualHost>
-
-Listen 35357
-WSGIDaemonProcess keystoneapi user=keystone group=nogroup processes=8 threads=1
-<VirtualHost _default_:35357>
-    LogLevel    warn
-    ErrorLog    ${APACHE_LOG_DIR}/error.log
-    CustomLog   ${APACHE_LOG_DIR}/ssl_access.log combined
-
-    SSLEngine               on
-    SSLCertificateFile      /etc/grid-security/hostcert.pem
-    SSLCertificateKeyFile   /etc/grid-security/hostkey.pem
-    SSLCACertificatePath    /etc/grid-security/certificates
-    SSLCARevocationPath     /etc/grid-security/certificates
-    SSLVerifyClient         optional
-    SSLVerifyDepth          10
-    SSLProtocol             all -SSLv2
-    SSLCipherSuite          ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW
-    SSLOptions              +StdEnvVars +ExportCertData
-
-    WSGIScriptAlias     / /usr/lib/cgi-bin/keystone/admin
-    WSGIProcessGroup    keystoneapi
-</VirtualHost>
-"""
 
 
 class KeystoneVOMSDeploy(base.Deploy):
@@ -87,7 +42,7 @@ class KeystoneVOMSDeploy(base.Deploy):
             metapkg=package,
             need_cert=True,
             cfgtool=self.puppetconf,
-            # qc_specific_id="gridftp"
+            qc_specific_id="keystone-voms"
         )
 
     def pre_install(self):
@@ -95,33 +50,20 @@ class KeystoneVOMSDeploy(base.Deploy):
                           % self.version_codename.lower())
 
     def pre_config(self):
-        ## 1. Fetch keystone puppet repository based on the OpenStack release
-        #self.puppetconf.install_module_from_tarball((
-        #    "https://github.com/egi-qc/"
-        #    "puppet-keystone/archive/umd_stable_%s.tar.gz" % self.version_codename.lower()),
-        #    module_name="keystone")
-        # 2. Trust UMDVerificationCA
+        # Trust UMDVerificationCA
         ca_location = config.CFG["ca"].location
         if not ca_location:
             ca_location = "/etc/grid-security/certificates/0d2a3bdd.0"
             api.info("Using hardcoded CA path: %s" % ca_location)
         ca_location_basename = os.path.basename(ca_location)
-        ca_location_basename_crt = '.'.join([ca_location_basename.split('.')[0], "crt"])
+        ca_location_basename_crt = '.'.join([
+            ca_location_basename.split('.')[0], "crt"])
         utils.runcmd("cp %s /usr/share/ca-certificates/%s" % (
             ca_location,
             ca_location_basename_crt))
-        utils.runcmd("echo '%s' >> /etc/ca-certificates.conf" % ca_location_basename_crt)
+        utils.runcmd("echo '%s' >> /etc/ca-certificates.conf"
+                     % ca_location_basename_crt)
         utils.runcmd("update-ca-certificates")
-
-    #def post_config(self):
-    #    deps = ["apache2", "apache2-mpm-prefork", "libapache2-mod-wsgi",
-    #            "libvomsapi1"]
-    #    utils.install(deps)
-
-    #    utils.runcmd("rm -f /etc/apache2/sites-enabled/*")
-    #    with open("/etc/apache2/sites-enabled/keystone", 'w') as f:
-    #        f.write(apache_conf)
-    #        f.flush()
 
     def pre_validate(self):
         voms.client_install()

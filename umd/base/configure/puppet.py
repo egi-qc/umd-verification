@@ -165,3 +165,14 @@ class PuppetConfig(BaseConfig):
         self.has_run = True
 
         return r
+
+    def install_module_from_tarball(self, tarball, module_name):
+        """Downloads and installs manually a Puppet module tarball."""
+        dest_basename = os.path.basename(tarball)
+        dest = os.path.join("/tmp", dest_basename)
+        utils.runcmd("wget %s -O %s" % (tarball, dest))
+        root_dir = utils.runcmd("tar tzf %s | sed -e 's@/.*@@' | uniq" % dest)
+        utils.runcmd("tar xvfz %s -C %s" % (dest, self.module_path))
+        utils.runcmd("mv %s %s" % (
+            os.path.join(self.module_path, root_dir),
+            os.path.join(self.module_path, module_name)))

@@ -163,5 +163,7 @@ keystone-voms:
         - test: "bin/myproxy/client-test.sh"
           description: "Retrieve myproxy for dteam VO."
           args: "retrieve"
-        - test: "bin/keystone-voms/client-test.sh"
+        - test: "bin/keystone-voms/client-test.py"
           description: "Requesting a token using a valid VOMS proxy."
+          source: "https://github.com/IFCA/voms-auth-system-openstack"
+          args: "VO:dteam"

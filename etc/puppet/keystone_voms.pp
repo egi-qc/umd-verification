@@ -1,3 +1,5 @@
+## Base Keystone
+
 Exec { logoutput => 'on_failure' }
 
 class { 'mysql::server': }
@@ -30,20 +32,24 @@ class { 'keystone::roles::admin':
     password => 'ChangeMe',
 }
 
+## WSGI Keystone
+
 include apache
 class { 'keystone::wsgi::apache':
-    ssl              => true,
-    ssl_cert         => "/etc/grid-security/hostcert.pem",
-    ssl_key          => "/etc/grid-security/hostkey.pem",
-    ssl_certs_dir    => "/etc/grid-security/certificates",
-    ssl_crl_path     => "/etc/grid-security/certificates",
-    ssl_verify_depth => "10",
+    ssl               => true,
+    ssl_cert          => "/etc/grid-security/hostcert.pem",
+    ssl_key           => "/etc/grid-security/hostkey.pem",
+    ssl_certs_dir     => "/etc/grid-security/certificates",
+    ssl_crl_path      => "/etc/grid-security/certificates",
+    ssl_verify_client => "optional",
+    ssl_verify_depth  => "10",
+    ssl_options       => "+StdEnvVars +ExportCertData",
 }
 
 #keystone_config { 'ssl/enable': value => true }
 
 
-## Keystone VOMS ##
+## Keystone VOMS
 
 # keystone-paste.ini
 keystone_paste_ini {
@@ -73,13 +79,21 @@ $voms_conf  = {
         "ca_path"          => "/etc/grid-security/certificates",
         "voms_policy"      => "/etc/keystone/voms.json",
         "vomsapi_lib"      => "libvomsapi.so.1",
-        "autocreate_users" => "False",
-        "add_roles"        => "False",
+        "autocreate_users" => "True",
+        "add_roles"        => "True",
         "user_roles"       => "_member_",
     }
 }
 create_ini_settings($voms_conf, $defaults)
 
+# apache2/envvars
+file_line {
+    "apache_proxy_envvar":
+        path => "/etc/apache2/envvars",
+        line => "export OPENSSL_ALLOW_PROXY_CERTS=1",
+}
+
+# Tenants/VOs
 keystone_tenant {
     "VO:dteam":
         ensure  => present,
@@ -140,4 +154,22 @@ voms::client{
             dn     => "/DC=es/DC=irisgrid/O=ifca/CN=host/ibergrid-voms.ifca.es",
             ca_dn  => "/DC=es/DC=irisgrid/CN=IRISGridCA"
         }]
+}
+
+
+## Misc
+
+package {
+    "fetch-crl":
+        ensure => latest,
+}
+
+cron {
+    "fetch-crl":
+        command => "/usr/sbin/fetch-crl",
+        user    => "root",
+        minute  => "12",
+        hour    => [6,12,18,0],
+        weekday => "*",
+        require => Package["fetch-crl"],
 }
