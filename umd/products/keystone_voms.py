@@ -2,7 +2,6 @@ import os.path
 
 from umd import api
 from umd import base
-from umd import config
 from umd.base.configure.puppet import PuppetConfig
 from umd import config
 from umd.products import voms
@@ -22,18 +21,18 @@ class KeystoneVOMSDeploy(base.Deploy):
                                                         self.version)
 
         self.puppetconf = PuppetConfig(
-                manifest="keystone_voms.pp",
-                hiera_data="voms.yaml",
-                module_from_puppetforge=[
-                    "puppetlabs-mysql",
-                    "puppetlabs/apache --version '>=1.0.0 <2.0.0'",
-                    "puppetlabs/inifile --version '>=1.0.0 <2.0.0'",
-                    "puppetlabs/stdlib --version '>=4.0.0 <5.0.0'",
-                    "stackforge/openstacklib --version '>=5.0.0 <6.0.0'",
-                    "lcgdm-voms"],
-                module_from_repository=(("https://github.com/egi-qc/"
-                    "puppet-keystone/archive/umd_stable_%s.tar.gz" 
-		    % name_short), "keystone")
+            manifest="keystone_voms.pp",
+            hiera_data="voms.yaml",
+            module_from_puppetforge=[
+                "puppetlabs-mysql",
+                "puppetlabs/apache --version '>=1.0.0 <2.0.0'",
+                "puppetlabs/inifile --version '>=1.0.0 <2.0.0'",
+                "puppetlabs/stdlib --version '>=4.0.0 <5.0.0'",
+                "stackforge/openstacklib --version '>=5.0.0 <6.0.0'",
+                "lcgdm-voms"],
+            module_from_repository=((
+                "https://github.com/egi-qc/puppet-keystone/archive/"
+                "umd_stable_%s.tar.gz" % name_short), "keystone")
         )
 
         super(KeystoneVOMSDeploy, self).__init__(

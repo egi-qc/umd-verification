@@ -35,7 +35,6 @@ class ConfigDict(dict):
         self.__setitem__(
             "igtf_repo_key",
             self.defaults["igtf_repo_key"][system.distname])
-	print ">>>>> ", self.defaults["repo_keys"]
         self.__setitem__(
             "repo_keys",
             self.defaults["repo_keys"][system.distname])
