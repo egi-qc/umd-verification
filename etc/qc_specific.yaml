@@ -157,3 +157,13 @@ frontier-squid:
           description: "Frontier squid cache test."
           source: "https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Testing_the_installation"
           user: "umd"
+
+keystone-voms:
+    qc_func_1: 
+        - test: "bin/myproxy/client-test.sh"
+          description: "Retrieve myproxy for dteam VO."
+          args: "retrieve"
+        - test: "bin/keystone-voms/client-test.py"
+          description: "Requesting a token using a valid VOMS proxy."
+          source: "https://github.com/IFCA/voms-auth-system-openstack"
+          args: "VO:dteam"

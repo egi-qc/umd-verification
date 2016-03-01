@@ -1,6 +1,5 @@
 import os.path
 
-from umd import api
 from umd import base
 from umd.base.installation import Install
 from umd import config
@@ -10,15 +9,11 @@ from umd import utils
 
 class CADeploy(base.Deploy):
     def pre_install(self):
-        if not config.CFG["repository_url"]:
-            api.fail("No CA verification URL was given.", stop_on_error=True)
-
         # NOTE(orviz) workaround CA release with no Debian '.list' repofile
         if system.distname in ["debian", "ubuntu"]:
             # Just one repository is expected
             repo = "deb %s egi-igtf core" % os.path.join(
-                config.CFG["repository_url"][0],
-                "current")
+                config.CFG["repository_url"][0], "current")
             utils.remove_repo(repo)
 
             utils.add_repo_key(config.CFG["igtf_repo_key"])
