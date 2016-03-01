@@ -28,6 +28,7 @@ class KeystoneVOMSDeploy(base.Deploy):
                 "puppetlabs/apache --version '>=1.0.0 <2.0.0'",
                 "puppetlabs/inifile --version '>=1.0.0 <2.0.0'",
                 "puppetlabs/stdlib --version '>=4.0.0 <5.0.0'",
+                "puppetlabs/concat --version '>= 1.1.1 < 3.0.0'",
                 "stackforge/openstacklib --version '>=5.0.0 <6.0.0'",
                 "lcgdm-voms"],
             module_from_repository=((
