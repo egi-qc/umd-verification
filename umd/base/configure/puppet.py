@@ -89,7 +89,7 @@ class PuppetConfig(BaseConfig):
         dest = os.path.join(self.module_path, root_dir)
         utils.runcmd("tar xvfz %s -C %s" % (tarball, self.module_path))
         if mod_name:
-            dest_o = os.path.join(self.module_path, mod_name))
+            dest_o = os.path.join(self.module_path, mod_name)
             if os.path.exists(dest_o):
                 utils.runcmd("rm -rf %s" % dest_o)
             return utils.runcmd("mv %s %s" % (dest, dest_o))
