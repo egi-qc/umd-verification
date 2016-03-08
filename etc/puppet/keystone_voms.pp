@@ -87,10 +87,16 @@ $voms_conf  = {
 create_ini_settings($voms_conf, $defaults)
 
 # apache2/envvars
+file {
+    "/etc/apache2/envvars":
+        ensure => present
+}
+
 file_line {
     "apache_proxy_envvar":
-        path => "/etc/apache2/envvars",
-        line => "export OPENSSL_ALLOW_PROXY_CERTS=1",
+        path    => "/etc/apache2/envvars",
+        line    => "export OPENSSL_ALLOW_PROXY_CERTS=1",
+        require => File["/etc/apache2/envvars"],
 }
 
 # Tenants/VOs
