@@ -48,7 +48,6 @@ class { 'keystone::wsgi::apache':
 
 #keystone_config { 'ssl/enable': value => true }
 
-
 ## Keystone VOMS
 
 # keystone-paste.ini
@@ -89,7 +88,8 @@ create_ini_settings($voms_conf, $defaults)
 # apache2/envvars
 file {
     "/etc/apache2/envvars":
-        ensure => present
+        ensure  => present,
+        require => Class["Keystone::Wsgi::Apache"] 
 }
 
 file_line {
