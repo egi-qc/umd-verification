@@ -82,7 +82,7 @@ def runcmd(cmd, stderr_to_stdout=False):
     with fabric_api.settings(warn_only=True):
         with fabric_api.shell_env(**env_d):
             # FIXME(orviz) use sudo fabric function
-            r = fabric_api.local("sudo " + cmd, capture=True)
+            r = fabric_api.local("sudo -E " + cmd, capture=True)
     return r
 
 
