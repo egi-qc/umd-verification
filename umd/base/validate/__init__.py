@@ -1,4 +1,5 @@
 import collections
+import getpass
 import os
 import pwd
 
@@ -75,7 +76,10 @@ class Validate(object):
             api.info("Probe '%s'" % description)
 
             cmd = "./%s" % " ".join([f, args])
-            if user:
+            is_root_user = True
+            if getpass.getuser() != "root":
+                is_root_user = False
+            if user or not is_root_user:
                 cmd = "su %s -c \"%s\"" % (user, cmd)
 
             if not self._is_executable(f):
