@@ -50,10 +50,11 @@ function retrieve {
     fi
 }
 
-if [ $# -eq 1 ]; then
+
+if [ $# -gt 0 ]; then
     case $1 in
         retrieve)
-            retrieve $MYPROXY_PASSWD
+            [ $# -eq 2 ] && retrieve $MYPROXY_PASSWD $2 || retrieve $MYPROXY_PASSWD
             ;;
         *)
             echo "Method '$1' not implemented"
