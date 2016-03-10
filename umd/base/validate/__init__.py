@@ -1,5 +1,4 @@
 import collections
-import getpass
 import os
 import pwd
 
@@ -77,8 +76,10 @@ class Validate(object):
 
             cmd = "./%s" % " ".join([f, args])
             is_root_user = True
-            if getpass.getuser() != "root":
+            current_user = utils.runcmd("echo $(logname)")
+            if current_user and current_user != "root":
                 is_root_user = False
+                user = current_user
             if user or not is_root_user:
                 cmd = "su %s -c \"%s\"" % (user, cmd)
 
