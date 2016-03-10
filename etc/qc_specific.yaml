@@ -162,8 +162,8 @@ keystone-voms:
     qc_func_1: 
         - test: "bin/myproxy/client-test.sh"
           description: "Retrieve myproxy for dteam VO."
-          args: "retrieve"
+          args: "retrieve /tmp/x509_proxy"
         - test: "bin/keystone-voms/client-test.py"
           description: "Requesting a token using a valid VOMS proxy."
           source: "https://github.com/IFCA/voms-auth-system-openstack"
-          args: "VO:dteam"
+          args: "VO:dteam --proxy-path /tmp/x509_proxy"

@@ -42,7 +42,12 @@ function info {
 }
 
 function retrieve {
-    echo $1 | myproxy-logon -S -s $MYPROXY_SERVER -l $MYPROXY_USER -m $VO
+    if [ $# -eq 2 ]; then
+        echo "Output path to store the generated proxy was expecified: $2"
+        echo $1 | myproxy-logon -S -s $MYPROXY_SERVER -l $MYPROXY_USER -m $VO -o $2
+    else
+        echo $1 | myproxy-logon -S -s $MYPROXY_SERVER -l $MYPROXY_USER -m $VO
+    fi
 }
 
 if [ $# -eq 1 ]; then
