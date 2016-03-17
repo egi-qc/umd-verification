@@ -3,12 +3,12 @@ import json
 import requests
 
 from umd import api
-from umd.base import utils as butils
+from umd.common import qc
 from umd import config
 
 
 class Operations(object):
-    @butils.qcstep("QC_MON_1", "Service Probes")
+    @qc.qcstep("QC_MON_1", "Service Probes")
     def qc_mon_1(self):
         """Service Probes."""
         if config.CFG["qc_mon_capable"]:
@@ -37,7 +37,7 @@ class Operations(object):
         else:
             api.na("Product cannot be tested by Nagios.")
 
-    @butils.qcstep_request
+    @qc.qcstep_request
     def run(self, steps, *args, **kwargs):
         if steps:
             for method in steps:

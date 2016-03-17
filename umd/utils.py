@@ -266,6 +266,9 @@ class Yum(object):
 
         return d
 
+    def join_pkg_version(self, pkgs):
+        return ['-'.join(list(pkg)) for pkg in pkgs if isinstance(pkg, tuple)]
+
 
 class Apt(object):
     def __init__(self):
@@ -362,6 +365,9 @@ class Apt(object):
             d[name] = version
         return d
 
+    def join_pkg_version(self, pkgs):
+        return ['='.join(list(pkg)) for pkg in pkgs if isinstance(pkg, tuple)]
+
     def handle_repo_ssl(self):
         raise NotImplementedError
 
@@ -449,6 +455,11 @@ class PkgTool(object):
 
     def get_pkg_version(self, pkgfile, check_installed=True):
         return self.client.get_pkg_version(pkgfile, check_installed)
+
+    def join_pkg_version(self, pkgs):
+        """Returns a list of strings with the 'pkg:version' format name."""
+        pkgs = to_list(pkgs)
+        return self.client.join_pkg_version(pkgs)
 
 
 def show_exec_banner_ascii():
@@ -619,6 +630,11 @@ def enable_repo(repo, **kwargs):
 def add_repo_key(keyurl):
     pkgtool = PkgTool()
     return pkgtool.add_repo_key(keyurl)
+
+
+def join_pkg_version(pkg):
+    pkgtool = PkgTool()
+    return pkgtool.join_pkg_version(pkg)
 
 
 def load_from_hiera(fname):

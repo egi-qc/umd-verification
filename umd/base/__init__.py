@@ -8,8 +8,8 @@ from umd.base.infomodel import InfoModel
 from umd.base.installation import Install
 from umd.base.operations import Operations
 from umd.base.security import Security
-from umd.base import utils as butils
 from umd.base.validate import Validate
+from umd.common import pki
 from umd import config
 from umd import utils
 
@@ -167,7 +167,7 @@ class Deploy(tasks.Task):
                     cert_for_subject = hostcert
                 else:
                     api.info("Generating own certificates")
-                    config.CFG["ca"] = butils.OwnCA(
+                    config.CFG["ca"] = pki.OwnCA(
                         domain_comp_country="es",
                         domain_comp="UMDverification",
                         common_name="UMDVerificationOwnCA")
@@ -181,8 +181,8 @@ class Deploy(tasks.Task):
                 cert_for_subject = cert_path
 
             if cert_for_subject:
-                subject = butils.get_subject(cert_for_subject)
-                config.CFG["cert"] = butils.OwnCACert(subject)
+                subject = pki.get_subject(cert_for_subject)
+                config.CFG["cert"] = pki.OwnCACert(subject)
 
         # Workflow
         utils.remove_logs()

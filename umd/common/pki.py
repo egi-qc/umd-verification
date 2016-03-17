@@ -1,12 +1,8 @@
-import functools
-import os
 import os.path
 
 import fabric
-from fabric import colors
 
 from umd import api
-from umd import config
 from umd import system
 from umd import utils
 
@@ -29,43 +25,34 @@ default_crl_days = 730
 """
 
 
-def qcstep_request(f):
-    """Decorator method that handles on-demand QC step executions."""
-    def _request(self, *args, **kwargs):
-        step_methods = []
-        if "qc_step" in kwargs.keys():
-            for step in utils.to_list(kwargs["qc_step"]):
-                try:
-                    method = getattr(self, step.lower())
-                    step_methods.append(method)
-                except AttributeError:
-                    api.info("Ignoring QC step '%s': not defined." % step)
-                    continue
-        return f(self, step_methods, *args, **kwargs)
-    return _request
-
-
-def qcstep(id, description):
-    """Decorator method that prints QC step header."""
-    def _qcstep(f):
-        @functools.wraps(f)
-        def wrapper(*args, **kwargs):
-            print("[[%s: %s]]" % (colors.blue(id),
-                                  colors.blue(description)))
-            return f(*args, **kwargs)
-        return wrapper
-    return _qcstep
-
-
-def get_qc_envvars():
-    """Returns a dict with the bash environment variables found in conf."""
-    return dict([(k.split("qcenv_")[1], v)
-                 for k, v in config.CFG.items() if k.startswith("qcenv")])
-
-
 def get_subject(hostcert):
     return utils.runcmd(("openssl x509 -in %s -noout "
                          "-subject" % hostcert)).split()[1]
+
+
+def trust_ca(ca_location):
+    """Add the given CA to the system's CA trust database."""
+    if system.distname == "ubuntu":
+        trust_dir = "/usr/share/ca-certificates/"
+        trust_cmd = "update-ca-certificates"
+    elif system.distname == "centos":
+        trust_dir = "/etc/pki/ca-trust/source/anchors/"
+        trust_cmd = "update-ca-trust"
+
+    ca_location_basename = os.path.basename(ca_location)
+    ca_location_basename_crt = '.'.join([
+        ca_location_basename.split('.')[0], "crt"])
+    utils.runcmd("cp %s %s" % (
+        ca_location,
+        os.path.join(trust_dir, ca_location_basename_crt)))
+    utils.runcmd("echo '%s' >> /etc/ca-certificates.conf"
+                 % ca_location_basename_crt)
+    r = utils.runcmd(trust_cmd)
+    if r.failed:
+        api.fail("Could not add CA '%s' to the system's trust DB"
+                 % ca_location)
+    else:
+        api.info("CA '%s' added to system's trust DB" % ca_location)
 
 
 class OwnCACert(object):
