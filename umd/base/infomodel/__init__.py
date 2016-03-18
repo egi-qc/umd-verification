@@ -4,7 +4,7 @@ import time
 
 from umd import api
 from umd.base.infomodel import utils as info_utils
-from umd.base import utils as butils
+from umd.common import qc
 from umd import config
 from umd import exception
 from umd import system
@@ -123,19 +123,19 @@ class InfoModel(object):
         finally:
             conn.unbind_s()
 
-    @butils.qcstep("QC_INFO_1", "GlueSchema 1.3 Support")
+    @qc.qcstep("QC_INFO_1", "GlueSchema 1.3 Support")
     @bdii_support
     def qc_info_1(self):
         """GlueSchema 1.3 Support."""
         self._run_validator("glue1", logfile="qc_info_1")
 
-    @butils.qcstep("QC_INFO_2", "GlueSchema 2.0 Support")
+    @qc.qcstep("QC_INFO_2", "GlueSchema 2.0 Support")
     @bdii_support
     def qc_info_2(self):
         """GlueSchema 2.0 Support."""
         self._run_validator("glue2", logfile="qc_info_2")
 
-    @butils.qcstep("QC_INFO_3", "Middleware Version Information")
+    @qc.qcstep("QC_INFO_3", "Middleware Version Information")
     @bdii_support
     def qc_info_3(self):
         """Middleware Version Information."""
@@ -145,7 +145,7 @@ class InfoModel(object):
         else:
             api.warn(msg)
 
-    @butils.qcstep_request
+    @qc.qcstep_request
     def run(self, steps, *args, **kwargs):
         if steps:
             for method in steps:

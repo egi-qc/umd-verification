@@ -1,6 +1,6 @@
 from umd import api
 from umd.base.security import utils as sec_utils
-from umd.base import utils as butils
+from umd.common import qc
 from umd import config
 from umd import utils
 
@@ -14,7 +14,7 @@ class Security(object):
         #   'known_worldwritable_filelist': already-known world writable files
         self.exceptions = config.CFG["exceptions"]
 
-    @butils.qcstep("QC_SEC_2", "SHA-2 Certificates Support")
+    @qc.qcstep("QC_SEC_2", "SHA-2 Certificates Support")
     def qc_sec_2(self):
         """SHA-2 Certificates Support."""
         if self.need_cert:
@@ -32,7 +32,7 @@ class Security(object):
         else:
             api.na("Product does not need certificates.")
 
-    @butils.qcstep("QC_SEC_5", "World Writable Files")
+    @qc.qcstep("QC_SEC_5", "World Writable Files")
     def qc_sec_5(self):
         """World Writable Files check."""
         _logfile = "qc_sec_5"
@@ -64,7 +64,7 @@ class Security(object):
         #         print(yellow("Detected package world-writable files:\n%s"
         #                      % pkg_wwf_files))
 
-    @butils.qcstep_request
+    @qc.qcstep_request
     def run(self, steps, *args, **kwargs):
         if steps:
             for method in steps:

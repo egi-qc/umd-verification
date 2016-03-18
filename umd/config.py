@@ -77,6 +77,11 @@ class ConfigDict(dict):
             self.__setitem__("installation_type", "install")
         # Metapackage
         v = self.__getitem__("metapkg")
+        for pkg in v:                       # check if version is added
+            if isinstance(pkg, tuple):
+                t = v.pop(v.index(pkg))
+                from umd import utils
+                v.extend(utils.join_pkg_version(t))
         if v:
             msg = "Metapackage/s selected: %s" % ''.join([
                 "\n\t+ %s" % mpkg for mpkg in v])

@@ -1,10 +1,10 @@
-import os.path
-
 from umd import api
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
+from umd.common import pki
 from umd import config
 from umd.products import voms
+from umd import system
 from umd import utils
 
 
@@ -14,9 +14,8 @@ class KeystoneVOMSDeploy(base.Deploy):
         package = "python-keystone-voms"
         description = "Keystone VOMS module"
 
-        name_short = self.version_codename.lower()
-        name = "keystone-voms-%s" % name_short
-        package = "python-keystone-voms=%s*" % self.version
+        name = "keystone-voms-%s" % self.version_codename.lower()
+        package = ("python-keystone-voms", self.version)
         description = "Keystone %s VOMS Module (%s)" % (self.version_codename,
                                                         self.version)
         super(KeystoneVOMSDeploy, self).__init__(
@@ -29,7 +28,11 @@ class KeystoneVOMSDeploy(base.Deploy):
         )
 
     def pre_install(self):
-        utils.enable_repo("cloud-archive:%s"
+        if system.distname == "ubuntu":
+            utils.enable_repo("cloud-archive:%s"
+                              % self.version_codename.lower())
+        elif system.distname == "centos":
+            utils.install("centos-release-openstack-%s"
                           % self.version_codename.lower())
 
     def pre_config(self):
@@ -38,18 +41,14 @@ class KeystoneVOMSDeploy(base.Deploy):
         if not ca_location:
             ca_location = "/etc/grid-security/certificates/0d2a3bdd.0"
             api.info("Using hardcoded CA path: %s" % ca_location)
-        ca_location_basename = os.path.basename(ca_location)
-        ca_location_basename_crt = '.'.join([
-            ca_location_basename.split('.')[0], "crt"])
-        utils.runcmd("cp %s /usr/share/ca-certificates/%s" % (
-            ca_location,
-            ca_location_basename_crt))
-        utils.runcmd("echo '%s' >> /etc/ca-certificates.conf"
-                     % ca_location_basename_crt)
-        utils.runcmd("update-ca-certificates")
-        # pytz requirement for Juno
+        pki.trust_ca(ca_location)
+        # pytz requirement for Kilo
         if self.version_codename == "Kilo":
             utils.runcmd("pip install pytz==2013.6")
+        # Fix no operatingsystemrelease fact on CentOS 7
+        utils.runcmd("ln -s -f /etc/centos-release /etc/redhat-release")
+        # selinux
+        utils.install("openstack-selinux")
 
     def pre_validate(self):
         voms.client_install()

@@ -5,7 +5,7 @@ import pwd
 import yaml
 
 from umd import api
-from umd.base import utils as butils
+from umd.common import qc
 from umd import config
 from umd import utils
 
@@ -98,7 +98,7 @@ class Validate(object):
 
         return failed_checks
 
-    @butils.qcstep("QC_FUNC_1", "Basic Funcionality Test.")
+    @qc.qcstep("QC_FUNC_1", "Basic Funcionality Test.")
     def qc_func_1(self, cfg):
         """Basic Funcionality Test."""
         if cfg:
@@ -110,7 +110,7 @@ class Validate(object):
         else:
             api.na("No definition found for QC_FUNC_1.")
 
-    @butils.qcstep("QC_FUNC_2", "New features/bug fixes testing.")
+    @qc.qcstep("QC_FUNC_2", "New features/bug fixes testing.")
     def qc_func_2(self, cfg):
         """New features/bug fixes testing."""
         if cfg:
@@ -122,9 +122,9 @@ class Validate(object):
         else:
             api.na("No definition found for QC_FUNC_2.")
 
-    @butils.qcstep_request
+    @qc.qcstep_request
     def run(self, steps, *args, **kwargs):
-        config.CFG["qc_envvars"] = butils.get_qc_envvars()
+        config.CFG["qc_envvars"] = qc.get_qc_envvars()
         qc_specific_id = config.CFG["qc_specific_id"]
 
         if qc_specific_id:

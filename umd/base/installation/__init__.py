@@ -2,7 +2,7 @@ import os.path
 import shutil
 
 from umd import api
-from umd.base import utils as butils
+from umd.common import qc
 from umd import config
 from umd import exception
 from umd import system
@@ -200,7 +200,7 @@ class Install(object):
         else:
             api.fail(msgtext, logfile=r.logfile, stop_on_error=True)
 
-    @butils.qcstep("QC_DIST_1", "Binary Distribution")
+    @qc.qcstep("QC_DIST_1", "Binary Distribution")
     def qc_dist_1(self):
         _logfile = "qc_inst_1"
         repo = config.CFG.get("repository_url", [])
@@ -220,9 +220,9 @@ class Install(object):
 
         # 3) Install verification version
         api.info("Using repositories: %s" % self.pkgtool.get_repos())
-        return self.pkgtool.install(self.metapkg, log_to_file=_logfile)
+        return utils.install(self.metapkg, log_to_file=_logfile)
 
-    @butils.qcstep("QC_UPGRADE_1", "Upgrade")
+    @qc.qcstep("QC_UPGRADE_1", "Upgrade")
     def qc_upgrade_1(self):
         _logfile = "qc_upgrade_1"
         repo = config.CFG.get("repository_url", [])

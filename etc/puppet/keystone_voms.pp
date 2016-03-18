@@ -2,7 +2,15 @@
 
 Exec { logoutput => 'on_failure' }
 
-class { 'mysql::server': }
+class { '::mysql::client':
+    package_name => 'mariadb',
+}
+
+class { '::mysql::server':
+    package_name => 'mariadb-server',
+    #root_password           => 'TESTOWY',
+    #remove_default_accounts => true,
+}
 class { 'keystone::db::mysql':
     password      => 'super_secret_db_password',
     allowed_hosts => '%',
@@ -53,17 +61,23 @@ class { 'keystone::wsgi::apache':
 # keystone-paste.ini
 keystone_paste_ini {
     "VOMS_filter":
-        name => "filter:voms/paste.filter_factory",
-        value => "keystone_voms.core:VomsAuthNMiddleware.factory"
+        name      => "filter:voms/paste.filter_factory",
+        value     => "keystone_voms.core:VomsAuthNMiddleware.factory",
 }
 
+if $::operatingsystem == "CentOS" {
+    $keystone_ini = "/usr/share/keystone/keystone-dist-paste.ini"
+}
+elsif $::operatingsystem == "Ubuntu" {
+    $keystone_ini = "/etc/keystone/keystone-paste.ini"
+}
 ini_subsetting {
     "VOMS_filter_public_api":
         ensure            => present,
         section           => "pipeline:public_api",
         setting           => "pipeline",
         key_val_separator => '=',
-        path              => "/etc/keystone/keystone-paste.ini",
+        path              => $keystone_ini,
         subsetting        => "ec2_extension",
         value             => " voms",
         require           => Keystone_paste_ini["VOMS_filter"],
@@ -85,18 +99,31 @@ $voms_conf  = {
 }
 create_ini_settings($voms_conf, $defaults)
 
-# apache2/envvars
-file {
-    "/etc/apache2/envvars":
-        ensure  => present,
-        require => Class["Keystone::Wsgi::Apache"] 
-}
+# OPENSSL_ALLOW_PROXY_CERTS
+if $::osfamily == "Debian" {
+    file {
+        "/etc/apache2/envvars":
+            ensure  => present,
+            require => Class["Keystone::Wsgi::Apache"]
+    }
 
-file_line {
-    "apache_proxy_envvar":
-        path    => "/etc/apache2/envvars",
-        line    => "export OPENSSL_ALLOW_PROXY_CERTS=1",
-        require => File["/etc/apache2/envvars"],
+    file_line {
+        "apache_proxy_envvar":
+            path    => "/etc/apache2/envvars",
+            line    => "export OPENSSL_ALLOW_PROXY_CERTS=1",
+            require => File["/etc/apache2/envvars"],
+    }
+}
+elsif $::osfamily == "RedHat" {
+    $apache_dir = "/etc/httpd"
+    augeas {
+        "Allow proxy certs":
+            context => "/files/etc/sysconfig/httpd",
+            changes => [
+                "set OPENSSL_ALLOW_PROXY_CERTS 1",
+            ],
+    }
+
 }
 
 # Tenants/VOs
