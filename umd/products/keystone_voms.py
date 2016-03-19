@@ -15,7 +15,7 @@ class KeystoneVOMSDeploy(base.Deploy):
         description = "Keystone VOMS module"
 
         name = "keystone-voms-%s" % self.version_codename.lower()
-        package = ("python-keystone-voms", self.version)
+        package = ("python-keystone-voms", self.version+'*')
         description = "Keystone %s VOMS Module (%s)" % (self.version_codename,
                                                         self.version)
         super(KeystoneVOMSDeploy, self).__init__(
