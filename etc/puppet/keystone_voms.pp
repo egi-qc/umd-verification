@@ -8,8 +8,8 @@ class { '::mysql::client':
 
 class { '::mysql::server':
     package_name => 'mariadb-server',
-    #root_password           => 'TESTOWY',
-    #remove_default_accounts => true,
+    root_password           => 'TESTOWY',
+    remove_default_accounts => true,
 }
 class { 'keystone::db::mysql':
     password      => 'super_secret_db_password',
