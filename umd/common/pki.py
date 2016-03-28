@@ -22,6 +22,20 @@ serial = $dir/certserial
 default_days = 730
 default_md = sha1
 default_crl_days = 730
+
+[req]
+distinguished_name = req_dn
+req_extensions = v3_req
+
+[req_dn]
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+IP.1 = 127.0.0.1
 """
 
 
@@ -135,10 +149,11 @@ class OwnCA(object):
                                               hostname)
             utils.runcmd(("openssl req -newkey rsa:%s -nodes -sha1 -keyout "
                           "cert.key -keyform PEM -out cert.req -outform PEM "
-                          "-subj '%s'"
+                          "-subj '%s' -config openssl.cnf"
                           % (hash, subject)))
             utils.runcmd(("openssl x509 -req -in cert.req -CA ca.pem -CAkey "
-                          "ca.key -CAcreateserial -out cert.crt -days 1"))
+                          "ca.key -CAcreateserial -extensions v3_req -extfile "
+                          "openssl.cnf -out cert.crt -days 1"))
 
             if key_prv:
                 utils.runcmd("chmod 600 cert.key")
