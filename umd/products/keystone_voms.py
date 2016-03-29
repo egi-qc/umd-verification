@@ -32,10 +32,10 @@ class KeystoneVOMSDeploy(base.Deploy):
             utils.enable_repo("cloud-archive:%s"
                               % self.version_codename.lower())
         elif system.distname == "centos":
-            utils.remove_repo("epel")
-            utils.runcmd("yum makecache")
             utils.install("centos-release-openstack-%s"
                           % self.version_codename.lower())
+            # workaround pycrypto - https://bugs.centos.org/view.php?id=9896
+            utils.runcmd("pip uninstall -y pycrypto")
 
     def pre_config(self):
         # Trust UMDVerificationCA
