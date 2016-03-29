@@ -8,6 +8,7 @@ from umd.products.bdii import bdii_top_puppet               # NOQA
 from umd.products.ca import ca, crl                         # NOQA
 from umd.products.creamce import gridenginerized            # NOQA
 from umd.products.creamce import standalone                 # NOQA
+from umd.products.dcache import dcache                      # NOQA
 from umd.products.dpm import dpm_1_8_10                     # NOQA
 from umd.products.frontier_squid import frontier_squid      # NOQA
 from umd.products.fts import fts                            # NOQA
