@@ -42,6 +42,19 @@ argus = ArgusDeploy(
         module_from_puppetforge="puppetlabs-stdlib"),
     qc_specific_id="argus")
 
+argus_no_metapkg = ArgusDeploy(
+    name="argus-no-metapkg",
+    doc="ARGUS server with no metapackage deployment.",
+    metapkg=["argus-pap", "argus-pdp", "argus-pep-server"],
+    need_cert=True,
+    has_infomodel=True,
+    cfgtool=PuppetConfig(
+        manifest="argus.pp",
+        module_from_repository=("https://github.com/cernops/puppet-argus/"
+                                "archive/master.tar.gz"),
+        module_from_puppetforge="puppetlabs-stdlib"),
+    qc_specific_id="argus")
+
 argus_yaim = base.Deploy(
     name="argus",
     doc="ARGUS server deployment using YAIM.",
