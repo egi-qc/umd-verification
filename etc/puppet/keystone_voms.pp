@@ -2,8 +2,15 @@
 
 Exec { logoutput => 'on_failure' }
 
+if $::osfamily == 'Debian' {
+    $pkgname = 'mariadb-client'
+}
+else {
+    $pkgname = 'mariadb'
+}
+
 class { '::mysql::client':
-    package_name => 'mariadb',
+    package_name => $pkgname,
 }
 
 class { '::mysql::server':

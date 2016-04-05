@@ -47,10 +47,13 @@ class KeystoneVOMSDeploy(base.Deploy):
         # pytz requirement for Kilo
         if self.version_codename == "Kilo":
             utils.runcmd("pip install pytz==2013.6")
-        # Fix no operatingsystemrelease fact on CentOS 7
-        utils.runcmd("ln -s -f /etc/centos-release /etc/redhat-release")
-        # selinux
-        utils.install("openstack-selinux")
+        if system.distname == "centos":
+            # Fix no operatingsystemrelease fact on CentOS 7
+            utils.runcmd("ln -s -f /etc/centos-release /etc/redhat-release")
+            # selinux
+            utils.install("openstack-selinux")
+        elif system.distname == "ubuntu":
+            utils.runcmd("pip install pbr==0.10.0 mock==1.0.1")
 
     def pre_validate(self):
         voms.client_install()
