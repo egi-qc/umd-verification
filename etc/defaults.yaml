@@ -33,6 +33,8 @@ igtf_repo_key:
 repo_keys:
     redhat: 
         - "http://repository.egi.eu/sw/production/umd/UMD-RPM-PGP-KEY"
+    centos:
+        - "http://repository.egi.eu/sw/production/umd/UMD-RPM-PGP-KEY"
     debian:
         - "http://repository.egi.eu/sw/production/umd/UMD-DEB-PGP-KEY"
     ubuntu:
