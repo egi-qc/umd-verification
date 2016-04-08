@@ -17,7 +17,7 @@ class Install(object):
         self.repo_config = True
         self.verification_repo_config = True
 
-    def _enable_verification_repo(self, url, logfile):
+    def _enable_verification_repo(self, url, logfile, name=None):
         """Downloads the repofiles found in the given URL."""
         utils.runcmd("rm -rf %s/*" % self.download_dir)
 
@@ -42,11 +42,11 @@ class Install(object):
                 api.info("Verification repository '%s' enabled." % repofile)
 
         else:
-            api.fail(("Could not find any valid %s ('%s') file in the remote "
-                     "repository URL") % (system.distname,
-                                          self.pkgtool.get_extension()),
-                     logfile=r.logfile,
-                     stop_on_error=True)
+            api.info(("Could not find any %s ('%s') repository file at %s "
+                      "repository URL") % (system.distname,
+                                           self.pkgtool.get_extension(),
+                                           url))
+            utils.enable_repo(url, name=name)
 
     def _get_pkgs_from_verification_repo(self):
         d = {}
@@ -212,8 +212,13 @@ class Install(object):
         # 1) Enable verification repository
         if repo:
             if self.verification_repo_config:
+                c = 1
                 for url in config.CFG["repository_url"]:
-                    self._enable_verification_repo(url, logfile=_logfile)
+                    self._enable_verification_repo(
+                        url,
+                        logfile=_logfile,
+                        name="fab_added_repository_%s" % c)
+                    c += 1
 
         # 2) Refresh
         self.pkgtool.refresh()

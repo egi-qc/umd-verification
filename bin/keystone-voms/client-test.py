@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import argparse
 import os
 import socket
 
+import argparse
 import novaclient
 import novaclient.auth_plugin
 import novaclient.client
