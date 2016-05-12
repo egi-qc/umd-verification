@@ -63,7 +63,7 @@ class InfoModel(object):
         slapd_working = False
         for attempt in xrange(self.attempt_no):
             r = utils.runcmd(cmd, log_to_file=logfile)
-            if not r.failed:
+            if r:
                 slapd_working = True
                 break
             else:
