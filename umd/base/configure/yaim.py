@@ -1,6 +1,8 @@
+import os
+import subprocess
 import tempfile
 
-from fabric import context_managers
+import mock
 
 from umd import api
 from umd.base.configure import BaseConfig
@@ -29,6 +31,10 @@ class YaimConfig(BaseConfig):
             raise exception.ConfigException(("Could not run YAIM: Bad "
                                              "nodetype or site-info."))
 
+        # FIXME(orviz) Not using Fabric to run this command
+        r = mock.MagicMock()
+        r.failed = True
+
         with tempfile.NamedTemporaryFile("w+t",
                                          dir=config.CFG["yaim_path"],
                                          delete=True) as f:
@@ -39,16 +45,25 @@ class YaimConfig(BaseConfig):
             api.info(("Creating temporary file '%s' with "
                       "content: %s" % (f.name, f.readlines())))
 
-            with context_managers.lcd(config.CFG["yaim_path"]):
-                r = utils.runcmd("/opt/glite/yaim/bin/yaim -c -s %s -n %s"
-                                 % (f.name, " -n ".join(self.nodetype)))
+            os.chdir(config.CFG["yaim_path"])
+            p = subprocess.Popen([
+                "/opt/glite/yaim/bin/yaim",
+                "-c",
+                "-s",
+                f.name,
+                "-n",
+                " -n ".join(self.nodetype)],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE)
+            p.communicate()
 
-            if r.failed:
+            if p.returncode:
                 api.fail(("YAIM execution failed. Check "
                           "the logs at '/opt/glite/yaim/log/yaimlog'."))
             else:
                 api.info("YAIM configuration ran successfully.")
+                r.failed = False
 
-            self.has_run = True
+        self.has_run = True
 
-            return r
+        return r

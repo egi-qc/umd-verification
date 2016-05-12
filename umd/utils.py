@@ -119,7 +119,7 @@ class Yum(object):
             opts = "--downloadonly"
 
         if action == "refresh":
-            action = "makecache"
+            action = "makecache fast"
 
         if pkgs:
             r = runcmd("yum -y %s %s %s" % (opts, action, " ".join(pkgs)))
