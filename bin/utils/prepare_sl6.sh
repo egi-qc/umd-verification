@@ -18,11 +18,11 @@ EOF
 wget -q http://springdale.math.ias.edu/data/puias/6/x86_64/os/RPM-GPG-KEY-puias -O /etc/pki/rpm-gpg/RPM-GPG-KEY-puias
 rpm --import RPM-GPG-KEY-puias
 
-yum -y install gcc python27 python27-devel openldap-devel libffi-devel
+yum -y install gcc python27 python27-devel openldap-devel libffi-devel openssl-devel
 
 wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
 python2.7 /tmp/get-pip.py
 
 # Getting issues with upper versions
-pip2.7 install Fabric==1.8.1 python-ldap
+pip2.7 install Fabric python-ldap
 pip2.7 install -r umd-verification/requirements.txt
