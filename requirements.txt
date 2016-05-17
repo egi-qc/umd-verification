@@ -3,4 +3,4 @@ fabric
 mock
 PyYAML
 requests
-#python-ldap
+python-ldap
