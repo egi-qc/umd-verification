@@ -46,7 +46,9 @@ standalone = CreamCEStandalone(
 
 gridenginerized = CreamCEGridengine(
     name="creamce-gridengine",
-    metapkg="emi-cream-ce emi-ge-utils",
+    metapkg=["emi-cream-ce"
+             "glite-info-dynamic-ge",
+             "glite-yaim-ge-utils"],
     need_cert=True,
     has_infomodel=True,
     cfgtool=YaimConfig(

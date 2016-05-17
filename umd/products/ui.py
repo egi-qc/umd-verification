@@ -23,7 +23,13 @@ ui_myproxy = base.Deploy(
 ui_gfal = base.Deploy(
     name="ui-gfal",
     doc="GFAL2 verfication on UI.",
-    metapkg=["emi-ui", "gfal2", "gfal2-python", "gfal2-util", "srm-ifce"],
+    metapkg=[
+        "emi-ui",
+        "gfal2",
+        "gfal2-python",
+        "gfal2-util",
+        "srm-ifce",
+        "gfal2-plugin-xrootd"],
     cfgtool=YaimConfig(
         nodetype="UI",
         siteinfo=["site-info-UI.def"]),
