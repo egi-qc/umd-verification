@@ -5,34 +5,32 @@ import xml.etree.ElementTree as ET
 from umd import api
 from umd import base
 from umd import config
-from umd import products
 from umd import system
 from umd import utils
 
 
 class RCDeploy(base.Deploy):
-    def _get_metapkg_list(self):
-        l = []
+    from umd.products import bdii, gram5, globus, gridsite, wms, fts    # NOQA
+    from umd.products import glexec, cream, arc, ui, canl, xrootd       # NOQA
 
-        # FIXME The list of products should be gathered programatically
-        for pkg in [
-            products.bdii.bdii_site_puppet,
-            products.bdii.bdii_top_puppet,
-            products.fts.fts,
-            products.arc.arc_ce,
-            products.dpm.dpm_1_8_10,
-            ["dcache", "umd-release"],
-        ]:
-            if isinstance(pkg, base.Deploy):
-                l.extend(pkg.metapkg)
-            elif isinstance(pkg, list):
-                l.extend(pkg)
-            else:
-                l.append(pkg)
-        api.info("Release candidate will install the following products: %s"
-                 % l)
-
-        return l
+    product_mapping = {
+        "site-bdii": bdii.bdii_site_puppet.metapkg,
+        "top-bdii": bdii.bdii_top_puppet.metapkg,
+        "Gram5": gram5.gram5.metapkg,
+        "globus-default-security": globus.default_security.metapkg,
+        "GridSite": gridsite.gridsite.metapkg,
+        "wms-utils": wms.wms_utils.metapkg,
+        "fts3": fts.fts.metapkg,
+        "gLexec": glexec.glexec_wn.metapkg,
+        "cream": cream.standalone.metapkg,
+        "ARC": arc.arc_ce.metapkg,
+        "gridFTP": globus.gridftp.metapkg,
+        "Gfal2": ui.ui_gfal.metapkg,
+        "cream-ge": cream.gridenginerized.metapkg,
+        "Canl": canl.canl.metapkg,
+        "gfal2-utils": ui.ui_gfal.metapkg,
+        "xroot": xrootd.xrootd.metapkg,
+    }
 
     def _get_callback(self, url, from_major_release=None):
         """Get the callback URL from UMD repository feeds.
@@ -99,7 +97,14 @@ class RCDeploy(base.Deploy):
             self._get_callback(url_candidate))
         api.info("Products from the candidate RC: %s" % candidate_products)
         # Merge them all
-        config.CFG["metapkg"] = production_products + candidate_products
+        products = production_products + candidate_products
+        s = set()
+        for product in products:
+            try:
+                s = s.union(self.product_mapping[product])
+            except KeyError:
+                s = s.union([product])
+        config.CFG["metapkg"] = list(s)
 
     def _install(self, **kwargs):
         kwargs.update({
