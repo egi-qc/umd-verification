@@ -74,6 +74,8 @@ class Validate(object):
             description, user, f, args = check
             api.info("Probe '%s'" % description)
 
+            if isinstance(args, list):
+                args = ' '.join(args)
             cmd = "./%s" % " ".join([f, args])
             is_root_user = True
             current_user = utils.runcmd("echo $(logname)")
