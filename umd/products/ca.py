@@ -47,7 +47,8 @@ ca = CADeploy(
         "ca-policy-egi-core",
         "ca-policy-lcg",
     ],
-    qc_step="QC_DIST_1")
+    # qc_step="QC_DIST_1",
+    qc_specific_id="ca")
 
 crl = base.Deploy(
     name="crl",

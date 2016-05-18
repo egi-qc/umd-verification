@@ -125,3 +125,7 @@ class ConfigDict(dict):
         super(ConfigDict, self).update(d_tmp)
 
 CFG = ConfigDict()
+
+
+def cfg_item(i):
+    return CFG[i]

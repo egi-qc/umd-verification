@@ -1,3 +1,5 @@
+repo_url: &REPO_URL !!python/object/apply:umd.config.cfg_item [repository_url]
+
 argus:
     qc_func_1:
         - test: "bin/certs/check-cert"
@@ -34,8 +36,12 @@ bdii-top:
 
 ca:
     qc_func_1:
-        - test: "bin/ca/fetch_crl.run"
-          description: "Run fetch_crl script with verbosity."
+        #- test: "bin/ca/fetch_crl.run"
+        #  description: "Run fetch_crl script with verbosity."
+        - test: "bin/ca/check-release.py"
+          description: "Check release date."
+          user: "umd"
+          args: *REPO_URL
 
 cream:
     qc_func_1:
