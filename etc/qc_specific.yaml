@@ -77,7 +77,7 @@ storm:
         - test: "bin/srm/client-test.sh"
           description: "lcg-utils client."
           user: "umd"
-          args: "localhost lcg-util"
+          args: "localhost dcache-client"
 
 ui:
     qc_func_1: 

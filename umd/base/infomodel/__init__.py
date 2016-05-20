@@ -58,20 +58,26 @@ class InfoModel(object):
                    % port)
             version = "2.0"
 
-        self._set_breathe_time()
+        time.sleep(self.attempt_sleep)
 
+        breathe_time_set = False
         slapd_working = False
+        summary = None
         for attempt in xrange(self.attempt_no):
             r = utils.runcmd(cmd, log_to_file=logfile)
             if r:
-                slapd_working = True
-                break
+                summary = info_utils.get_gluevalidator_summary(r)
+                if summary:
+                    slapd_working = True
+                    break
             else:
+                if not breathe_time_set:
+                    self._set_breathe_time()
+                    breathe_time_set = True
                 time.sleep(self.attempt_sleep)
         if not slapd_working:
             api.fail("Could not connect to LDAP service.", stop_on_error=True)
 
-        summary = info_utils.get_gluevalidator_summary(r)
         if summary:
             if summary["errors"] != '0':
                 api.fail(("Found %s errors while validating GlueSchema "
