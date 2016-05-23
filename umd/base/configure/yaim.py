@@ -45,6 +45,7 @@ class YaimConfig(BaseConfig):
             api.info(("Creating temporary file '%s' with "
                       "content: %s" % (f.name, f.readlines())))
 
+            dirlast = os.getcwd()
             os.chdir(config.CFG["yaim_path"])
             p = subprocess.Popen([
                 "/opt/glite/yaim/bin/yaim",
@@ -56,6 +57,10 @@ class YaimConfig(BaseConfig):
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE)
             p.communicate()
+            os.chdir(dirlast)
+
+            r = utils.runcmd("cp /opt/glite/yaim/log/yaimlog %s/"
+                             % config.CFG["log_path"])
 
             if p.returncode:
                 api.fail(("YAIM execution failed. Check "
