@@ -47,6 +47,13 @@ class YaimConfig(BaseConfig):
 
             dirlast = os.getcwd()
             os.chdir(config.CFG["yaim_path"])
+            api.info("Running YAIM tool: %s" % ' '.join([
+                "/opt/glite/yaim/bin/yaim",
+                "-c",
+                "-s",
+                f.name,
+                "-n",
+                " -n ".join(self.nodetype)]))
             p = subprocess.Popen([
                 "/opt/glite/yaim/bin/yaim",
                 "-c",
@@ -59,8 +66,8 @@ class YaimConfig(BaseConfig):
             p.communicate()
             os.chdir(dirlast)
 
-            r = utils.runcmd("cp /opt/glite/yaim/log/yaimlog %s/"
-                             % config.CFG["log_path"])
+            utils.runcmd("cp /opt/glite/yaim/log/yaimlog %s/"
+                         % config.CFG["log_path"])
 
             if p.returncode:
                 api.fail(("YAIM execution failed. Check "
