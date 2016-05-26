@@ -217,7 +217,7 @@ class Yum(object):
                      "baseurl=%s" % repo,
                      "protect=1",
                      "enabled=1",
-                     "priority=1",
+                     "priority=%s" % kwargs["priority"],
                      "gpgcheck=0"]
             fname = os.path.join(self.path,
                                  name.replace(' ', '') + self.extension)

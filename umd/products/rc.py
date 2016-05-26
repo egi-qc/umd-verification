@@ -130,9 +130,15 @@ class RCDeploy(base.Deploy):
     def pre_install(self):
 	repocount = 1
 	for repo in config.CFG["repository_url"]:
-	    utils.enable_repo(repo, name="UMD RC %s" % repocount)
-	    repocount += 1
-        #utils.enable_repo(config.CFG["repository_url"], name="UMD base RC")
+	    if repo.find("base") != -1:
+	 	utils.enable_repo(repo,
+				  name="UMD RC base",
+				  priority=1)
+	    else:
+		utils.enable_repo(repo,
+				  name="UMD RC %s" % repocount,
+				  priority=2)
+	    	repocount += 1
         
 	# Add IGTF repository as well (some products have dependencies on it)
         utils.enable_repo(config.CFG["igtf_repo"])
