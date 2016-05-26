@@ -57,3 +57,9 @@ gridenginerized = CreamCEGridengine(
                   "site-info-SGE_utils.def"]),
     qc_specific_id="cream",
     exceptions=exceptions)
+
+lsfized = base.Deploy(
+    name="creamce-lsf",
+    metapkg=["emi-cream-ce",
+             "emi-lsf-utils"])
+

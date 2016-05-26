@@ -36,7 +36,8 @@ fts = FTSDeploy(
              "fts-monitoring",
              "fts-mysql",
              "fts-server-selinux",
-             "fts-msg"],
+             "fts-msg",
+	     "fts-ext"],
     need_cert=True,
     cfgtool=PuppetConfig(
         manifest="fts.pp",

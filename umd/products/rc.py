@@ -12,26 +12,72 @@ from umd import utils
 class RCDeploy(base.Deploy):
     from umd.products import bdii, gram5, globus, gridsite, wms, fts    # NOQA
     from umd.products import glexec, cream, arc, ui, canl, xrootd       # NOQA
-    from umd.products import storm       				# NOQA
+    from umd.products import storm, argus, dcache, ca, frontier_squid   # NOQA
+    from umd.products import dpm   					# NOQA
 
     product_mapping = {
-        "site-bdii": bdii.bdii_site_puppet.metapkg,
-        "top-bdii": bdii.bdii_top_puppet.metapkg,
-        "Gram5": gram5.gram5.metapkg,
-        "globus-default-security": globus.default_security.metapkg,
-        "GridSite": gridsite.gridsite.metapkg,
-        "wms-utils": wms.wms_utils.metapkg,
-        "fts3": fts.fts.metapkg,
-        "gLexec": glexec.glexec_wn.metapkg,
+        "arc": arc.arc_ce.metapkg,
+	"argus-pap": argus.argus_no_metapkg.metapkg,
+	"bdii core": ["bdii"],
+	"bdii site": bdii.bdii_site_puppet.metapkg,
+	"bdii top": bdii.bdii_top_puppet.metapkg,
+        "canl": canl.canl.metapkg,
+        "canl32": canl.canl.metapkg,
+        "cgsi-gsoap": ["CGSI-gSOAP"],
+        "classads-libs": ["classads"],
         "cream": cream.standalone.metapkg,
-        "ARC": arc.arc_ce.metapkg,
-        "gridFTP": globus.gridftp.metapkg,
-        "Gfal2": ui.ui_gfal.metapkg,
         "cream-ge": cream.gridenginerized.metapkg,
-        "Canl": canl.canl.metapkg,
+        "cream-ge module": cream.gridenginerized.metapkg,
+	"cream lsf": cream.lsfized.metapkg,
+	"cvmfs": ["cvmfs"],
+        "dcache": dcache.dcache.metapkg,
+        "dcache-srmclient": dcache.dcache.metapkg,
+        "dcache-srm-client": dcache.dcache.metapkg,
+        "dmlite": ["python-dmlite", "dmlite-shell", "dmlite-libs"],
+	"dpm": dpm.dpm_1_8_10.metapkg,
+        "emi ui": ui.ui.metapkg,
+        "emi-ui": ui.ui.metapkg,
+        "fetch-crl": ca.crl.metapkg,
+        "fts3": fts.fts.metapkg,
+        "fts3-ext": fts.fts.metapkg,
+	"gateway": ["unicore-gateway"],
+        "gfal2": ui.ui_gfal.metapkg,
+        "gfal2-python": ui.ui_gfal.metapkg,
         "gfal2-utils": ui.ui_gfal.metapkg,
-        "xroot": xrootd.xrootd.metapkg,
+	"gfal/lcg_util": ["lcg-util"],
+        "glexec": glexec.glexec_wn.metapkg,
+        "globus": globus.gridftp.metapkg+globus.default_security.metapkg,
+        "globus-32-bit": globus.gridftp.metapkg+globus.default_security.metapkg,
+        "globus-default-security": globus.default_security.metapkg,
+	"globus info provider service": ["globus-info-provider-service"],
+	"globus gsissh": globus.gridftp.metapkg+globus.default_security.metapkg,
+        "gram5": gram5.gram5.metapkg,
+        "gridftp": globus.gridftp.metapkg,
+        "globus-gridftp-32": globus.gridftp.metapkg,
+        "gridsafe": ["ige-meta-gridsafe"],
+        "gridsite": gridsite.gridsite.metapkg,
+        "gridway": ["ige-meta-gridway"],
+        "json-c": ["json-c"],
+        "lb": wms.lb.metapkg,
+        "lfc": ["lfc", "lfc-server-mysql"],
+        "myproxy": ui.ui_myproxy.metapkg,
+        "site-bdii": bdii.bdii_site_puppet.metapkg,
+        "squid": frontier_squid.frontier_squid.metapkg,
         "storm": storm.storm.metapkg,
+        "srm-ifce": ui.ui_gfal.metapkg,
+	"qcg-comp": ["qcg-comp"],
+	"qcg-ntf": ["qcg-ntf"],
+        "top-bdii": bdii.bdii_top_puppet.metapkg,
+        "tsi": ["unicore-tsi-nobatch"],
+	"umd-3 repository configuration": ["umd-release"],
+        "voms-admin": ["voms-admin-client", "voms-admin-server"],
+        "voms-clients": ["voms-clients"],
+        "voms-server": ["voms-server"],
+        "wms": wms.wms.metapkg,
+        "wms-utils": wms.wms_utils.metapkg,
+        "xuudb": ["unicore-xuudb"],
+        "xroot": xrootd.xrootd.metapkg,
+        "xroot-libs": xrootd.xrootd.metapkg,
     }
 
     def _get_callback(self, url, from_major_release=None):
@@ -46,7 +92,7 @@ class RCDeploy(base.Deploy):
 
         l = []
         for p in root.iter('item'):
-            s = re.search("Release: UMD-(\d\.\d\.\d)", p.find("title").text)
+            s = re.search("Release: UMD-(\d*\.\d*\.\d*)", p.find("title").text)
             if s:
                 release = s.groups()[0]
                 cb = p.find("distroAPICallBack").text
@@ -82,8 +128,13 @@ class RCDeploy(base.Deploy):
         return list(s)
 
     def pre_install(self):
-        utils.enable_repo(config.CFG["repository_url"], name="UMD base RC")
-        # Add IGTF repository as well (some products have dependencies on it)
+	repocount = 1
+	for repo in config.CFG["repository_url"]:
+	    utils.enable_repo(repo, name="UMD RC %s" % repocount)
+	    repocount += 1
+        #utils.enable_repo(config.CFG["repository_url"], name="UMD base RC")
+        
+	# Add IGTF repository as well (some products have dependencies on it)
         utils.enable_repo(config.CFG["igtf_repo"])
         # Products from production
         url_production = "http://admin-repo.egi.eu/feeds/production/"
@@ -102,10 +153,13 @@ class RCDeploy(base.Deploy):
         products = production_products + candidate_products
         s = set()
         for product in products:
+	    product = product.lower()
             try:
                 s = s.union(self.product_mapping[product])
             except KeyError:
-                s = s.union([product])
+                #s = s.union([product])
+		api.warn("Product '%s' not mapped to any package. Will not be installed" 
+			 % product)
         config.CFG["metapkg"] = list(s)
 
     def _install(self, **kwargs):
