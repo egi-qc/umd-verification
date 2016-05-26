@@ -119,6 +119,7 @@ class Yum(object):
             opts = "--downloadonly"
 
         if action == "refresh":
+            runcmd("yum clean all")
             action = "makecache fast"
 
         if pkgs:
