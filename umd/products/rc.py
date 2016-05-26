@@ -12,6 +12,7 @@ from umd import utils
 class RCDeploy(base.Deploy):
     from umd.products import bdii, gram5, globus, gridsite, wms, fts    # NOQA
     from umd.products import glexec, cream, arc, ui, canl, xrootd       # NOQA
+    from umd.products import storm       				# NOQA
 
     product_mapping = {
         "site-bdii": bdii.bdii_site_puppet.metapkg,
@@ -30,6 +31,7 @@ class RCDeploy(base.Deploy):
         "Canl": canl.canl.metapkg,
         "gfal2-utils": ui.ui_gfal.metapkg,
         "xroot": xrootd.xrootd.metapkg,
+        "storm": storm.storm.metapkg,
     }
 
     def _get_callback(self, url, from_major_release=None):

@@ -46,7 +46,7 @@ standalone = CreamCEStandalone(
 
 gridenginerized = CreamCEGridengine(
     name="creamce-gridengine",
-    metapkg=["emi-cream-ce"
+    metapkg=["emi-cream-ce",
              "glite-info-dynamic-ge",
              "glite-yaim-ge-utils"],
     need_cert=True,
