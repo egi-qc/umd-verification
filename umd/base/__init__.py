@@ -24,7 +24,7 @@ class Deploy(tasks.Task):
                  has_infomodel=False,
                  cfgtool=None,
                  qc_mon_capable=False,
-                 qc_specific_id=None,
+                 qc_specific_id=[],
                  qc_step=[],
                  exceptions={},
                  dryrun=False,
@@ -116,6 +116,9 @@ class Deploy(tasks.Task):
             it as 'qc_step'.
         :hostcert: Public key server certificate.
         :hostkey: Private key server certificate.
+        :package: Custom individual package/s to install.
+        :func_id: Functional test/s to be performed ('id' from
+            etc/qc_specific.yaml)
         """
         # Get configuration parameters
         config.CFG.set_defaults()

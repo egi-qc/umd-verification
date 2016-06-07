@@ -17,10 +17,10 @@ class RCDeploy(base.Deploy):
 
     product_mapping = {
         "arc": arc.arc_ce.metapkg,
-	"argus-pap": argus.argus_no_metapkg.metapkg,
-	"bdii core": ["bdii"],
-	"bdii site": bdii.bdii_site_puppet.metapkg,
-	"bdii top": bdii.bdii_top_puppet.metapkg,
+        "argus-pap": argus.argus_no_metapkg.metapkg,
+        "bdii core": ["bdii"],
+        "bdii site": bdii.bdii_site_puppet.metapkg,
+        "bdii top": bdii.bdii_top_puppet.metapkg,
         "canl": canl.canl.metapkg,
         "canl32": canl.canl.metapkg,
         "cgsi-gsoap": ["CGSI-gSOAP"],
@@ -28,29 +28,32 @@ class RCDeploy(base.Deploy):
         "cream": cream.standalone.metapkg,
         "cream-ge": cream.gridenginerized.metapkg,
         "cream-ge module": cream.gridenginerized.metapkg,
-	"cream lsf": cream.lsfized.metapkg,
-	"cvmfs": ["cvmfs"],
+        "cream lsf": cream.lsfized.metapkg,
+        "cvmfs": ["cvmfs"],
         "dcache": dcache.dcache.metapkg,
         "dcache-srmclient": dcache.dcache.metapkg,
         "dcache-srm-client": dcache.dcache.metapkg,
         "dmlite": ["python-dmlite", "dmlite-shell", "dmlite-libs"],
-	"dpm": dpm.dpm_1_8_10.metapkg,
+        "dpm": dpm.dpm_1_8_10.metapkg,
         "emi ui": ui.ui.metapkg,
         "emi-ui": ui.ui.metapkg,
         "fetch-crl": ca.crl.metapkg,
         "fts3": fts.fts.metapkg,
         "fts3-ext": fts.fts.metapkg,
-	"gateway": ["unicore-gateway"],
+        "gateway": ["unicore-gateway"],
         "gfal2": ui.ui_gfal.metapkg,
         "gfal2-python": ui.ui_gfal.metapkg,
         "gfal2-utils": ui.ui_gfal.metapkg,
-	"gfal/lcg_util": ["lcg-util"],
+        "gfal/lcg_util": ["lcg-util"],
         "glexec": glexec.glexec_wn.metapkg,
-        "globus": globus.gridftp.metapkg+globus.default_security.metapkg,
-        "globus-32-bit": globus.gridftp.metapkg+globus.default_security.metapkg,
+        "globus":
+            globus.gridftp.metapkg + globus.default_security.metapkg,
+        "globus-32-bit":
+            globus.gridftp.metapkg + globus.default_security.metapkg,
         "globus-default-security": globus.default_security.metapkg,
-	"globus info provider service": ["globus-info-provider-service"],
-	"globus gsissh": globus.gridftp.metapkg+globus.default_security.metapkg,
+        "globus info provider service": ["globus-info-provider-service"],
+        "globus gsissh":
+            globus.gridftp.metapkg + globus.default_security.metapkg,
         "gram5": gram5.gram5.metapkg,
         "gridftp": globus.gridftp.metapkg,
         "globus-gridftp-32": globus.gridftp.metapkg,
@@ -65,11 +68,11 @@ class RCDeploy(base.Deploy):
         "squid": frontier_squid.frontier_squid.metapkg,
         "storm": storm.storm.metapkg,
         "srm-ifce": ui.ui_gfal.metapkg,
-	"qcg-comp": ["qcg-comp"],
-	"qcg-ntf": ["qcg-ntf"],
+        "qcg-comp": ["qcg-comp"],
+        "qcg-ntf": ["qcg-ntf"],
         "top-bdii": bdii.bdii_top_puppet.metapkg,
         "tsi": ["unicore-tsi-nobatch"],
-	"umd-3 repository configuration": ["umd-release"],
+        "umd-3 repository configuration": ["umd-release"],
         "voms-admin": ["voms-admin-client", "voms-admin-server"],
         "voms-clients": ["voms-clients"],
         "voms-server": ["voms-server"],
@@ -128,19 +131,19 @@ class RCDeploy(base.Deploy):
         return list(s)
 
     def pre_install(self):
-	repocount = 1
-	for repo in config.CFG["repository_url"]:
-	    if repo.find("base") != -1:
-	 	utils.enable_repo(repo,
-				  name="UMD RC base",
-				  priority=1)
-	    else:
-		utils.enable_repo(repo,
-				  name="UMD RC %s" % repocount,
-				  priority=2)
-	    	repocount += 1
-        
-	# Add IGTF repository as well (some products have dependencies on it)
+        repocount = 1
+        for repo in config.CFG["repository_url"]:
+            if repo.find("base") != -1:
+                utils.enable_repo(repo,
+                                  name="UMD RC base",
+                                  priority=1)
+            else:
+                utils.enable_repo(repo,
+                                  name="UMD RC %s" % repocount,
+                                  priority=2)
+                repocount += 1
+
+        # Add IGTF repository as well (some products have dependencies on it)
         utils.enable_repo(config.CFG["igtf_repo"])
         # Products from production
         url_production = "http://admin-repo.egi.eu/feeds/production/"
@@ -159,13 +162,12 @@ class RCDeploy(base.Deploy):
         products = production_products + candidate_products
         s = set()
         for product in products:
-	    product = product.lower()
+            product = product.lower()
             try:
                 s = s.union(self.product_mapping[product])
             except KeyError:
-                #s = s.union([product])
-		api.warn("Product '%s' not mapped to any package. Will not be installed" 
-			 % product)
+                api.warn(("Product '%s' not mapped to any package. Will not "
+                          "be installed" % product))
         config.CFG["metapkg"] = list(s)
 
     def _install(self, **kwargs):

@@ -23,22 +23,16 @@ wms = base.Deploy(
     doc="WMS installation",
     metapkg=[
         "glite-wms-common",
-        #"glite-wms-common-devel",
         "glite-wms-configuration",
         "glite-wms-core",
-        #"glite-wms-core-devel",
         "glite-wms-ice",
         "glite-wms-interface",
         "glite-wms-jobsubmission",
-        #"glite-wms-jobsubmission-devel",
         "glite-wms-purger",
-        #"glite-wms-purger-devel",
         "glite-wms-ui-api-python",
         "glite-wms-ui-commands",
         "glite-wms-utils-classad",
-        #"glite-wms-utils-classad-devel",
         "glite-wms-utils-exception",
-        #"glite-wms-utils-exception-devel",
         "glite-wms-wmproxy-api-cpp",
     ])
 

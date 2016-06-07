@@ -21,6 +21,7 @@ from umd.products.globus import default_security            # NOQA
 from umd.products.globus import gridftp                     # NOQA
 from umd.products.gram5 import gram5                        # NOQA
 from umd.products.gridsite import gridsite                  # NOQA
+from umd.products.individual_packages import individual     # NOQA
 from umd.products.keystone_voms import keystone_voms_juno   # NOQA
 from umd.products.keystone_voms import keystone_voms_kilo   # NOQA
 from umd.products.myproxy import myproxy                    # NOQA

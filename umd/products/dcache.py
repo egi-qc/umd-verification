@@ -5,5 +5,5 @@ dcache = base.Deploy(
     name="dcache",
     doc="dCache installation only.",
     metapkg=[
-	"dcache",
-	"dcache-srmclient"])
+        "dcache",
+        "dcache-srmclient"])
