@@ -173,3 +173,10 @@ keystone-voms:
           description: "Requesting a token using a valid VOMS proxy."
           source: "https://github.com/IFCA/voms-auth-system-openstack"
           args: "VO:dteam --proxy-path /tmp/x509_proxy"
+
+mkgridmap:
+    qc_func_1:
+        - test: "bin/mkgridmap"
+          description: "edg-mkgridmap functionality."
+          args: "bin/auth/edg-mkgridmap.sh"
+

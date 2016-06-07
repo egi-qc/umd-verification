@@ -104,6 +104,12 @@ class ConfigDict(dict):
                         pkg = self.defaults[(
                             "umd_release")][int(v)][system.distro_version]
                         d_tmp["umd_release_pkg"] = pkg
+                elif k.startswith("package"):
+                    item = "metapkg"
+                    append_arg = True
+                elif k.startswith("func_id"):
+                    item = "qc_specific_id"
+                    append_arg = True
 
                 # Parameters that accept lists
                 if append_arg:
@@ -116,7 +122,10 @@ class ConfigDict(dict):
                             l.append(v)
                             d_tmp[item] = l
                     else:
-                        d_tmp[item] = [v]
+                        if isinstance(v, list):
+                            d_tmp[item] = v
+                        else:
+                            d_tmp[item] = [v]
                 else:
                     d_tmp[k] = v
             else:

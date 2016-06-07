@@ -62,4 +62,3 @@ lsfized = base.Deploy(
     name="creamce-lsf",
     metapkg=["emi-cream-ce",
              "emi-lsf-utils"])
-

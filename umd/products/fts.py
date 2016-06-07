@@ -30,14 +30,15 @@ class FTSDeploy(base.Deploy):
 fts = FTSDeploy(
     name="fts",
     doc="File Transfer Service (FTS) deployment.",
-    metapkg=["fts-server",
-             "fts-client",
-             "fts-rest",
-             "fts-monitoring",
-             "fts-mysql",
-             "fts-server-selinux",
-             "fts-msg",
-	     "fts-ext"],
+    metapkg=[
+        "fts-server",
+        "fts-client",
+        "fts-rest",
+        "fts-monitoring",
+        "fts-mysql",
+        "fts-server-selinux",
+        "fts-msg",
+        "fts-ext"],
     need_cert=True,
     cfgtool=PuppetConfig(
         manifest="fts.pp",
