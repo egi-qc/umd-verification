@@ -130,29 +130,30 @@ class Validate(object):
         qc_specific_id = config.CFG["qc_specific_id"]
 
         if qc_specific_id:
-            try:
-                with open(QC_SPECIFIC_FILE) as f:
-                    d = yaml.load(f)
-            except IOError:
-                api.info("Could not load QC-specific config file: %s"
-                         % QC_SPECIFIC_FILE)
-            try:
-                d[qc_specific_id]
-            except KeyError:
-                api.info("QC-specific ID '%s' definition not found "
-                         "in configuration file '%s'"
-                         % (qc_specific_id, QC_SPECIFIC_FILE))
+            for id in qc_specific_id:
+                try:
+                    with open(QC_SPECIFIC_FILE) as f:
+                        d = yaml.load(f)
+                except IOError:
+                    api.info("Could not load QC-specific config file: %s"
+                             % QC_SPECIFIC_FILE)
+                try:
+                    d[id]
+                except KeyError:
+                    api.info("QC-specific ID '%s' definition not found "
+                             "in configuration file '%s'"
+                             % (id, QC_SPECIFIC_FILE))
 
-            cfg = collections.defaultdict(dict)
-            for k, v in d[qc_specific_id].items():
-                cfg[k] = v
+                cfg = collections.defaultdict(dict)
+                for k, v in d[id].items():
+                    cfg[k] = v
 
-            if steps:
-                for method in steps:
-                    method(cfg[method.im_func.func_name])
-            else:
-                self.qc_func_1(cfg["qc_func_1"])
-                self.qc_func_2(cfg["qc_func_2"])
+                if steps:
+                    for method in steps:
+                        method(cfg[method.im_func.func_name])
+                else:
+                    self.qc_func_1(cfg["qc_func_1"])
+                    self.qc_func_2(cfg["qc_func_2"])
         else:
             api.info(("No QC-specific ID provided: no specific QC probes "
                       "will be ran."))
