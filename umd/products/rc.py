@@ -35,6 +35,7 @@ class RCDeploy(base.Deploy):
         "dcache-srm-client": dcache.dcache.metapkg,
         "dmlite": ["python-dmlite", "dmlite-shell", "dmlite-libs"],
         "dpm": dpm.dpm_1_8_10.metapkg,
+        "edg-mkgrid": ["edg-mkgridmap"],
         "emi ui": ui.ui.metapkg,
         "emi-ui": ui.ui.metapkg,
         "fetch-crl": ca.crl.metapkg,
@@ -140,7 +141,7 @@ class RCDeploy(base.Deploy):
             else:
                 utils.enable_repo(repo,
                                   name="UMD RC %s" % repocount,
-                                  priority=2)
+                                  priority=1)
                 repocount += 1
 
         # Add IGTF repository as well (some products have dependencies on it)
