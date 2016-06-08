@@ -176,7 +176,5 @@ keystone-voms:
 
 mkgridmap:
     qc_func_1:
-        - test: "bin/mkgridmap"
+        - test: "bin/auth/edg-mkgridmap.sh"
           description: "edg-mkgridmap functionality."
-          args: "bin/auth/edg-mkgridmap.sh"
-
