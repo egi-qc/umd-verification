@@ -98,22 +98,33 @@ class Install(object):
         if not self.metapkg:
             api.fail("No metapackage selected", stop_on_error=True)
 
-    def _config_repo(self, logfile):
+    def _distro_pkgs(self, logfile):
+        pkgs = []
+        if system.distname == "redhat":
+            pkgs.append("yum-priorities")
+            pkgs.append("yum-conf-sl%sx" % system.version_major)
+
+        for pkg in pkgs:
+            r = self.pkgtool.install(pkg, log_to_file=logfile)
+            if r.failed:
+                api.fail("Error while installing '%s'." % pkg,
+                         logfile=r.logfile)
+            else:
+                api.info("'%s' requirement installed." % pkg)
+
+    def _repo_pkgs(self, logfile):
         # Distribution-based settings
         repopath = self.pkgtool.client.path
         msg_purge = "UMD"
         paths_to_purge = ["%s/UMD-*" % repopath]
         pkgs_to_purge = ["umd-release*"]
         pkgs_to_download = [("UMD", config.CFG["umd_release_pkg"])]
-        pkgs_additional = []
         if system.distname == "redhat":
             msg_purge = " ".join(["EPEL and/or", msg_purge])
             paths_to_purge.insert(0, "%s/epel-*" % repopath)
             pkgs_to_purge.insert(0, "epel-release*")
             pkgs_to_download.insert(0, ("EPEL",
                                         config.CFG["epel_release"]))
-            pkgs_additional.append("yum-priorities")
-            pkgs_additional.append("yum-conf-sl%sx" % system.version_major)
 
         # Remove any trace of UMD (and external) repository files
         r = self.pkgtool.remove(pkgs_to_purge)
@@ -151,14 +162,6 @@ class Install(object):
                              stop_on_error=True)
                 else:
                     api.info("%s release package installed." % pkg_id)
-
-        for pkg in pkgs_additional:
-            r = self.pkgtool.install(pkg, log_to_file=logfile)
-            if r.failed:
-                api.fail("Error while installing '%s'." % pkg,
-                         logfile=r.logfile)
-            else:
-                api.info("'%s' requirement installed." % pkg)
 
     def _handle_output_msg(self, r, d):
         is_ok = True
@@ -206,7 +209,8 @@ class Install(object):
         repo = config.CFG.get("repository_url", [])
 
         if self.repo_config:
-            self._config_repo(logfile=_logfile)
+            self._repo_pkgs(logfile=_logfile)
+        self._distro_pkgs(logfile=_logfile)
 
         # NOTE(orviz): missing WARNING case
         # 1) Enable verification repository
@@ -234,6 +238,7 @@ class Install(object):
 
         if self.repo_config:
             self._config_repo(logfile=_logfile)
+        self._distro_pkgs(logfile=_logfile)
 
         if repo:
             # 1) Install base (production) version
