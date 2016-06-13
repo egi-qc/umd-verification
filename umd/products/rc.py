@@ -171,6 +171,10 @@ class RCDeploy(base.Deploy):
                           "be installed" % product))
         config.CFG["metapkg"] = list(s)
 
+        # check_obsoletes
+        utils.runcmd(("echo 'check_obsoletes = 1' >> "
+                      "/etc/yum/pluginconf.d/priorities.conf"))
+
     def _install(self, **kwargs):
         kwargs.update({
             "ignore_repos": True,
