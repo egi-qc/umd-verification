@@ -172,8 +172,9 @@ class RCDeploy(base.Deploy):
         config.CFG["metapkg"] = list(s)
 
         # check_obsoletes
-        utils.runcmd(("echo 'check_obsoletes = 1' >> "
-                      "/etc/yum/pluginconf.d/priorities.conf"))
+        if system.distro_version.startswith("redhat"):
+            utils.runcmd(("echo 'check_obsoletes = 1' >> "
+                          "/etc/yum/pluginconf.d/priorities.conf"))
 
     def _install(self, **kwargs):
         kwargs.update({
