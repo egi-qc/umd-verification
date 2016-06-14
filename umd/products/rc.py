@@ -173,9 +173,9 @@ class RCDeploy(base.Deploy):
 
         # check_obsoletes
         if system.distro_version.startswith("redhat"):
-            #utils.runcmd(("echo 'check_obsoletes = 1' >> "
-            #              "/etc/yum/pluginconf.d/priorities.conf"))
-            utils.runcmd("echo -e \"[main]\nenabled = 1\ncheck_obsoletes = 1\" > /etc/yum/pluginconf.d/priorities.conf")
+            utils.runcmd(("echo -e \"[main]\nenabled = 1"
+                          "\ncheck_obsoletes = 1\" > "
+                          "/etc/yum/pluginconf.d/priorities.conf"))
 
     def _install(self, **kwargs):
         kwargs.update({
