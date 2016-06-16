@@ -209,13 +209,6 @@ default_security_pkgs = [
 ]
 
 
-# Remove them from UMD3
-if config.CFG["umd_release"] == "3":
-    gridftp_pkgs = [
-        pkg for pkg in gridftp_pkgs if pkg.find("devel") == -1]
-    default_security_pkgs = [
-        pkg for pkg in default_security_pkgs if pkg.find("devel") == -1]
-
 gridftp = GridFTPDeploy(
     name="globus-gridftp",
     doc="Globus GridFTP server.",
