@@ -127,7 +127,7 @@ class Validate(object):
     @qc.qcstep_request
     def run(self, steps, *args, **kwargs):
         config.CFG["qc_envvars"] = qc.get_qc_envvars()
-        qc_specific_id = config.CFG["qc_specific_id"]
+        qc_specific_id = utils.to_list(config.CFG["qc_specific_id"])
 
         if qc_specific_id:
             for id in qc_specific_id:
