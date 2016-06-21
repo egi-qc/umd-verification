@@ -200,6 +200,18 @@ class Yum(object):
                     os.remove(f)
                     api.info("Existing repository '%s' removed." % f)
 
+    def disable_repo(self, repo):
+        """Sets repositories as disabled.
+
+        :repo: repository name
+        """
+        r = runcmd("grep %s %s/* | cut -d':' -f1|uniq" % (repo, self.path))
+        if r:
+            f = r.split('\n')[0]
+            r_disable = runcmd(("sed -i 's/enabled.*=.*1/enabled=0/g' "
+                                "%s" % f))
+            return r_disable
+
     def add_repo_key(self, keylist):
         for key in keylist:
             r = runcmd("rpm --import %s" % key)
@@ -372,6 +384,9 @@ class Apt(object):
     def handle_repo_ssl(self):
         raise NotImplementedError
 
+    def disable_repo(self):
+        raise NotImplementedError
+
 
 class PkgTool(object):
     def __init__(self):
@@ -414,6 +429,14 @@ class PkgTool(object):
                 api.fail("Could not add repo '%s'" % repo)
             else:
                 api.info("Repository '%s' added" % repo)
+
+    def disable_repo(self, repolist):
+        for repo in to_list(repolist):
+            r = self.client.disable_repo(repo)
+            if r.failed:
+                api.fail("Could not disable repo '%s'" % repo)
+            else:
+                api.info("Repository '%s' disabled" % repo)
 
     def remove_repo(self, repolist):
         return self.client.remove_repo(to_list(repolist))

@@ -211,8 +211,11 @@ class Install(object):
         if self.repo_config:
             self._repo_pkgs(logfile=_logfile)
         self._distro_pkgs(logfile=_logfile)
+        # FIXME(orviz) hack: UMD4 base for SL6 does not exist!
+        if (system.distro_version == "redhat6" and
+           config.CFG["umd_release"] == "4"):
+                self.pkgtool.disable_repo("UMD-4-base")
 
-        # NOTE(orviz): missing WARNING case
         # 1) Enable verification repository
         if repo:
             if self.verification_repo_config:
@@ -239,6 +242,10 @@ class Install(object):
         if self.repo_config:
             self._config_repo(logfile=_logfile)
         self._distro_pkgs(logfile=_logfile)
+        # FIXME(orviz) hack: UMD4 base for SL6 does not exist!
+        if (system.distro_version == "redhat6" and
+           config.CFG["umd_release"] == "4"):
+                self.pkgtool.disable_repo("UMD-4-base")
 
         if repo:
             # 1) Install base (production) version
