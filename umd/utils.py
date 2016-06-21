@@ -664,9 +664,12 @@ def join_pkg_version(pkg):
 def load_from_hiera(fname):
     """Returns a dictionary with the content of fname.
 
-    :fname: YAML filename to load.
+    :fname: YAML filename to load (could be a list).
     """
-    return yaml.load(file("etc/puppet/%s" % fname, "r"))
+    d = {}
+    for f in to_list(fname):
+        d.update(yaml.load(file("etc/puppet/%s" % f, "r")))
+    return d
 
 
 def hiera(v):
