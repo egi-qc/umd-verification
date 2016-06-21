@@ -1,6 +1,7 @@
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
 from umd import config
+from umd import system
 from umd import utils
 
 
@@ -13,8 +14,14 @@ class FTSDeploy(base.Deploy):
         db_pass = hiera_config["fts3_db_password"]
 
         # mysql
-        utils.install("mysql-server")
-        utils.runcmd("service mysqld start")
+	if system.distro_version == "centos7":
+	    pkg_server = "mariadb-server"
+	    cmd_start = "systemctl start mariadb"
+	else:
+	    pkg_server = "mysql-server"
+	    cmd_start = "service mysqld start"
+        utils.install(pkg_server)
+        utils.runcmd(cmd_start)
         utils.runcmd("mysql -e \"drop database IF EXISTS ftsdb\"")
         utils.runcmd("mysql -e \"create database %s\"" % db_name)
         utils.runcmd("mysql ftsdb < /usr/share/fts-mysql/mysql-schema.sql")
