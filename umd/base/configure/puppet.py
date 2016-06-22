@@ -151,11 +151,6 @@ class PuppetConfig(BaseConfig):
                                       self.module_from_repository):
             self._module_install(module)
 
-        # FIXME (orviz) This is ugly - PATCHES
-        if "CERNOps-fts" in self.module_from_puppetforge:
-            utils.install("patch")
-            utils.runcmd("patch -p0 < etc/patches/CERNOps-fts.patch")
-
         # Hiera environment
         self._set_hiera()
 

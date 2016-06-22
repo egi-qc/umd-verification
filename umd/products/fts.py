@@ -50,10 +50,13 @@ fts = FTSDeploy(
     cfgtool=PuppetConfig(
         manifest="fts.pp",
         hiera_data="fts.yaml",
-        module_from_puppetforge=["CERNOps-fts",
-                                 "CERNOps-fetchcrl",
+        module_from_repository=((
+            "https://github.com/egi-qc/puppet-fts/archive/"
+            "umd.tar.gz" ), "fts"),
+        module_from_puppetforge=["CERNOps-fetchcrl",
                                  "puppetlabs-firewall",
                                  "puppetlabs-stdlib",
                                  "cprice404-inifile",
                                  "domcleal-augeasproviders",
-                                 "erwbgy-limits"]))
+                                 "erwbgy-limits"]),
+)
