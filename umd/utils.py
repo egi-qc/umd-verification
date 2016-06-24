@@ -210,7 +210,8 @@ class Yum(object):
             f = r.split('\n')[0]
             r_disable = runcmd(("sed -i 's/enabled.*=.*1/enabled=0/g' "
                                 "%s" % f))
-            return r_disable
+            r = r_disable
+	return r
 
     def add_repo_key(self, keylist):
         for key in keylist:
