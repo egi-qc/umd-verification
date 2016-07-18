@@ -11,10 +11,8 @@ class MyProxyDeploy(base.Deploy):
 myproxy = MyProxyDeploy(
     name="myproxy",
     doc="MyProxy server deployment.",
-    metapkg="myproxy",
+    metapkg=["myproxy", "myproxy-server"],
     need_cert=True,
     has_infomodel=True,
-    cfgtool=YaimConfig(
-        nodetype="PX",
-        siteinfo=["site-info-PX.def"]),
+    cfgtool=ScriptConfig("bin/myproxy/configure.sh"),
     qc_specific_id="myproxy")
