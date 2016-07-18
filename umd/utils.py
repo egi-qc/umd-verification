@@ -211,12 +211,11 @@ class Yum(object):
             r_disable = runcmd(("sed -i 's/enabled.*=.*1/enabled=0/g' "
                                 "%s" % f))
             r = r_disable
-	return r
+        return r
 
     def add_repo_key(self, keylist):
         for key in keylist:
             r = runcmd("rpm --import %s" % key)
-
             if r.failed:
                 api.fail("Could not add key '%s'" % key)
             else:
