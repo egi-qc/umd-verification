@@ -1,5 +1,5 @@
 from umd import base
-from umd.base.configure.yaim import YaimConfig
+from umd.base.configure.script import ScriptConfig
 from umd import utils
 
 
