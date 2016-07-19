@@ -52,7 +52,7 @@ fts = FTSDeploy(
         hiera_data="fts.yaml",
         module_from_repository=((
             "https://github.com/egi-qc/puppet-fts/archive/"
-            "umd.tar.gz" ), "fts"),
+            "umd.tar.gz"), "fts"),
         module_from_puppetforge=["CERNOps-fetchcrl",
                                  "puppetlabs-firewall",
                                  "puppetlabs-stdlib",
