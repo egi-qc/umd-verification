@@ -29,7 +29,9 @@ ui_gfal = base.Deploy(
         "gfal2-python",
         "gfal2-util",
         "srm-ifce",
-        "gfal2-plugin-xrootd"],
+        "gfal2-plugin-xrootd",
+        "davix",
+        "davix-libs"],
     cfgtool=YaimConfig(
         nodetype="UI",
         siteinfo=["site-info-UI.def"]),
