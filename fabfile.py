@@ -28,6 +28,7 @@ from umd.products.myproxy import myproxy                    # NOQA
 from umd.products.rc import rc                              # NOQA
 from umd.products.storm import storm                        # NOQA
 from umd.products.ui import ui, ui_myproxy, ui_gfal         # NOQA
+from umd.products.ui import ui_gfal, gfal_solo              # NOQA
 from umd.products.voms import voms_server                   # NOQA
 from umd.products.wms import wms_utils                      # NOQA
 from umd.products.xrootd import xrootd                      # NOQA
