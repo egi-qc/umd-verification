@@ -36,3 +36,19 @@ ui_gfal = base.Deploy(
         nodetype="UI",
         siteinfo=["site-info-UI.def"]),
     qc_specific_id="ui")
+
+gfal_solo = base.Deploy(
+    name="gfal-solo",
+    doc="GFAL2 verfication (without UI).",
+    metapkg=[
+        "gfal2",
+        "gfal2-python",
+        "gfal2-util",
+        "srm-ifce",
+        "gfal2-plugin-xrootd",
+        "davix",
+        "davix-libs",
+        # tests
+        "myproxy",
+        "voms-clients3"],
+    qc_specific_id="ui")
