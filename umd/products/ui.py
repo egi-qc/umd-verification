@@ -65,6 +65,7 @@ gfal_solo = base.Deploy(
         "davix",
         "davix-libs",
         # tests
+        "ca-policy-egi-core",
         "myproxy",
         "voms-clients"],
     qc_specific_id="ui")
