@@ -84,6 +84,7 @@ class RCDeploy(base.Deploy):
         "voms-server": ["voms-server"],
         "wms": wms.wms.metapkg,
         "wms-utils": wms.wms_utils.metapkg,
+        "wn-slurm": ["emi-slurm-client"],
         "xuudb": ["unicore-xuudb"],
         "xroot": xrootd.xrootd.metapkg,
         "xroot-libs": xrootd.xrootd.metapkg,
