@@ -62,3 +62,8 @@ lsfized = base.Deploy(
     name="creamce-lsf",
     metapkg=["emi-cream-ce",
              "emi-lsf-utils"])
+
+slurmized = base.Deploy(
+    name="creamce-slurm",
+    metapkg=["emi-cream-ce",
+             "emi-slurm-utils"])
