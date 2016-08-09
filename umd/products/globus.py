@@ -218,7 +218,8 @@ gridftp = GridFTPDeploy(
     cfgtool=PuppetConfig(
         manifest="gridftp.pp",
         hiera_data="gridftp.yaml",
-        module_from_puppetforge="lcgdm-gridftp"),
+        module_from_repository=(("https://github.com/cern-it-sdc-id/puppet-gridftp/"
+                                 "archive/master.tar.gz"), "gridftp")),
     qc_specific_id="gridftp")
 
 default_security = base.Deploy(
