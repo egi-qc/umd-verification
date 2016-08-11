@@ -77,12 +77,14 @@ class Validate(object):
             if isinstance(args, list):
                 args = ' '.join(args)
             cmd = "./%s" % " ".join([f, args])
-            is_root_user = True
-            current_user = utils.runcmd("echo $(logname)")
-            if current_user and current_user != "root":
-                is_root_user = False
-                user = current_user
-            if user or not is_root_user:
+            #is_root_user = True
+            #current_user = utils.runcmd("echo $(logname)")
+            #if current_user and current_user != "root":
+            #    is_root_user = False
+            #    user = current_user
+            #if user or not is_root_user:
+	    print ">>>>>>> USER: ", user
+            if user:
                 cmd = "su %s -c \"%s\"" % (user, cmd)
 
             if not self._is_executable(f):

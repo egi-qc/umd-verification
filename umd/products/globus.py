@@ -6,7 +6,7 @@ from umd import utils
 
 class GridFTPDeploy(base.Deploy):
     def pre_validate(self):
-        utils.install("myproxy")
+        utils.install(["myproxy", "globus-gass-copy-progs"])
 
         # FIXME(orviz) 'jenkins' account hardcoded here
         utils.runcmd("echo '%s jenkins' > /etc/grid-security/grid-mapfile"
