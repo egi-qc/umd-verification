@@ -8,8 +8,8 @@ class GridFTPDeploy(base.Deploy):
     def pre_validate(self):
         utils.install("myproxy")
 
-        # FIXME(orviz) 'umd' account hardcoded here
-        utils.runcmd("echo '%s umd' > /etc/grid-security/grid-mapfile"
+        # FIXME(orviz) 'jenkins' account hardcoded here
+        utils.runcmd("echo '%s jenkins' > /etc/grid-security/grid-mapfile"
                      % config.CFG["cert"].subject)
 
 
