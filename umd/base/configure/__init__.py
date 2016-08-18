@@ -1,6 +1,9 @@
+from umd import api
+
+
 class BaseConfig(object):
     """Base class for all the configuration types."""
-    def init(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.has_run = False
         self.logfile = None
 
@@ -18,4 +21,6 @@ class BaseConfig(object):
         r = self.config()
         self.post_config()
 
+        if r.failed:
+            api.fail("Configuration has failed.", stop_on_error=True)
         return r

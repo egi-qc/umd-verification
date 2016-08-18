@@ -1,4 +1,5 @@
 from umd import base
+from umd.base.configure.puppet import PuppetConfig
 
 
 xrootd = base.Deploy(
@@ -23,4 +24,12 @@ xrootd = base.Deploy(
         "xrootd-server",
         "xrootd-server-devel",
         "xrootd-server-libs",
-    ])
+    ],
+    cfgtool=PuppetConfig(
+        manifest="xrootd.pp",
+        hiera_data="xrootd.yaml",
+        module_from_repository=((
+            "https://github.com/egi-qc/puppet-xrootd/archive/"
+            "umd.tar.gz"), "xrootd"),
+        module_from_puppetforge=[
+            "CERNOps-fetchcrl"]))
