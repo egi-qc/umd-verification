@@ -85,6 +85,11 @@ class Deploy(tasks.Task):
         Install().run(**kwargs)
         self.post_install()
 
+    def _config(self, **kwargs):
+        if not self.cfgtool.has_run:
+            api.info("Running configuration")
+            self.cfgtool.run()
+
     def _security(self, **kwargs):
         Security().run(**kwargs)
 
@@ -208,6 +213,8 @@ class Deploy(tasks.Task):
         else:
             # QC_INST, QC_UPGRADE
             self._install()
+
+            self._config()
 
             # QC_SEC
             self._security()
