@@ -37,7 +37,7 @@ class PuppetConfig(BaseConfig):
                                   (from PuppetForge).
         :module_from_repository: URL pointing to repository tarball/s.
         """
-	super(PuppetConfig, self).__init__()
+        super(PuppetConfig, self).__init__()
         self.manifest = manifest
         self.hiera_data = utils.to_list(hiera_data)
         self.module_path = "/etc/puppet/modules"

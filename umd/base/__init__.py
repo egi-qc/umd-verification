@@ -88,7 +88,7 @@ class Deploy(tasks.Task):
     def _config(self, **kwargs):
         if not self.cfgtool.has_run:
             api.info("Running configuration")
-	    self.cfgtool.run()
+            self.cfgtool.run()
 
     def _security(self, **kwargs):
         Security().run(**kwargs)
@@ -140,7 +140,7 @@ class Deploy(tasks.Task):
         if config.CFG["cfgtool"]:
             config.CFG["cfgtool"].pre_config = self.pre_config
             config.CFG["cfgtool"].post_config = self.post_config
-	
+
         # Certificate management
         if self.need_cert:
             r = utils.install("ca-policy-egi-core",
@@ -214,7 +214,7 @@ class Deploy(tasks.Task):
             # QC_INST, QC_UPGRADE
             self._install()
 
-	    self._config()
+            self._config()
 
             # QC_SEC
             self._security()
