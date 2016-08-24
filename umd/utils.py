@@ -69,7 +69,7 @@ def filelog(f):
 
 
 @filelog
-def runcmd(cmd, stderr_to_stdout=False):
+def runcmd(cmd, stderr_to_stdout=False, nosudo=False):
     """Runs a generic command.
 
     :cmd: command to execute
@@ -82,7 +82,9 @@ def runcmd(cmd, stderr_to_stdout=False):
     with fabric_api.settings(warn_only=True):
         with fabric_api.shell_env(**env_d):
             # FIXME(orviz) use sudo fabric function
-            r = fabric_api.local("sudo -E " + cmd, capture=True)
+            if not nosudo:
+                cmd = "sudo -E " + cmd
+            r = fabric_api.local(cmd, capture=True)
     return r
 
 
