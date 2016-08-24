@@ -1,16 +1,11 @@
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
-from umd import config
 from umd import utils
 
 
 class GridFTPDeploy(base.Deploy):
     def pre_validate(self):
-        utils.install(["myproxy", "globus-gass-copy-progs"])
-
-        # FIXME(orviz) 'jenkins' account hardcoded here
-        utils.runcmd("echo '%s jenkins' > /etc/grid-security/grid-mapfile"
-                     % config.CFG["cert"].subject)
+        utils.install(["myproxy", "globus-gass-copy-progs", "voms-clients"])
 
 
 gridftp_pkgs = [
