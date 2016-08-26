@@ -18,17 +18,17 @@ class Security(object):
     def qc_sec_2(self):
         """SHA-2 Certificates Support."""
         if self.need_cert:
-            if self.cfgtool:
-                r = self.cfgtool.run()
-                if r.failed:
-                    api.fail("Configuration failed with SHA-2 certs",
-                             stop_on_error=True)
-                else:
-                    api.ok("Product services can manage SHA-2 certs.")
-            else:
+            if not self.cfgtool:
                 api.warn(("SHA-2 management not tested: configuration tool "
-                          "not defined."),
-                         logfile=r.logfile)
+                          "not defined."))
+            else:
+                if not self.cfgtool.has_run:
+                    r = self.cfgtool.run()
+                    if r.failed:
+                        api.fail("Configuration failed with SHA-2 certs",
+                                 stop_on_error=True)
+                    else:
+                        api.ok("Product services can manage SHA-2 certs.")
         else:
             api.na("Product does not need certificates.")
 
