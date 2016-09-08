@@ -1,5 +1,7 @@
 from umd import base
+from umd.base.configure.script import ScriptConfig
 from umd import utils
+
 
 
 class GridSiteDeploy(base.Deploy):
@@ -18,4 +20,6 @@ gridsite = GridSiteDeploy(
         "gridsite-libs",
         "gridsite1.7-compat",
     ],
-    need_cert=True)
+    need_cert=True,
+    cfgtool=ScriptConfig("./bin/gridsite/configure.sh"),
+    qc_specific_id="gridsite")

@@ -178,3 +178,8 @@ mkgridmap:
     qc_func_1:
         - test: "bin/auth/edg-mkgridmap.sh"
           description: "edg-mkgridmap functionality."
+
+gridsite:
+    qc_func_1: 
+        - test: "bin/gridsite/test_read_gacl.sh"
+          description: "Test reading a file using gacl."
