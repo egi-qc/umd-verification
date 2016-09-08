@@ -1,7 +1,13 @@
 from umd import base
+from umd import utils
 
 
-gridsite = base.Deploy(
+class GridSiteDeploy(base.Deploy):
+    def pre_config(self):
+        utils.install(["ca-policy-egi-core", "httpd"])
+
+
+gridsite = GridSiteDeploy(
     name="gridsite",
     doc="Gridsite installation",
     metapkg=[
@@ -11,4 +17,5 @@ gridsite = base.Deploy(
         "gridsite-doc",
         "gridsite-libs",
         "gridsite1.7-compat",
-    ])
+    ],
+    need_cert=True)
