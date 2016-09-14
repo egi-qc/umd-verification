@@ -4,6 +4,7 @@ import socket
 import tempfile
 
 from umd import base
+from umd.base.configure import BaseConfig
 from umd import config
 from umd import system
 from umd import utils
@@ -43,10 +44,9 @@ set server kill_delay = 10
 """
 
 
-class Gram5Config:
-    def __init__(self, pre_config, post_config):
-        self.pre_config = pre_config
-        self.post_config = post_config
+class Gram5Config(BaseConfig):
+    def __init__(self):
+        super(Gram5Config, self).__init__()
 
     def torque_config(self):
         if system.distro_version == 'redhat6':
@@ -115,9 +115,7 @@ class Gram5Deploy(base.Deploy):
                                           has_infomodel=False,
                                           qc_specific_id="gram5",
                                           exceptions=exceptions, dryrun=dryrun)
-        config.CFG["cfgtool"] = Gram5Config(
-            pre_config=self.pre_config,
-            post_config=self.post_config)
+        config.CFG["cfgtool"] = Gram5Config()
         self.cfgtool = config.CFG["cfgtool"]
 
     def pre_validate(self):
