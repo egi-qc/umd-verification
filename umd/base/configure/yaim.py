@@ -20,6 +20,7 @@ class YaimConfig(BaseConfig):
         :nodetype: YAIM nodetype to configure.
         :siteinfo: File containing YAIM configuration variables.
         """
+        super(YaimConfig, self).__init__()
         self.nodetype = nodetype
         self.siteinfo = siteinfo
 
