@@ -1,3 +1,4 @@
+import mock
 import os
 import pwd
 import socket
@@ -107,6 +108,10 @@ class Gram5Config(BaseConfig):
         utils.runcmd("sed -i -e 's/^cpu_per_node=.*/cpu_per_node=\"2\"/' "
                      "/etc/globus/globus-pbs.conf")
         self.post_config()
+
+        r = mock.MagicMock()
+        r.failed = False
+        return r
 
 
 class Gram5Deploy(base.Deploy):

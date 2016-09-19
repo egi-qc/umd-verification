@@ -61,12 +61,27 @@ def filelog(f):
     """Decorator method to write command's output to file."""
     def _log(*args, **kwargs):
         logfile = kwargs.pop("log_to_file", None)
+	stop_on_error = kwargs.pop("stop_on_error", True)
+        r = f(*args, **kwargs)
+        if logfile:
+            r.logfile = to_file(r, logfile)
+	if r.failed:
+            msg = "Exit on command failure. Reason: \"%s\"" % r
+	    if logfile:
+		msg += ". Logs at '%s'" % r.logfile
+	    api.fail(msg, stop_on_error=stop_on_error)
+        return r
+    return _log
+
+def cmd_exit(f):
+    """Decorator method to exit from execution if needed."""
+    def _cmd_exit(*args, **kwargs):
+        stop_on_error = kwargs.pop("stop_on_error", None)
         r = f(*args, **kwargs)
         if logfile:
             r.logfile = to_file(r, logfile)
         return r
     return _log
-
 
 @filelog
 def runcmd(cmd, stderr_to_stdout=False, nosudo=False):
