@@ -3,7 +3,6 @@ from umd.base.configure.script import ScriptConfig
 from umd import utils
 
 
-
 class GridSiteDeploy(base.Deploy):
     def pre_config(self):
         utils.install(["ca-policy-egi-core", "httpd"])

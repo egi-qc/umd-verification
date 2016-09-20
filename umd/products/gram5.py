@@ -1,8 +1,9 @@
-import mock
 import os
 import pwd
 import socket
 import tempfile
+
+import mock
 
 from umd import base
 from umd.base.configure import BaseConfig
