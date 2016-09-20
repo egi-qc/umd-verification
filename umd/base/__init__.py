@@ -110,6 +110,8 @@ class Deploy(tasks.Task):
         :installation_type: Type of installation ('install', 'update').
         :repository_url: Repository path with the verification content. Could
             pass multiple values by prefixing with 'repository_url'.
+        :repository_file: URL pointing to a repository file. Could
+            pass multiple values by prefixing with 'repository_file'.
         :epel_release: Package URL with the EPEL release.
         :umd_release: Package URL with the UMD release.
         :igtf_repo: Repository for the IGTF release.

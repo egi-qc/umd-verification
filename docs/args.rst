@@ -35,6 +35,16 @@ runtime arguments are:
 
                 - Arguments passed with equal names will overwrite the value.
 
+:repository_file: URL pointing to a valid repository file (.list, .repo).
+
+                - Multiple values are allowed by prefixing with `repository_file`.
+
+                  .. code:: bash
+
+                     fab repository_file=<URL1>,repository_file_2=<URL2>,repository_file_other=<URL3>,..
+
+                - Arguments passed with equal names will overwrite the value.
+
 :installation_type: Type of installation.
 
                 - Available options:

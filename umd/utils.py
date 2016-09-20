@@ -535,6 +535,12 @@ def show_exec_banner_ascii():
         for repo in repos:
             print(u'\t+ %s' % colors.blue(repo))
 
+    if "repository_file" in cfg.keys():
+        api.info("Using the following repository files")
+        repos = to_list(cfg.pop("repository_file"))
+        for repo in repos:
+            print(u'\t+ %s' % colors.blue(repo))
+
 
 def show_exec_banner():
     """Displays execution banner."""
@@ -556,6 +562,12 @@ def show_exec_banner():
     if "repository_url" in cfg.keys() and cfg["repository_url"]:
         print(u'\u2502 Verification repositories used:')
         repos = to_list(cfg.pop("repository_url"))
+        for repo in repos:
+            print(u'\u2502\t%s' % colors.blue(repo))
+
+    if "repository_file" in cfg.keys():
+        print(u'\u2502 Verification repositories (files) used:')
+        repos = to_list(cfg.pop("repository_file"))
         for repo in repos:
             print(u'\u2502\t%s' % colors.blue(repo))
 
