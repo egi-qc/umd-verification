@@ -66,9 +66,12 @@ def filelog(f):
         if logfile:
             r.logfile = to_file(r, logfile)
         if r.failed:
-            msg = "Exit on command failure. Reason: \"%s\"" % r
+            msg = ("Command execution has failed (reason: \"%s\")"
+                   % r.stderr.replace('\n', ' '))
+            if stop_on_error:
+                msg += " (action: no exit)"
             if logfile:
-                msg += ". Logs at '%s'" % r.logfile
+                msg += " (log: %s)" % r.logfile
             api.fail(msg, stop_on_error=stop_on_error)
         return r
     return _log
@@ -166,7 +169,8 @@ class Yum(object):
 
     def get_repo_from_pkg(self, pkglist):
         d = {}
-        r = runcmd("yum -q list %s" % ' '.join(pkglist))
+        r = runcmd("yum -q list %s" % ' '.join(pkglist),
+                   stop_on_error=False)
         if not r.failed:
             for line in r.split('\n'):
                 fields = line.split()
@@ -181,7 +185,8 @@ class Yum(object):
     def get_repos(self):
         l = []
         is_repo = False
-        for line in runcmd("yum repolist").split('\n'):
+        for line in runcmd("yum repolist",
+                           stop_on_error=False).split('\n'):
             l_str = filter(None, line.split('  '))
             if "repo id" in l_str:
                 is_repo = True
@@ -202,7 +207,8 @@ class Yum(object):
         :repolist: list of repository names (ID between brackets)
         """
         for repo in repolist:
-            r = runcmd("grep %s %s/* | cut -d':' -f1|uniq" % (repo, self.path))
+            r = runcmd("grep %s %s/* | cut -d':' -f1|uniq" % (repo, self.path),
+                       stop_on_error=False)
             if r:
                 for f in r.split('\n'):
                     os.remove(f)
@@ -213,17 +219,20 @@ class Yum(object):
 
         :repo: repository name
         """
-        r = runcmd("grep %s %s/* | cut -d':' -f1|uniq" % (repo, self.path))
+        r = runcmd("grep %s %s/* | cut -d':' -f1|uniq" % (repo, self.path),
+                   stop_on_error=False)
         if r:
             f = r.split('\n')[0]
             r_disable = runcmd(("sed -i 's/enabled.*=.*1/enabled=0/g' "
-                                "%s" % f))
+                                "%s" % f),
+                               stop_on_error=False)
             r = r_disable
         return r
 
     def add_repo_key(self, keylist):
         for key in keylist:
-            r = runcmd("rpm --import %s" % key)
+            r = runcmd("rpm --import %s" % key,
+                       stop_on_error=False)
             if r.failed:
                 api.fail("Could not add key '%s'" % key)
             else:
@@ -251,13 +260,15 @@ class Yum(object):
             r = runcmd("wget %s -O %s" % (repo,
                                           os.path.join(
                                               self.path,
-                                              os.path.basename(repo))))
+                                              os.path.basename(repo))),
+                       stop_on_error=False)
         return r
 
     def handle_repo_ssl(self):
         """Removes SSL verification for https repositories."""
         r = runcmd("sed -i 's/^sslverify.*/sslverify=False/g' %s"
-                   % self.config)
+                   % self.config,
+                   stop_on_error=False)
         if r.failed:
             api.fail("Could not disable SSL in %s" % self.config)
 
@@ -272,7 +283,8 @@ class Yum(object):
         if not check_installed:
             opts = "-qp"
         r = runcmd(("rpm %s --queryformat '%%{NAME} %%{VERSION}-%%{RELEASE}"
-                    ".%%{ARCH}\\n' %s" % (opts, rpmfile)))
+                    ".%%{ARCH}\\n' %s" % (opts, rpmfile)),
+                   stop_on_error=False)
         if not r.failed:
             for pkg in r.split('\n'):
                 name, version = pkg.split()
@@ -317,12 +329,14 @@ class Apt(object):
         else:
             cmd = "apt-get -y %s %s" % (opts, action)
 
-        return runcmd(cmd)
+        return runcmd(cmd,
+                      stop_on_error=False)
 
     def get_repos(self):
         """Gets the list of enabled repositories."""
         return runcmd(("grep -h ^deb /etc/apt/sources.list "
-                       "/etc/apt/sources.list.d/*")).split('\n')
+                       "/etc/apt/sources.list.d/*"),
+                      stop_on_error=False).split('\n')
 
     def get_repo_from_pkg(self, pkglist):
         # NOTE(orviz) There is no easy way to know from which repository
@@ -340,14 +354,17 @@ class Apt(object):
         for repo in repolist:
             for available_repo in available_repos:
                 if available_repo.find(repo) != -1:
-                    runcmd("apt-add-repository -y -r '%s'" % available_repo)
+                    runcmd("apt-add-repository -y -r '%s'" % available_repo,
+                           stop_on_error=False)
                     api.info("Existing repository removed: %s"
                              % available_repo)
 
     def add_repo_key(self, keylist):
         for key in keylist:
-            runcmd("wget -q %s -O /tmp/key.key" % key)
-            r = runcmd("apt-key add /tmp/key.key")
+            runcmd("wget -q %s -O /tmp/key.key" % key,
+                   stop_on_error=False)
+            r = runcmd("apt-key add /tmp/key.key",
+                       stop_on_error=False)
             if r.failed:
                 api.fail("Could not add key '%s'" % key)
             else:
@@ -355,7 +372,8 @@ class Apt(object):
 
     def add_repo(self, repo):
         self.run("install", False, pkgs=["software-properties-common"])
-        return runcmd("apt-add-repository -y '%s'" % repo)
+        return runcmd("apt-add-repository -y '%s'" % repo,
+                      stop_on_error=False)
 
     def get_pkglist(self, r):
         d = {}
@@ -380,7 +398,8 @@ class Apt(object):
             cmd = "dpkg-query"
         else:
             cmd = "dpkg-deb"
-        r = runcmd("%s -W %s" % (cmd, debfile))
+        r = runcmd("%s -W %s" % (cmd, debfile),
+                   stop_on_error=False)
         if not r.failed:
             name, version = r.split()
             d[name] = version

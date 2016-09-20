@@ -53,7 +53,8 @@ class KeystoneVOMSDeploy(base.Deploy):
             # selinux
             utils.install("openstack-selinux")
         elif system.distname == "ubuntu":
-            utils.runcmd("pip install pbr==0.10.0 mock==1.0.1")
+            # utils.runcmd("pip install pbr==0.10.0 mock==1.0.1")
+            utils.runcmd("pip install mock==1.0.1")
 
     def pre_validate(self):
         voms.client_install()
@@ -109,10 +110,10 @@ class KeystoneVOMSLibertyDeploy(KeystoneVOMSDeploy):
         hiera_data="voms.yaml",
         module_from_puppetforge=[
             # "openstack/keystone --version '>=6.0.0 <7.0.0'",
-            "openstack/openstacklib --version '>=6.0.0 <7.0.0'",
-            "puppetlabs/inifile --version '>=1.0.0 <2.0.0'",
+            "openstack/openstacklib",
+            "puppetlabs/inifile",
             "puppetlabs-mysql",
-            "puppetlabs/apache --version '>=1.0.0 <2.0.0'",
+            "puppetlabs/apache",
             "puppetlabs-stdlib",
             "puppetlabs/concat",
             "lcgdm-voms"],

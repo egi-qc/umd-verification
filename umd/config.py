@@ -60,7 +60,8 @@ class ConfigDict(dict):
             api.info("Using UMD verification repository: %s" % v_repo)
 
         if v_repo_file:
-            api.info("Using UMD verification repository file: %s" % v_repo_file)
+            api.info("Using UMD verification repository file: %s"
+                     % v_repo_file)
 
         # Configuration management: Puppet
         from umd.base.configure.puppet import PuppetConfig
@@ -144,4 +145,7 @@ CFG = ConfigDict()
 
 
 def cfg_item(i):
-    return CFG[i]
+    try:
+        return CFG[i]
+    except KeyError:
+        return None

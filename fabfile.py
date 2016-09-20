@@ -24,7 +24,7 @@ from umd.products.gridsite import gridsite                  	# NOQA
 from umd.products.individual_packages import individual     	# NOQA
 from umd.products.keystone_voms import keystone_voms_juno   	# NOQA
 from umd.products.keystone_voms import keystone_voms_kilo   	# NOQA
-from umd.products.keystone_voms import keystone_voms_liberty	# NOQA
+from umd.products.keystone_voms import keystone_voms_liberty    # NOQA
 from umd.products.myproxy import myproxy                    	# NOQA
 from umd.products.rc import rc                              	# NOQA
 from umd.products.storm import storm                        	# NOQA
