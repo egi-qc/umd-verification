@@ -9,7 +9,7 @@ class ScriptConfig(BaseConfig):
 
         :script: Location of the script to be ran.
         """
-	super(ScriptConfig, self).__init__()
+        super(ScriptConfig, self).__init__()
         self.script = script
 
     def config(self, logfile=None):
