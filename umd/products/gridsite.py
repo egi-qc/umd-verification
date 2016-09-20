@@ -13,7 +13,7 @@ gridsite = GridSiteDeploy(
     doc="Gridsite installation",
     metapkg=[
         "gridsite",
-        "gridsite-clients",
+        # "gridsite-clients",
         "gridsite-devel",
         "gridsite-doc",
         "gridsite-libs",
