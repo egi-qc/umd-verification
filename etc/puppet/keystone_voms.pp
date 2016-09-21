@@ -21,7 +21,7 @@ class { '::mysql::server':
 class { 'keystone::db::mysql':
     password      => 'super_secret_db_password',
     allowed_hosts => '%',
-    mysql_module  => '2.2',
+    #mysql_module  => '2.2',
 }
 class { 'keystone':
     verbose             => true,
@@ -31,7 +31,7 @@ class { 'keystone':
     admin_token         => 'random_uuid',
     enabled             => false,
     enable_ssl          => true,
-    mysql_module        => '2.2',
+    #mysql_module        => '2.2',
     public_endpoint     => "https://${::fqdn}:5000/",
     admin_endpoint      => "https://${::fqdn}:35357/",
 }
@@ -63,7 +63,7 @@ class { 'keystone::wsgi::apache':
 
 #keystone_config { 'ssl/enable': value => true }
 
-## Keystone VOMS
+## Keystone VOMS ##
 
 # keystone-paste.ini
 keystone_paste_ini {

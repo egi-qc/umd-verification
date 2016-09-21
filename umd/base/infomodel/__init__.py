@@ -33,11 +33,6 @@ class InfoModel(object):
         self.attempt_no = 5
         self.attempt_sleep = 60
 
-        # NOTE(orviz): within a QCStep?
-        utils.install("glue-validator")
-        if system.distro_version == "redhat5":
-            utils.install("openldap-clients")
-
     def _set_breathe_time(self):
         # FIXME(orviz) This should be handled by the Puppet module
         breathe_time = 30
@@ -46,6 +41,11 @@ class InfoModel(object):
         utils.runcmd("/etc/init.d/bdii restart")
 
     def _run_validator(self, glue_version, logfile):
+        # NOTE(orviz): within a QCStep?
+        utils.install("glue-validator")
+        if system.distro_version == "redhat5":
+            utils.install("openldap-clients")
+
         port = config.CFG.get("info_port", "2170")
         if glue_version == "glue1":
             cmd = ("glue-validator -H localhost -p %s -b "

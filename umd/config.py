@@ -49,6 +49,7 @@ class ConfigDict(dict):
         # Strong validations first: (umd_release, repository_url)
         v_umd_release = self.get("umd_release", None)
         v_repo = self.get("repository_url", None)
+        v_repo_file = self.get("repository_file", None)
         if not v_umd_release:
             api.fail(("No UMD release was selected: cannot start UMD "
                       "deployment"), stop_on_error=True)
@@ -57,6 +58,10 @@ class ConfigDict(dict):
 
         if v_repo:
             api.info("Using UMD verification repository: %s" % v_repo)
+
+        if v_repo_file:
+            api.info("Using UMD verification repository file: %s"
+                     % v_repo_file)
 
         # Configuration management: Puppet
         from umd.base.configure.puppet import PuppetConfig
@@ -95,6 +100,9 @@ class ConfigDict(dict):
                 # Special treatments
                 if k.startswith("repository_url"):
                     item = "repository_url"
+                    append_arg = True
+                elif k.startswith("repository_file"):
+                    item = "repository_file"
                     append_arg = True
                 elif k.startswith("qc_step"):
                     item = "qc_step"
@@ -137,4 +145,7 @@ CFG = ConfigDict()
 
 
 def cfg_item(i):
-    return CFG[i]
+    try:
+        return CFG[i]
+    except KeyError:
+        return None

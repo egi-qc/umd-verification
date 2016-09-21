@@ -16,37 +16,52 @@ class Install(object):
         self.download_dir = "/tmp/repofiles"
         self.repo_config = True
         self.verification_repo_config = True
+        self.repo_url = config.CFG.get("repository_url", [])
+        self.repo_file = config.CFG.get("repository_file", [])
 
-    def _enable_verification_repo(self, url, logfile, name=None):
+    def _enable_verification_repo(self,
+                                  url,
+                                  logfile,
+                                  name=None,
+                                  is_file=False):
         """Downloads the repofiles found in the given URL."""
-        utils.runcmd("rm -rf %s/*" % self.download_dir)
+        repopath = self.pkgtool.get_path()
 
-        cmd = "wget -P %s -r --no-parent -R*.html* %s" % (self.download_dir,
-                                                          url)
-        if url.startswith("https"):
-            cmd = ' '.join([cmd, "--no-check-certificate"])
-            self.pkgtool.handle_repo_ssl()
-
-        r = utils.runcmd(cmd, log_to_file=logfile)
-        if r.failed:
-            api.fail("Could not fetch repository '%s'" % url,
-                     logfile=r.logfile)
-
-        repofiles = utils.find_extension_files(self.download_dir,
-                                               self.pkgtool.get_extension())
-        if repofiles:
-            repopath = self.pkgtool.get_path()
-            for f in repofiles:
-                repofile = os.path.basename(f)
-                shutil.copy2(f, os.path.join(repopath, repofile))
-                api.info("Verification repository '%s' enabled." % repofile)
-
+        if is_file:
+            dest = os.path.join(repopath, os.path.basename(url))
+            cmd = "wget %s -O %s" % (url, dest)
+            utils.runcmd(cmd, log_to_file=logfile)
+            api.info("Repository file downloaded to %s" % dest)
         else:
-            api.info(("Could not find any %s ('%s') repository file at %s "
-                      "repository URL") % (system.distname,
-                                           self.pkgtool.get_extension(),
-                                           url))
-            utils.enable_repo(url, name=name)
+            utils.runcmd("rm -rf %s/*" % self.download_dir)
+
+            cmd = ("wget -P %s -r --no-parent -R*.html* "
+                   "%s") % (self.download_dir, url)
+            if url.startswith("https"):
+                cmd = ' '.join([cmd, "--no-check-certificate"])
+                self.pkgtool.handle_repo_ssl()
+
+            r = utils.runcmd(cmd, log_to_file=logfile)
+            if r.failed:
+                api.fail("Could not fetch repository '%s'" % url,
+                         logfile=r.logfile)
+
+            repofiles = utils.find_extension_files(
+                self.download_dir,
+                self.pkgtool.get_extension())
+            if repofiles:
+                for f in repofiles:
+                    repofile = os.path.basename(f)
+                    shutil.copy2(f, os.path.join(repopath, repofile))
+                    api.info("Verification repository '%s' enabled."
+                             % repofile)
+
+            else:
+                api.info(("Could not find any %s ('%s') repository file at %s "
+                          "repository URL") % (system.distname,
+                                               self.pkgtool.get_extension(),
+                                               url))
+                utils.enable_repo(url, name=name)
 
     def _get_pkgs_from_verification_repo(self):
         d = {}
@@ -127,7 +142,7 @@ class Install(object):
                                         config.CFG["epel_release"]))
 
         # Remove any trace of UMD (and external) repository files
-        r = self.pkgtool.remove(pkgs_to_purge)
+        r = self.pkgtool.remove(pkgs_to_purge, stop_on_error=False)
         if r.failed:
             api.info("Could not delete %s release packages." % msg_purge)
 
@@ -203,10 +218,29 @@ class Install(object):
         else:
             api.fail(msgtext, logfile=r.logfile, stop_on_error=True)
 
+    def _handle_repo_adding(self, repo, logfile, is_file=False):
+        """Handles repository adding.
+
+        :is_file: The given URL matches a repository file (.list, .repo).
+        """
+        if repo:
+            if is_file:
+                api.info("Repository files found: adding")
+            else:
+                api.info("Repository URLs found: adding")
+            if self.verification_repo_config:
+                c = 1
+                for url in repo:
+                    self._enable_verification_repo(
+                        url,
+                        logfile=logfile,
+                        name="fab_added_repository_%s" % c,
+                        is_file=is_file)
+                    c += 1
+
     @qc.qcstep("QC_DIST_1", "Binary Distribution")
     def qc_dist_1(self):
         _logfile = "qc_inst_1"
-        repo = config.CFG.get("repository_url", [])
 
         if self.repo_config:
             self._repo_pkgs(logfile=_logfile)
@@ -216,16 +250,9 @@ class Install(object):
            config.CFG["umd_release"] == "4"):
                 self.pkgtool.disable_repo("UMD-4-base")
 
-        # 1) Enable verification repository
-        if repo:
-            if self.verification_repo_config:
-                c = 1
-                for url in config.CFG["repository_url"]:
-                    self._enable_verification_repo(
-                        url,
-                        logfile=_logfile,
-                        name="fab_added_repository_%s" % c)
-                    c += 1
+        # 1) Enable verification repositories
+        self._handle_repo_adding(self.repo_url, _logfile)
+        self._handle_repo_adding(self.repo_file, _logfile, is_file=True)
 
         # 2) Refresh
         self.pkgtool.refresh()
@@ -237,7 +264,6 @@ class Install(object):
     @qc.qcstep("QC_UPGRADE_1", "Upgrade")
     def qc_upgrade_1(self):
         _logfile = "qc_upgrade_1"
-        repo = config.CFG.get("repository_url", [])
 
         if self.repo_config:
             self._config_repo(logfile=_logfile)
@@ -247,25 +273,23 @@ class Install(object):
            config.CFG["umd_release"] == "4"):
                 self.pkgtool.disable_repo("UMD-4-base")
 
-        if repo:
-            # 1) Install base (production) version
-            r = self.pkgtool.install(self.metapkg, log_to_file=_logfile)
-            if r.failed:
-                api.fail(("Could not install base (production) version of "
-                          "metapackage '%s'" % self.metapkg),
-                         logfile=r.logfile,
-                         stop_on_error=True)
-            else:
-                api.info("UMD product/s '%s' production version installed."
-                         % self.metapkg)
+        # 1) Install base (production) version
+        r = self.pkgtool.install(self.metapkg, log_to_file=_logfile)
+        if r.failed:
+            api.fail(("Could not install base (production) version of "
+                      "metapackage '%s'" % self.metapkg),
+                     logfile=r.logfile,
+                     stop_on_error=True)
+        else:
+            api.info("UMD product/s '%s' production version installed."
+                     % self.metapkg)
 
-            # 2) Enable verification repository
-            if self.verification_repo_config:
-                for url in repo:
-                    self._enable_verification_repo(url, logfile=_logfile)
+        # 2) Enable verification repository
+        self._handle_repo_adding(self.repo_url, _logfile)
+        self._handle_repo_adding(self.repo_file, _logfile, is_file=True)
 
-            # 3) Refresh
-            self.pkgtool.refresh()
+        # 3) Refresh
+        self.pkgtool.refresh()
 
         # 4) Update
         api.info("Using repositories: %s" % self.pkgtool.get_repos())

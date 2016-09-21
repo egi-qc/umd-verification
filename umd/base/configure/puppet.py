@@ -77,7 +77,8 @@ class PuppetConfig(BaseConfig):
                 api.fail("Could not download tarball '%s'" % mod,
                          stop_on_error=True)
             mod = dest
-        r = utils.runcmd("puppet module install %s --force" % mod)
+        r = utils.runcmd("puppet module install %s --force" % mod,
+                         stop_on_error=False)
         if r.failed and from_repo:
             r = self._module_install_from_tarball(mod, mod_name)
         if r.failed:
@@ -102,7 +103,9 @@ class PuppetConfig(BaseConfig):
         cmd = "puppet apply --modulepath %s %s --detail-exitcodes" % (
             module_path,
             self.manifest)
-        r = utils.runcmd(cmd, log_to_file="qc_conf")
+        r = utils.runcmd(cmd,
+                         log_to_file="qc_conf",
+                         stop_on_error=False)
         if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
         elif r.return_code == 2:
@@ -111,7 +114,8 @@ class PuppetConfig(BaseConfig):
             r.failed = False
         else:
             api.fail("Puppet execution failed. More information in logs: %s"
-                     % logfile)
+                     % logfile,
+                     stop_on_error=True)
             r.failed = True
         return r
 
