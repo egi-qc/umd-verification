@@ -37,7 +37,7 @@ gridftp_pkgs = [
     "globus-gass-copy-doc",
     "globus-gass-copy-progs",
     "globus-gass-server-ez",
-    "globus-gass-server-ez-devel",
+    # "globus-gass-server-ez-devel",
     "globus-gass-server-ez-progs",
     "globus-gass-transfer",
     "globus-gass-transfer-devel",
