@@ -68,7 +68,7 @@ def filelog(f):
         if r.failed:
             msg = ("Command execution has failed (reason: \"%s\")"
                    % r.stderr.replace('\n', ' '))
-            if stop_on_error:
+            if not stop_on_error:
                 msg += " (action: no exit)"
             if logfile:
                 msg += " (log: %s)" % r.logfile
