@@ -166,13 +166,10 @@ frontier-squid:
 
 keystone-voms:
     qc_func_1: 
-        - test: "bin/myproxy/client-test.sh"
-          description: "Retrieve myproxy for dteam VO."
-          args: "retrieve /tmp/x509_proxy"
         - test: "bin/keystone-voms/client-test.py"
           description: "Requesting a token using a valid VOMS proxy."
           source: "https://github.com/IFCA/voms-auth-system-openstack"
-          args: "VO:dteam --proxy-path /tmp/x509_proxy"
+          args: "VO:dteam --proxy-path /tmp/umd_proxy"
 
 mkgridmap:
     qc_func_1:
