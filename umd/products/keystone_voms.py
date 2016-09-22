@@ -3,6 +3,7 @@ from umd import base
 from umd.base.configure.puppet import PuppetConfig
 from umd.common import pki
 from umd import config
+from umd.products import utils as product_utils
 from umd.products import voms
 from umd import system
 from umd import utils
@@ -35,7 +36,8 @@ class KeystoneVOMSDeploy(base.Deploy):
             utils.install("centos-release-openstack-%s"
                           % self.version_codename.lower())
             # workaround pycrypto - https://bugs.centos.org/view.php?id=9896
-            utils.runcmd("pip uninstall -y pycrypto")
+            utils.runcmd("pip uninstall -y pycrypto",
+                          stop_on_error=False)
 
     def pre_config(self):
         # Trust UMDVerificationCA
@@ -57,8 +59,13 @@ class KeystoneVOMSDeploy(base.Deploy):
             utils.runcmd("pip install mock==1.0.1")
 
     def pre_validate(self):
+        # voms packages
         voms.client_install()
         utils.runcmd("pip install voms-auth-system-openstack")
+        # fake proxy
+        product_utils.create_fake_proxy()
+	# fake voms server - lsc
+	product_utils.add_fake_lsc()
 
 
 class KeystoneVOMSJunoDeploy(KeystoneVOMSDeploy):
