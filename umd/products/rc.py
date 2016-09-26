@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from umd import api
 from umd import base
 from umd import config
+from umd.products import utils as product_utils
 from umd import system
 from umd import utils
 
@@ -149,7 +150,7 @@ class RCDeploy(base.Deploy):
                     if t.get("platform") in distro:
                         match_os = True
                 if match_os:
-                    s = s.union([p.get("display")])
+                    s = s.union([(p.get("display"), p.get("version"))])
         return list(s)
 
     def pre_install(self):
@@ -184,6 +185,12 @@ class RCDeploy(base.Deploy):
         products = production_products + candidate_products
         s = set()
         for product in products:
+            # CMD products are tuples (name, version)
+            if config.CFG.get("cmd_release", None) and isinstance(product, tuple):
+                _name, _version = product
+                product_utils.add_openstack_distro_repos(_version)
+                product = _name
+
             product = product.lower()
             try:
                 s = s.union(self.product_mapping[product])

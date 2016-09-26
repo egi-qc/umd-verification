@@ -1,5 +1,6 @@
 import os
 import os.path
+import re
 
 from umd import api
 from umd import config
@@ -44,3 +45,31 @@ def add_fake_lsc(vo="dteam", root_dir="/etc/grid-security/vomsdir"):
 	f.write('\n')
         f.write(config.CFG["ca"].subject)
         f.flush()
+
+
+def add_openstack_distro_repos(release):
+    """Adds the official OpenStack repositories of the distribution.
+
+    :release: OpenStack release.
+    """
+    def _get_release():
+        release_map = {
+            "mitaka": ["9\.0\.[0-9]", "9\.1\.[0-9]", "9\.2\.[0-9]"]}
+        _release = None
+        if release in release_map.keys():
+            _release = release
+        else:
+            for name, regexp in release_map.items():
+                for exp in regexp:
+                    if re.search(exp, release):
+                        return name
+        return _release
+
+    matched_release = _get_release()
+    if not matched_release:
+        api.fail("Could not match OpenStack release: %s" % release,
+                 stop_on_error=True)
+    if system.distname == "ubuntu":
+        utils.enable_repo("cloud-archive:%s" % matched_release)
+    elif system.distname == "centos":
+        utils.install("centos-release-openstack-%s" % matched_release)
