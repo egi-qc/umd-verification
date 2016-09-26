@@ -86,9 +86,10 @@ class Deploy(tasks.Task):
         self.post_install()
 
     def _config(self, **kwargs):
-        if not self.cfgtool.has_run:
-            api.info("Running configuration")
-            self.cfgtool.run()
+	if config.CFG["cfgtool"]:
+            if not self.cfgtool.has_run:
+                api.info("Running configuration")
+                self.cfgtool.run()
 
     def _security(self, **kwargs):
         Security().run(**kwargs)
