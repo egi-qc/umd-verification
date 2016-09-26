@@ -172,7 +172,7 @@ class RCDeploy(base.Deploy):
         production_products = self._get_product_list(
             self._get_callback(
                 url_production,
-                from_major_release=config.CFG["umd_release"]))
+                from_major_release=config.CFG.get("umd_release", None)))
         api.info("Products from production repository: %s"
                  % production_products)
         # Products from the candidate RC

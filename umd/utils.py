@@ -542,7 +542,10 @@ def show_exec_banner_ascii():
     print(u'\t%s' % colors.white(u'Production repositories'))
     print(u'\t %s' % colors.white('|'))
     for repo in basic_repo:
-        v = cfg.pop(repo)
+        try:
+            v = cfg.pop(repo)
+        except KeyError:
+            v = None
         leftjust = len(max(basic_repo, key=len)) + 5
         print(u'\t %s %s %s' % (colors.white('|'),
                                 repo.ljust(leftjust),
