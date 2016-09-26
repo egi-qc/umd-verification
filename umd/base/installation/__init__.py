@@ -41,7 +41,7 @@ class Install(object):
                 cmd = ' '.join([cmd, "--no-check-certificate"])
                 self.pkgtool.handle_repo_ssl()
 
-            r = utils.runcmd(cmd, log_to_file=logfile)
+            r = utils.runcmd(cmd, log_to_file=logfile, stop_on_error=False)
             if r.failed:
                 api.fail("Could not fetch repository '%s'" % url,
                          logfile=r.logfile)

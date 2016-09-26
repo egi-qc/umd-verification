@@ -246,8 +246,9 @@ class Yum(object):
                      "baseurl=%s" % repo,
                      "protect=1",
                      "enabled=1",
-                     "priority=%s" % kwargs["priority"],
                      "gpgcheck=0"]
+            if "priority" in kwargs.keys():
+                lrepo.append("priority=%s" % kwargs["priority"])
             fname = os.path.join(self.path,
                                  name.replace(' ', '') + self.extension)
             with open(fname, 'w') as f:
