@@ -14,6 +14,7 @@ class KeystoneVOMSDeploy(base.Deploy):
         name = "keystone-voms-%s" % self.version_codename.lower()
         package = ("python-keystone-voms", self.version + '*')
         description = "Keystone %s VOMS Module (%s)" % (self.version_codename,
+                                                        self.version)
         puppetconf = PuppetConfig(
             manifest="keystone_voms.pp",
             hiera_data="voms.yaml",
