@@ -36,8 +36,8 @@ class KeystoneVOMSDeploy(base.Deploy):
             utils.install("centos-release-openstack-%s"
                           % self.version_codename.lower())
             # workaround pycrypto - https://bugs.centos.org/view.php?id=9896
-            utils.runcmd("pip uninstall -y pycrypto",
-                          stop_on_error=False)
+            #utils.runcmd("pip uninstall -y pycrypto",
+            #              stop_on_error=False)
 
     def pre_config(self):
         # Trust UMDVerificationCA
@@ -129,7 +129,27 @@ class KeystoneVOMSLibertyDeploy(KeystoneVOMSDeploy):
             "umd_stable_%s.tar.gz" % version_codename.lower()), "keystone")
     )
 
+class KeystoneVOMSMitakaDeploy(KeystoneVOMSDeploy):
+    version = "9.0.3"
+    version_codename = "Mitaka"
+    puppetconf = PuppetConfig(
+        manifest="keystone_voms.pp",
+	hiera_data="voms.yaml",
+	module_from_puppetforge=[
+	    "openstack/openstacklib",
+	    "puppetlabs/inifile",
+	    "puppetlabs-mysql",
+	    "puppetlabs/apache",
+	    "puppetlabs-stdlib",
+	    "puppetlabs/concat",
+	    "lcgdm-voms"],
+	module_from_repository=((
+	    "https://github.com/openstack/puppet-keystone/archive/"
+	    "stable/%s.tar.gz" % version_codename.lower()), "keystone")
+    )
+
 
 keystone_voms_juno = KeystoneVOMSJunoDeploy()
 keystone_voms_kilo = KeystoneVOMSKiloDeploy()
 keystone_voms_liberty = KeystoneVOMSLibertyDeploy()
+keystone_voms_mitaka = KeystoneVOMSMitakaDeploy()
