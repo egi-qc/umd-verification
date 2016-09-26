@@ -13,7 +13,7 @@ class RCDeploy(base.Deploy):
     from umd.products import bdii, gram5, globus, gridsite, wms, fts    # NOQA
     from umd.products import glexec, cream, arc, ui, canl, xrootd       # NOQA
     from umd.products import storm, argus, dcache, ca, frontier_squid   # NOQA
-    from umd.products import dpm   					# NOQA
+    from umd.products import dpm, keystone_voms  			# NOQA
 
     product_mapping = {
         "arc": arc.arc_ce.metapkg,
@@ -66,6 +66,7 @@ class RCDeploy(base.Deploy):
         "gridsite": gridsite.gridsite.metapkg,
         "gridway": ["ige-meta-gridway"],
         "json-c": ["json-c"],
+        "keystone-voms": ["python-keystone-voms"],
         "lb": wms.lb.metapkg,
         "lfc": ["lfc", "lfc-server-mysql"],
         "myproxy": ui.ui_myproxy.metapkg,
@@ -99,10 +100,19 @@ class RCDeploy(base.Deploy):
         response = urllib2.urlopen(url)
         txt = response.read()
         root = ET.fromstring(txt)
-
+        
+        if config.CFG["rc_release"].startswith("CMD"):
+            distro_type = "CMD-OS"
+        elif config.CFG["rc_release"].startswith("UMD"):
+            distro_type = "UMD"
+        else:
+            api.fail("Distribution type '%s' not known" 
+                     % config.CFG["rc_release"], 
+                     stop_on_error=True)
         l = []
         for p in root.iter('item'):
-            s = re.search("Release: UMD-(\d*\.\d*\.\d*)", p.find("title").text)
+            s = re.search("Release: (%s-\d*\.\d*\.\d*)" % distro_type,
+                          p.find("title").text)
             if s:
                 release = s.groups()[0]
                 cb = p.find("distroAPICallBack").text
@@ -133,8 +143,13 @@ class RCDeploy(base.Deploy):
             txt = response.read()
             root = ET.fromstring(txt)
 
-            s = s.union([p.get("display")for p in root.iter("product")
-                         if p.find("target").get("platform") in distro])
+            for p in root.iter("product"):
+                match_os = False
+		for t in p.iter("target"):
+                    if t.get("platform") in distro:
+                        match_os = True
+                if match_os:
+                    s = s.union([p.get("display")])
         return list(s)
 
     def pre_install(self):
