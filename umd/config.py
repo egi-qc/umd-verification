@@ -48,10 +48,11 @@ class ConfigDict(dict):
     def validate(self):
         # Strong validations first: (umd_release, repository_url)
         v_umd_release = self.get("umd_release", None)
+        v_cmd_release = self.get("cmd_release", None)
         v_repo = self.get("repository_url", None)
         v_repo_file = self.get("repository_file", None)
-        if not v_umd_release:
-            api.fail(("No UMD release was selected: cannot start UMD "
+        if not v_umd_release or not v_cmd_release:
+            api.fail(("No UMD or CMD release was selected: cannot start "
                       "deployment"), stop_on_error=True)
         else:
             api.info("Using UMD %s release repository" % v_umd_release)

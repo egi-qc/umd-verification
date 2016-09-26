@@ -21,7 +21,15 @@ runtime arguments are:
                     :4: UMD-4 release.
 
                 - Default value: No default value, this parameter **is required**
-                  to be provided at runtime.
+                  to be provided at runtime if ``cmd_release`` is not used.
+
+:cmd_release: CMD release to be triggered.
+
+                - Available options:
+                    :0: CMD-0 release.
+
+                - Default value: No default value, this parameter **is required**
+                  to be provided at runtime if ``umd_release`` is not used.
 
 :repository_url: Repository path with the verification content.
 
