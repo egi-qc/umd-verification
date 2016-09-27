@@ -371,7 +371,24 @@ class Apt(object):
             else:
                 api.info("Repository key added: %s" % key)
 
-    def add_repo(self, repo):
+    def add_repo(self, repo, **kwargs):
+        """Adds a Debian repository URL.
+
+        :repo: Debian formatted repo URL. If not, tries to get it by parsing
+               the URL (note that only one component will be added).
+        """
+        # Parse URL in not Debian-formatted or PPA
+        if len(repo.split(' ')) == 1 and not re.search(":(?!//)", repo):
+            uri, rest = repo.split("dists")
+            rest = rest.strip('/').split('/')
+            distro = rest.pop(0)
+            if not rest:
+                # 'main' as the default component
+                component = ["main"]
+            else:
+                component = rest.pop(0)
+            repo = ' '.join([uri, component])
+
         self.run("install", False, pkgs=["software-properties-common"])
         return runcmd("apt-add-repository -y '%s'" % repo,
                       stop_on_error=False)

@@ -135,9 +135,11 @@ class RCDeploy(base.Deploy):
         if system.distro_version.startswith("redhat"):
             distro = [system.distro_version,
                       system.distro_version.replace("redhat", "sl")]
+        elif system.distro_version == "ubuntu14":
+            distro = [system.distro_version,
+                      "ubuntu-trusty"]
         else:
             distro = [system.distro_version]
-
         s = set()
         for url in urls:
             response = urllib2.urlopen(url)
