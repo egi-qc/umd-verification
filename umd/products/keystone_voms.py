@@ -29,7 +29,7 @@ class KeystoneVOMSDeploy(base.Deploy):
             module_from_repository=((
                 "https://github.com/egi-qc/puppet-keystone/archive/"
                 "umd_stable_%s.tar.gz" % self.version_codename.lower()),
-		"keystone")
+                "keystone")
         )
 
         super(KeystoneVOMSDeploy, self).__init__(
@@ -69,8 +69,8 @@ class KeystoneVOMSDeploy(base.Deploy):
         utils.runcmd("pip install voms-auth-system-openstack")
         # fake proxy
         product_utils.create_fake_proxy()
-	# fake voms server - lsc
-	product_utils.add_fake_lsc()
+        # fake voms server - lsc
+        product_utils.add_fake_lsc()
 
 
 class KeystoneVOMSJunoDeploy(KeystoneVOMSDeploy):

@@ -3,5 +3,5 @@ fabric
 PyYAML
 requests
 #python-ldap
-mock==1.0.1
-pbr==0.10.0
+mock
+pbr

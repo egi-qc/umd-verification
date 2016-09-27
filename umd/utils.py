@@ -381,7 +381,7 @@ class Apt(object):
         if len(repo.split(' ')) == 1 and not re.search(":(?!//)", repo):
             uri, rest = repo.split("dists")
             rest = rest.strip('/').split('/')
-            distro = rest.pop(0)
+            rest.pop(0)  # distro
             if not rest:
                 # 'main' as the default component
                 component = ["main"]

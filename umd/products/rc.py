@@ -101,14 +101,14 @@ class RCDeploy(base.Deploy):
         response = urllib2.urlopen(url)
         txt = response.read()
         root = ET.fromstring(txt)
-        
+
         if config.CFG["rc_release"].startswith("CMD"):
             distro_type = "CMD-OS"
         elif config.CFG["rc_release"].startswith("UMD"):
             distro_type = "UMD"
         else:
-            api.fail("Distribution type '%s' not known" 
-                     % config.CFG["rc_release"], 
+            api.fail("Distribution type '%s' not known"
+                     % config.CFG["rc_release"],
                      stop_on_error=True)
         l = []
         for p in root.iter('item'):
@@ -148,7 +148,7 @@ class RCDeploy(base.Deploy):
 
             for p in root.iter("product"):
                 match_os = False
-		for t in p.iter("target"):
+                for t in p.iter("target"):
                     if t.get("platform") in distro:
                         match_os = True
                 if match_os:
@@ -156,6 +156,7 @@ class RCDeploy(base.Deploy):
         return list(s)
 
     def pre_install(self):
+        # Add repositories (and keys)
         repocount = 1
         for repo in config.CFG["repository_url"]:
             if repo.find("base") != -1:
@@ -167,9 +168,10 @@ class RCDeploy(base.Deploy):
                                   name="UMD RC %s" % repocount,
                                   priority=1)
                 repocount += 1
-
-        # Add IGTF repository as well (some products have dependencies on it)
+        utils.add_repo_key(config.CFG["repo_keys"])
         utils.enable_repo(config.CFG["igtf_repo"])
+        utils.add_repo_key(config.CFG["igtf_repo_key"])
+
         # Products from production
         url_production = "http://admin-repo.egi.eu/feeds/production/"
         production_products = self._get_product_list(
@@ -188,7 +190,9 @@ class RCDeploy(base.Deploy):
         s = set()
         for product in products:
             # CMD products are tuples (name, version)
-            if config.CFG.get("cmd_release", None) and isinstance(product, tuple):
+            if config.CFG.get("cmd_release",
+                              None) and isinstance(product,
+                                                   tuple):
                 _name, _version = product
                 product_utils.add_openstack_distro_repos(_version)
                 product = _name

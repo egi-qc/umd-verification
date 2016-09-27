@@ -22,12 +22,13 @@ def create_fake_proxy(vo="dteam", out="/tmp/umd_proxy"):
                                 key_prv=keypath,
                                 key_pub=certpath)
 
-    utils.runcmd(("voms-proxy-fake -rfc -cert %(certpath)s -key %(keypath)s "
-                  "-hours 44000 -voms %(vo)s -hostcert "
+    utils.runcmd(("voms-proxy-fake -rfc -cert %s -key %s "
+                  "-hours 44000 -voms %s -hostcert "
                   "/etc/grid-security/hostcert.pem -hostkey "
                   "/etc/grid-security/hostkey.pem "
-                  "-fqan /%(vo)s/Role=NULL/Capability=NULL "
-                  "-uri %(fqdn)s:15000 -out %(out)s") % locals())
+                  "-fqan /%s/Role=NULL/Capability=NULL "
+                  "-uri %s:15000 -out %s")
+                 % (certpath, keypath, vo, vo, fqdn, out))
     api.info("Fake proxy created under '%s'" % out)
 
 
@@ -38,11 +39,11 @@ def add_fake_lsc(vo="dteam", root_dir="/etc/grid-security/vomsdir"):
     """
     vo_dir = os.path.join(root_dir, vo)
     if not os.path.exists(vo_dir):
-	os.makedirs(vo_dir)
+        os.makedirs(vo_dir)
 
     with open(os.path.join(vo_dir, '.'.join([system.fqdn, "lsc"])), 'a') as f:
         f.write(config.CFG["cert"].subject)
-	f.write('\n')
+        f.write('\n')
         f.write(config.CFG["ca"].subject)
         f.flush()
 
