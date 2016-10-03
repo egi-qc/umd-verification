@@ -72,19 +72,13 @@ keystone_paste_ini {
         value     => "keystone_voms.core:VomsAuthNMiddleware.factory",
 }
 
-if $::operatingsystem == "CentOS" {
-    $keystone_ini = "/usr/share/keystone/keystone-dist-paste.ini"
-}
-elsif $::operatingsystem == "Ubuntu" {
-    $keystone_ini = "/etc/keystone/keystone-paste.ini"
-}
 ini_subsetting {
     "VOMS_filter_public_api":
         ensure            => present,
         section           => "pipeline:public_api",
         setting           => "pipeline",
         key_val_separator => '=',
-        path              => $keystone_ini,
+        path              => "/etc/keystone/keystone-paste.ini",
         subsetting        => "ec2_extension",
         value             => " voms",
         require           => Keystone_paste_ini["VOMS_filter"],
