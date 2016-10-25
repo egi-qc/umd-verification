@@ -1,8 +1,10 @@
+frontier-squid:
+    - Fermilab Fermitools license (BSD license)
 gfal2:
     - Apache 2.0
-gridftp:
-    - Apache 2.0
 globus-default-security:
+    - Apache 2.0
+gridftp:
     - Apache 2.0
 xrootd:
     - GNU LGPL
