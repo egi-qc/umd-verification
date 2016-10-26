@@ -1,3 +1,5 @@
+edg-mkgridmap:
+    - Apache 2.0
 frontier-squid:
     - Fermilab Fermitools license (BSD license)
 gfal2:
