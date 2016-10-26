@@ -2,12 +2,26 @@ import os.path
 
 from umd import api
 from umd import base
+from umd.base.configure.ansible import AnsibleConfig
 from umd.base.configure.puppet import PuppetConfig
 from umd.base.configure.yaim import YaimConfig
+from umd import config
+from umd import system
 from umd import utils
 
 
 class ArgusDeploy(base.Deploy):
+    def pre_config(self):
+        # extra vars
+        extra_vars = "pap_host=%s pap_host_dn=%s pdp_host=%s pepd_host=%s" % (
+                     system.fqdn,
+                     config.CFG["cert"].subject,
+                     system.fqdn,
+                     system.fqdn)
+        self.cfgtool.extra_vars = extra_vars
+
+
+class ArgusPuppetDeploy(base.Deploy):
     def pre_config(self):
         # NOTE(orviz) Check needed since there are official modules
         # that does not contain metadata.json file
@@ -31,6 +45,15 @@ class EESDeploy(base.Deploy):
 
 argus = ArgusDeploy(
     name="argus",
+    doc="ARGUS server deployment using Ansible.",
+    metapkg="argus-authz",
+    need_cert=True,
+    has_infomodel=True,
+    cfgtool=AnsibleConfig(
+        role="https://github.com/egi-qc/ansible-argus"),)
+
+argus_puppet = ArgusPuppetDeploy(
+    name="argus-puppet",
     doc="ARGUS server deployment using Puppet.",
     metapkg="emi-argus",
     need_cert=True,
@@ -42,8 +65,8 @@ argus = ArgusDeploy(
         module_from_puppetforge="puppetlabs-stdlib"),
     qc_specific_id="argus")
 
-argus_no_metapkg = ArgusDeploy(
-    name="argus-no-metapkg",
+argus_puppet_no_metapkg = ArgusPuppetDeploy(
+    name="argus-puppet-no-metapkg",
     doc="ARGUS server with no metapackage deployment.",
     metapkg=["argus-pap", "argus-pdp", "argus-pep-server"],
     need_cert=True,

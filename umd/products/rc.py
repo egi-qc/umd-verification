@@ -18,7 +18,7 @@ class RCDeploy(base.Deploy):
 
     product_mapping = {
         "arc": arc.arc_ce.metapkg,
-        "argus-pap": argus.argus_no_metapkg.metapkg,
+        "argus-pap": argus.argus_puppet_no_metapkg.metapkg,
         "bdii core": ["bdii"],
         "bdii site": bdii.bdii_site_puppet.metapkg,
         "bdii top": bdii.bdii_top_puppet.metapkg,
