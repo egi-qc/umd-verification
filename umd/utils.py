@@ -241,9 +241,11 @@ class Yum(object):
     def add_repo(self, repo, **kwargs):
         if "name" in kwargs.keys():
             name = kwargs["name"]
+            priority = kwargs["priority"]
             lrepo = ["[%s]" % name.replace(' ', '_'),
                      "name=%s" % name,
                      "baseurl=%s" % repo,
+                     "priority=%s" % priority,
                      "protect=1",
                      "enabled=1",
                      "gpgcheck=0"]

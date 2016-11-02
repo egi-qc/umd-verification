@@ -61,7 +61,10 @@ class Install(object):
                           "repository URL") % (system.distname,
                                                self.pkgtool.get_extension(),
                                                url))
-                utils.enable_repo(url, name=name)
+                if system.distname in ["redhat", "centos"]:
+                    utils.enable_repo(url, name=name, priority=1)
+                else:
+                    utils.enable_repo(url, name=name)
 
     def _get_pkgs_from_verification_repo(self):
         d = {}
