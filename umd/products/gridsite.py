@@ -5,7 +5,7 @@ from umd import utils
 
 class GridSiteDeploy(base.Deploy):
     def pre_config(self):
-        utils.install(["ca-policy-egi-core", "httpd"])
+        utils.install(["ca-policy-egi-core", "httpd", "mod_ssl"])
 
 
 gridsite = GridSiteDeploy(
