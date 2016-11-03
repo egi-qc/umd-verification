@@ -10,5 +10,7 @@ globus-default-security:
     - Apache 2.0
 gridftp:
     - Apache 2.0
+gridsite:
+    - Apache 2.0
 xrootd:
     - GNU LGPL
