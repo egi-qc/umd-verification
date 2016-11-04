@@ -29,6 +29,7 @@ igtf_repo:
 igtf_repo_key:
     debian: "https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3"
     ubuntu: "https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3"
+    redhat: "https://dist.eugridpma.info/distribution/igtf/current/GPG-KEY-EUGridPMA-RPM-3"
 
 repo_keys:
     redhat: 
