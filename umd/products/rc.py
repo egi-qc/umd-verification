@@ -82,6 +82,7 @@ class RCDeploy(base.Deploy):
         "umd-3 repository configuration": ["umd-release"],
         "umd-release": ["umd-release"],
         "voms-admin": ["voms-admin-client", "voms-admin-server"],
+        "voms-admin-server": ["voms-admin-server"],
         "voms-clients": ["voms-clients"],
         "voms-server": ["voms-server"],
         "wms": wms.wms.metapkg,
@@ -90,6 +91,7 @@ class RCDeploy(base.Deploy):
         "xuudb": ["unicore-xuudb"],
         "xroot": xrootd.xrootd.metapkg,
         "xroot-libs": xrootd.xrootd.metapkg,
+        "yaim-core": ["glite-yaim-core"],
     }
 
     def _get_callback(self, url, from_major_release=None):
@@ -189,14 +191,11 @@ class RCDeploy(base.Deploy):
         products = production_products + candidate_products
         s = set()
         for product in products:
-            # CMD products are tuples (name, version)
-            if config.CFG.get("cmd_release",
-                              None) and isinstance(product,
-                                                   tuple):
+            if isinstance(product, tuple):
                 _name, _version = product
-                product_utils.add_openstack_distro_repos(_version)
+                if config.CFG.get("cmd_release", None):
+                    product_utils.add_openstack_distro_repos(_version)
                 product = _name
-
             product = product.lower()
             try:
                 s = s.union(self.product_mapping[product])
