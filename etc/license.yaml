@@ -12,5 +12,7 @@ gridftp:
     - Apache 2.0
 gridsite:
     - Apache 2.0
+keystone-voms:
+    - Apache 2.0
 xrootd:
     - GNU LGPL
