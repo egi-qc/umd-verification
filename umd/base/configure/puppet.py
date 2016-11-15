@@ -3,6 +3,7 @@ import itertools
 import os.path
 import shutil
 
+import string
 import yaml
 
 from umd import api
@@ -20,6 +21,12 @@ hiera_config = """
   :datadir: /etc/puppet/hieradata
 :hierarchy:
   - global
+"""
+
+hiera_umd = """
+umd::release: ${umd_release} 
+umd::verification::repofile: ${repository_url}
+umd::openstack_release: ${openstack_release}
 """
 
 
@@ -40,29 +47,11 @@ class PuppetConfig(BaseConfig):
         super(PuppetConfig, self).__init__()
         self.manifest = manifest
         self.hiera_data = utils.to_list(hiera_data)
+        self.hiera_data_dir = "/etc/puppet/hieradata"
         self.module_path = "/etc/puppet/modules"
         self.module_from_puppetforge = utils.to_list(module_from_puppetforge)
         self.module_from_repository = utils.to_list(module_from_repository)
-
-    def _v3_workaround(self):
-        # Include hiera functions in Puppet environment
-        utils.install("rubygems")
-        utils.runcmd("gem install hiera-puppet --install-dir %s"
-                     % self.module_path)
-        utils.runcmd("mv %s %s" % (os.path.join(self.module_path, "gems/*"),
-                                   self.module_path))
-
-    def _set_hiera(self):
-        if self.hiera_data:
-            if not os.path.exists("/etc/puppet/hieradata"):
-                utils.runcmd("mkdir /etc/puppet/hieradata")
-            d = yaml.safe_load(hiera_config)
-            for f in self.hiera_data:
-                utils.runcmd("cp etc/puppet/%s /etc/puppet/hieradata/" % f)
-                d[":hierarchy"].append(os.path.splitext(f)[0])
-            with open("/etc/puppet/hiera.yaml", 'w') as f:
-                f.write(yaml.dump(d, default_flow_style=False))
-            shutil.copy("/etc/puppet/hiera.yaml", "/etc/hiera.yaml")
+        self.umd_module = "https://github.com/egi-qc/puppet-umd/archive/master.tar.gz"
 
     def _module_install(self, mod):
         mod_name = ''
@@ -95,6 +84,47 @@ class PuppetConfig(BaseConfig):
             if os.path.exists(dest_o):
                 utils.runcmd("rm -rf %s" % dest_o)
             return utils.runcmd("mv %s %s" % (dest, dest_o))
+
+    def _install_umd_module(self):
+        """Installs puppet-umd module in the system."""
+        self._module_install(self.umd_module, "umd")    
+
+    def _set_hiera(self):
+        """Sets hiera configuration files in place."""
+        d = yaml.safe_load(hiera_config)
+        with open("/etc/puppet/hiera.yaml", 'w') as f:
+            f.write(yaml.dump(d, default_flow_style=False))
+        shutil.copy("/etc/puppet/hiera.yaml", "/etc/hiera.yaml")
+        if not os.path.exists(self.hiera_data_dir):
+            utils.runcmd("mkdir %s" % self.hiera_data_dir)
+
+    def _set_hiera_params(self):
+        """Sets hiera parameter files (repository deploy and custom params)."""
+        # umd parameter file
+        umd_conf = string.Template(hiera_umd).safe_substitute({
+            "umd_release": config.CFG["umd_release"],
+            "repository_url": config.CFG.get("repository_url", ""),
+            "openstack_release": config.CFG.get("openstack_release", ""),
+        })
+        umd_conf_file = os.path.join(self.hiera_data_dir, "umd.yaml")
+        with open(umd_conf_file, 'w') as f:
+            f.write(umd_conf)
+        api.info("UMD hiera parameters set: %s" % umd_conf_file) 
+        # service parameter files
+        if self.hiera_data:
+            for f in self.hiera_data:
+                target = os.path.join(self.hiera_data_dir, f)
+                utils.runcmd("cp etc/puppet/%s %s" % (f, target))
+                d[":hierarchy"].append(os.path.splitext(f)[0])
+                api.info("Service hiera parameters set: %s" % target)
+
+    def _v3_workaround(self):
+        # Include hiera functions in Puppet environment
+        utils.install("rubygems")
+        utils.runcmd("gem install hiera-puppet --install-dir %s"
+                     % self.module_path)
+        utils.runcmd("mv %s %s" % (os.path.join(self.module_path, "gems/*"),
+                                   self.module_path))
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "puppet.log")
@@ -157,7 +187,9 @@ class PuppetConfig(BaseConfig):
             self._module_install(module)
 
         # Hiera environment
+        self._install_umd_module()
         self._set_hiera()
+        self._set_hiera_params()
 
         # Run Puppet
         r = self._run()
