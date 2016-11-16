@@ -1,5 +1,6 @@
 base:
     log_path: "/var/tmp/umd-verification"
+    jinja_template_dir: "etc/jinja_templates"
 
 epel_release:
     redhat5: "http://download.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm"

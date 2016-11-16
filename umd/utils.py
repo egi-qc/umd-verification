@@ -7,6 +7,8 @@ import tempfile
 
 from fabric import api as fabric_api
 from fabric import colors
+import fabric
+import jinja2
 import mock
 import yaml
 
@@ -94,6 +96,28 @@ def runcmd(cmd, stderr_to_stdout=False, nosudo=False):
             if not nosudo:
                 cmd = "sudo -E " + cmd
             r = fabric_api.local(cmd, capture=True)
+    return r
+
+
+@filelog
+def runcmd_chdir(cmd, chdir, stderr_to_stdout=False, nosudo=False):
+    """Runs a generic command based on a given directory
+
+    :cmd: command to execute
+    :chdir: directory to execute the command from
+    """
+    if stderr_to_stdout:
+        cmd = ' '.join([cmd, "2>&1"])
+    qc_envvars = config.CFG.get("qc_envvars", {})
+    env_d = dict(qc_envvars.items()
+                 + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")])
+    with fabric.context_managers.lcd(chdir):
+        with fabric_api.settings(warn_only=True):
+            with fabric_api.shell_env(**env_d):
+                # FIXME(orviz) use sudo fabric function
+                if not nosudo:
+                    cmd = "sudo -E " + cmd
+                r = fabric_api.local(cmd, capture=True)
     return r
 
 
@@ -757,3 +781,30 @@ def remove_logs():
     """Creates a new execution log directory."""
     if os.path.exists(config.CFG["log_path"]):
         shutil.rmtree(config.CFG["log_path"])
+
+
+def to_yaml(fname, str):
+    """Creates a YAML file with the content given (string)."""
+    with open(fname, 'w') as f:
+        f.write(yaml.dump(yaml.safe_load(str), default_flow_style=False))
+    return fname
+
+def render_jinja(template, data, output_file=None):
+    """Stores in a file the output of rendering a Jinja2 template.
+
+    :template: template file name (neither absolute nor relative path)
+    :data: data to be rendered in the template
+    :output_file: absolute path to the file to put the rendered result
+    """
+    template_file = os.path.join(
+        os.getcwd(),
+        os.path.join(config.CFG["jinja_template_dir"],
+                     template))
+    templateLoader = jinja2.FileSystemLoader('/')
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    template = templateEnv.get_template(template_file)
+    out = template.render(data)
+    with open(output_file, 'w') as f:
+        f.write(out)
+        f.flush()
+    return output_file

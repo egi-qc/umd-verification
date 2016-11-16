@@ -25,9 +25,11 @@ class ConfigDict(dict):
             return yaml.safe_load(f)
 
     def set_defaults(self):
+        self.__setitem__("log_path", self.defaults["base"]["log_path"])
+        self.__setitem__("jinja_template_dir",
+                         self.defaults["base"]["jinja_template_dir"])
         self.__setitem__("yaim_path", self.defaults["yaim"]["path"])
         self.__setitem__("puppet_path", self.defaults["puppet"]["path"])
-        self.__setitem__("log_path", self.defaults["base"]["log_path"])
         self.__setitem__("umdnsu_url", self.defaults["nagios"]["umdnsu_url"])
         self.__setitem__(
             "igtf_repo",

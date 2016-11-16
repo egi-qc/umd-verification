@@ -2,6 +2,7 @@ from distutils import version
 import itertools
 import os.path
 import shutil
+import tempfile
 
 import string
 import yaml
@@ -13,110 +14,105 @@ from umd import system
 from umd import utils
 
 
-hiera_config = """
----
-:backends:
-  - yaml
-:yaml:
-  :datadir: /etc/puppet/hieradata
-:hierarchy:
-  - global
-"""
-
-hiera_umd = """
-umd::release: ${umd_release} 
-umd::verification::repofile: ${repository_url}
-umd::openstack_release: ${openstack_release}
-"""
-
-
 class PuppetConfig(BaseConfig):
     def __init__(self,
                  manifest,
-                 hiera_data=[],
-                 module_from_puppetforge=[],
-                 module_from_repository=[]):
+                 module,
+                 hiera_data=[]):
         """Runs Puppet configurations.
 
         :manifest: Main ".pp" with the configuration to be applied.
+        :module: Name of a Forge module or git repository (Puppetfile format).
         :hiera_data: YAML file/s with hiera variables.
-        :module_from_puppetforge: list of modules to be installed
-                                  (from PuppetForge).
-        :module_from_repository: URL pointing to repository tarball/s.
         """
         super(PuppetConfig, self).__init__()
         self.manifest = manifest
+        self.module = utils.to_list(module)
         self.hiera_data = utils.to_list(hiera_data)
         self.hiera_data_dir = "/etc/puppet/hieradata"
         self.module_path = "/etc/puppet/modules"
-        self.module_from_puppetforge = utils.to_list(module_from_puppetforge)
-        self.module_from_repository = utils.to_list(module_from_repository)
-        self.umd_module = "https://github.com/egi-qc/puppet-umd/archive/master.tar.gz"
-
-    def _module_install(self, mod):
-        mod_name = ''
-        from_repo = False
-        if len(mod) == 2:
-            mod, mod_name = mod
-        if mod.startswith("http"):
-            from_repo = True
-            dest = os.path.join("/tmp", os.path.basename(mod))
-            r = utils.runcmd("wget %s -O %s" % (mod, dest))
-            if r.failed:
-                api.fail("Could not download tarball '%s'" % mod,
-                         stop_on_error=True)
-            mod = dest
-        r = utils.runcmd("puppet module install %s --force" % mod,
-                         stop_on_error=False)
-        if r.failed and from_repo:
-            r = self._module_install_from_tarball(mod, mod_name)
-        if r.failed:
-            api.fail("Puppet module '%s' could not be installed" % mod)
-
-    def _module_install_from_tarball(self, tarball, mod_name=''):
-        """Installs a Puppet module tarball manually."""
-        root_dir = utils.runcmd("tar tzf %s | sed -e 's@/.*@@' | uniq"
-                                % tarball)
-        dest = os.path.join(self.module_path, root_dir)
-        utils.runcmd("tar xvfz %s -C %s" % (tarball, self.module_path))
-        if mod_name:
-            dest_o = os.path.join(self.module_path, mod_name)
-            if os.path.exists(dest_o):
-                utils.runcmd("rm -rf %s" % dest_o)
-            return utils.runcmd("mv %s %s" % (dest, dest_o))
-
-    def _install_umd_module(self):
-        """Installs puppet-umd module in the system."""
-        self._module_install(self.umd_module, "umd")    
+        self.puppetfile = "etc/puppet/Puppetfile"
+        self.params_files = []
 
     def _set_hiera(self):
         """Sets hiera configuration files in place."""
-        d = yaml.safe_load(hiera_config)
-        with open("/etc/puppet/hiera.yaml", 'w') as f:
-            f.write(yaml.dump(d, default_flow_style=False))
-        shutil.copy("/etc/puppet/hiera.yaml", "/etc/hiera.yaml")
-        if not os.path.exists(self.hiera_data_dir):
-            utils.runcmd("mkdir %s" % self.hiera_data_dir)
+
+        print "========== PARAMS FILES: ", self.params_files
+        utils.render_jinja(
+            "hiera.yaml",
+            {
+                "hiera_data_dir": self.hiera_data_dir,
+                "params_files": self.params_files,
+            },
+            output_file=os.path.join("/etc/hiera.yaml"))
+        shutil.copy("/etc/hiera.yaml", "/etc/puppet/hiera.yaml")
 
     def _set_hiera_params(self):
         """Sets hiera parameter files (repository deploy and custom params)."""
-        # umd parameter file
-        umd_conf = string.Template(hiera_umd).safe_substitute({
-            "umd_release": config.CFG["umd_release"],
-            "repository_url": config.CFG.get("repository_url", ""),
-            "openstack_release": config.CFG.get("openstack_release", ""),
-        })
-        umd_conf_file = os.path.join(self.hiera_data_dir, "umd.yaml")
-        with open(umd_conf_file, 'w') as f:
-            f.write(umd_conf)
-        api.info("UMD hiera parameters set: %s" % umd_conf_file) 
-        # service parameter files
+        # umd
+        utils.render_jinja(
+            "umd.yaml",
+            {
+                "umd_release": config.CFG["umd_release"],
+                "repository_url": config.CFG.get("repository_url", ""),
+                "openstack_release": config.CFG.get("openstack_release", ""),
+            },
+            output_file=os.path.join(self.hiera_data_dir, "umd.yaml"))
+        self.params_files.append("umd.yaml")
+        # service (static parameter files)
         if self.hiera_data:
             for f in self.hiera_data:
                 target = os.path.join(self.hiera_data_dir, f)
                 utils.runcmd("cp etc/puppet/%s %s" % (f, target))
                 d[":hierarchy"].append(os.path.splitext(f)[0])
                 api.info("Service hiera parameters set: %s" % target)
+                self.params_files.append(f)
+
+    def _set_puppetfile(self):
+        """Processes the list of modules given."""
+        puppetfile = "/tmp/Puppetfile"
+        # Build dict to be rendered
+        d = {}
+        for mod in self.module:
+            version = None
+            if isinstance(mod, tuple):
+                mod, version = mod
+            mod_name = mod
+            extra = {}
+            if mod.startswith(("git://", "https://", "http://")):
+                mod_name = os.path.basename(mod).split('.')[0]
+                extra = {"repourl": mod}
+                if version:
+                    extra = {"repourl": mod, "ref": version}
+            else:
+                if version:
+                    extra = {"version": version}
+            d[mod_name] = extra
+        ## Render Puppetfile template
+        return utils.render_jinja("Puppetfile", {"modules": d}, puppetfile)
+        #template_file = os.path.join(
+        #    os.getcwd(),
+        #    os.path.join(config.CFG["jinja_template_dir"],
+        #                 "Puppetfile"))
+        #templateLoader = jinja2.FileSystemLoader('/')
+        #templateEnv = jinja2.Environment(loader=templateLoader)
+        #template = templateEnv.get_template(template_file)
+        #out = template.render({"modules": d})
+        #with open(puppetfile, 'w') as f:
+        #    f.write(out)
+        #    f.flush()
+        #    api.info("Puppetfile generated: %s" % puppetfile)
+        #return puppetfile
+
+    def _install_modules(self):
+         """Installs required Puppet modules through librarian-puppet."""
+         utils.runcmd("gem install librarian-puppet")
+         puppetfile = self._set_puppetfile()
+         utils.runcmd_chdir(
+             "librarian-puppet install --path=%s" % self.module_path,
+             os.path.dirname(puppetfile),
+             log_to_file="qc_conf")
+         api.info(utils.runcmd("librarian-puppet show", stop_on_error=False))
 
     def _v3_workaround(self):
         # Include hiera functions in Puppet environment
@@ -182,28 +178,17 @@ class PuppetConfig(BaseConfig):
 
             utils.install("puppet")
 
-        for module in itertools.chain(self.module_from_puppetforge,
-                                      self.module_from_repository):
-            self._module_install(module)
-
         # Hiera environment
-        self._install_umd_module()
-        self._set_hiera()
+        if not os.path.exists(self.hiera_data_dir):
+            utils.runcmd("mkdir %s" % self.hiera_data_dir)
         self._set_hiera_params()
+        self._set_hiera()
+
+        # Deploy modules
+        self._install_modules()
 
         # Run Puppet
         r = self._run()
         self.has_run = True
 
         return r
-
-    def install_module_from_tarball(self, tarball, module_name):
-        """Downloads and installs manually a Puppet module tarball."""
-        dest_basename = os.path.basename(tarball)
-        dest = os.path.join("/tmp", dest_basename)
-        utils.runcmd("wget %s -O %s" % (tarball, dest))
-        root_dir = utils.runcmd("tar tzf %s | sed -e 's@/.*@@' | uniq" % dest)
-        utils.runcmd("tar xvfz %s -C %s" % (dest, self.module_path))
-        utils.runcmd("mv %s %s" % (
-            os.path.join(self.module_path, root_dir),
-            os.path.join(self.module_path, module_name)))
