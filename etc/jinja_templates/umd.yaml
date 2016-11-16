@@ -1,3 +1,3 @@
 umd::release: {{ umd_release }} 
-umd::verification_repofile: {{ repository_url }}
+umd::verification_repofile: {{ repository_file }}
 umd::openstack_release: {{ openstack_release }}
