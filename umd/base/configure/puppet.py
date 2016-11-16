@@ -23,8 +23,9 @@ class PuppetConfig(BaseConfig):
 
         :manifest: Main ".pp" with the configuration to be applied.
         :module: Name of a Forge module or git repository (Puppetfile format).
-                 In can be a tuple, containing either the Forge version or a 
-                 Git repository valid reference (see Puppetfile)
+                 In can be a tuple, containing as a second item either the 
+                 Forge version or a Git repository valid reference (see 
+                 Puppetfile)
         :hiera_data: YAML file/s with hiera variables.
         """
         super(PuppetConfig, self).__init__()
