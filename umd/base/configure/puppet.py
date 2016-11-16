@@ -38,7 +38,7 @@ class PuppetConfig(BaseConfig):
         self.params_files = []
 
     def _add_hiera_param_file(self, fname):
-        self.params_file.append(fname.split('.')[0])
+        self.params_files.append(fname.split('.')[0])
 
     def _set_hiera(self):
         """Sets hiera configuration files in place."""
