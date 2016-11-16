@@ -2,8 +2,6 @@
 
 forge "https://forgeapi.puppetlabs.com"
 
-metadata
-
 mod "egi-qc/umd",
   :git => "git://github.com/egi-qc/puppet-umd.git"
 
