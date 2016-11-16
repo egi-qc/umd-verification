@@ -37,6 +37,9 @@ class PuppetConfig(BaseConfig):
         self.puppetfile = "etc/puppet/Puppetfile"
         self.params_files = []
 
+    def _add_hiera_param_file(self, fname):
+        self.params_file.append(fname.split('.')[0])
+
     def _set_hiera(self):
         """Sets hiera configuration files in place."""
         api.info("Adding hiera parameter files: %s" % self.params_files)
@@ -56,11 +59,11 @@ class PuppetConfig(BaseConfig):
             "umd.yaml",
             {
                 "umd_release": config.CFG["umd_release"],
-                "repository_url": config.CFG.get("repository_url", ""),
+                "repository_file": config.CFG.get("repository_file", ""),
                 "openstack_release": config.CFG.get("openstack_release", ""),
             },
             output_file=os.path.join(self.hiera_data_dir, "umd.yaml"))
-        self.params_files.append("umd.yaml")
+        self._add_hiera_param_file("umd.yaml")
         # service (static parameter files)
         if self.hiera_data:
             for f in self.hiera_data:
@@ -68,7 +71,7 @@ class PuppetConfig(BaseConfig):
                 utils.runcmd("cp etc/puppet/%s %s" % (f, target))
                 d[":hierarchy"].append(os.path.splitext(f)[0])
                 api.info("Service hiera parameters set: %s" % target)
-                self.params_files.append(f)
+                self._add_hiera_param_file(f)
 
     def _set_puppetfile(self):
         """Processes the list of modules given."""

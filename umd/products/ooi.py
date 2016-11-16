@@ -109,7 +109,7 @@ class OOIDeploy(base.Deploy):
         if utils.to_yaml(ooi_conf, ooi_params):
             api.info("OOI hiera parameters set: %s" % ooi_conf)
         # Add it to hiera.yaml
-        config.CFG["cfgtool"].params_files.append("ooi.yaml")
+        config.CFG["cfgtool"]._add_hiera_param_file("ooi.yaml")
 
 
 ooi = OOIDeploy(
