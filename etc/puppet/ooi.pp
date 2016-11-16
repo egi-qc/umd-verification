@@ -4,6 +4,6 @@ class {
     "ooi":
         openstack_version => "mitaka",
         manage_repos      => false,
-        manage_services   => false,
+        manage_service    => false,
         require           => Class["umd"],
 }

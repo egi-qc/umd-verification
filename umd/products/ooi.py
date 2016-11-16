@@ -117,6 +117,7 @@ ooi = OOIDeploy(
     doc="OCCI OpenStack Interface.",
     cfgtool=PuppetConfig(
         manifest="ooi.pp",
-        module="git://github.com/egi-qc/puppet-ooi.git"),
+        module=("git://github.com/egi-qc/puppet-ooi.git", "umd"),
+    ),
     #qc_specific_id="ooi",
 )

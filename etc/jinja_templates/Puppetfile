@@ -10,9 +10,8 @@ mod "egi-qc/umd",
 {% for mod, data in modules.items() %}
 {% if data %}mod "{{ mod }}", {% if not data.repourl %}"{{ data.version }}"
 {% else %}
-  :git => "{{ data.repourl }}" 
-{% if data.version %}
-  :ref => "{{ data.version }}"{% endif %}{% endif %}
+  :git => "{{ data.repourl }}"{% if data.ref %},
+  :ref => "{{ data.ref }}"{% endif %}{% endif %}
 {% else %}
 mod "{{ mod }}"
 {% endif %}

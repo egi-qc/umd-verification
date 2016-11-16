@@ -23,6 +23,8 @@ class PuppetConfig(BaseConfig):
 
         :manifest: Main ".pp" with the configuration to be applied.
         :module: Name of a Forge module or git repository (Puppetfile format).
+                 In can be a tuple, containing either the Forge version or a 
+                 Git repository valid reference (see Puppetfile)
         :hiera_data: YAML file/s with hiera variables.
         """
         super(PuppetConfig, self).__init__()
@@ -36,8 +38,7 @@ class PuppetConfig(BaseConfig):
 
     def _set_hiera(self):
         """Sets hiera configuration files in place."""
-
-        print "========== PARAMS FILES: ", self.params_files
+        api.info("Adding hiera parameter files: %s" % self.params_files)
         utils.render_jinja(
             "hiera.yaml",
             {
@@ -74,7 +75,6 @@ class PuppetConfig(BaseConfig):
         # Build dict to be rendered
         d = {}
         for mod in self.module:
-            version = None
             if isinstance(mod, tuple):
                 mod, version = mod
             mod_name = mod
@@ -88,21 +88,8 @@ class PuppetConfig(BaseConfig):
                 if version:
                     extra = {"version": version}
             d[mod_name] = extra
-        ## Render Puppetfile template
+        # Render Puppetfile template
         return utils.render_jinja("Puppetfile", {"modules": d}, puppetfile)
-        #template_file = os.path.join(
-        #    os.getcwd(),
-        #    os.path.join(config.CFG["jinja_template_dir"],
-        #                 "Puppetfile"))
-        #templateLoader = jinja2.FileSystemLoader('/')
-        #templateEnv = jinja2.Environment(loader=templateLoader)
-        #template = templateEnv.get_template(template_file)
-        #out = template.render({"modules": d})
-        #with open(puppetfile, 'w') as f:
-        #    f.write(out)
-        #    f.flush()
-        #    api.info("Puppetfile generated: %s" % puppetfile)
-        #return puppetfile
 
     def _install_modules(self):
          """Installs required Puppet modules through librarian-puppet."""
@@ -112,7 +99,6 @@ class PuppetConfig(BaseConfig):
              "librarian-puppet install --path=%s" % self.module_path,
              os.path.dirname(puppetfile),
              log_to_file="qc_conf")
-         api.info(utils.runcmd("librarian-puppet show", stop_on_error=False))
 
     def _v3_workaround(self):
         # Include hiera functions in Puppet environment
