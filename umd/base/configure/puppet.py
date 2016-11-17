@@ -1,11 +1,6 @@
 from distutils import version
-import itertools
 import os.path
 import shutil
-import tempfile
-
-import string
-import yaml
 
 from umd import api
 from umd.base.configure import BaseConfig
@@ -23,8 +18,8 @@ class PuppetConfig(BaseConfig):
 
         :manifest: Main ".pp" with the configuration to be applied.
         :module: Name of a Forge module or git repository (Puppetfile format).
-                 In can be a tuple, containing as a second item either the 
-                 Forge version or a Git repository valid reference (see 
+                 In can be a tuple, containing as a second item either the
+                 Forge version or a Git repository valid reference (see
                  Puppetfile)
         :hiera_data: YAML file/s with hiera variables.
         """
@@ -69,8 +64,6 @@ class PuppetConfig(BaseConfig):
             for f in self.hiera_data:
                 target = os.path.join(self.hiera_data_dir, f)
                 utils.runcmd("cp etc/puppet/%s %s" % (f, target))
-                d[":hierarchy"].append(os.path.splitext(f)[0])
-                api.info("Service hiera parameters set: %s" % target)
                 self._add_hiera_param_file(f)
 
     def _set_puppetfile(self):
@@ -96,13 +89,13 @@ class PuppetConfig(BaseConfig):
         return utils.render_jinja("Puppetfile", {"modules": d}, puppetfile)
 
     def _install_modules(self):
-         """Installs required Puppet modules through librarian-puppet."""
-         utils.runcmd("gem install librarian-puppet")
-         puppetfile = self._set_puppetfile()
-         utils.runcmd_chdir(
-             "librarian-puppet install --path=%s" % self.module_path,
-             os.path.dirname(puppetfile),
-             log_to_file="qc_conf")
+        """Installs required Puppet modules through librarian-puppet."""
+        utils.runcmd("gem install librarian-puppet")
+        puppetfile = self._set_puppetfile()
+        utils.runcmd_chdir(
+            "librarian-puppet install --path=%s" % self.module_path,
+            os.path.dirname(puppetfile),
+            log_to_file="qc_conf")
 
     def _v3_workaround(self):
         # Include hiera functions in Puppet environment

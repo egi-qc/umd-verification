@@ -5,9 +5,9 @@ import re
 import shutil
 import tempfile
 
+import fabric
 from fabric import api as fabric_api
 from fabric import colors
-import fabric
 import jinja2
 import mock
 import yaml
@@ -788,6 +788,7 @@ def to_yaml(fname, str):
     with open(fname, 'w') as f:
         f.write(yaml.dump(yaml.safe_load(str), default_flow_style=False))
     return fname
+
 
 def render_jinja(template, data, output_file=None):
     """Stores in a file the output of rendering a Jinja2 template.

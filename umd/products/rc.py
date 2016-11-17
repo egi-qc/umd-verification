@@ -77,7 +77,11 @@ class RCDeploy(base.Deploy):
         "keystone-voms": ["python-keystone-voms"],
         "lb": wms.lb.metapkg,
         "lcmaps": ["lcmaps"],
-        "lcmaps-plugins": ["lcmaps-plugins-basic", "lcmaps-plugins-c-pep", "lcmaps-plugins-voms", "lcmaps-plugins-vo-ca-ap"],
+        "lcmaps-plugins": [
+            "lcmaps-plugins-basic",
+            "lcmaps-plugins-c-pep",
+            "lcmaps-plugins-voms",
+            "lcmaps-plugins-vo-ca-ap"],
         "lfc": ["lfc", "lfc-server-mysql"],
         "myproxy": ui.ui_myproxy.metapkg,
         "site-bdii": bdii.bdii_site_puppet.metapkg,

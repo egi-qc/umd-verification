@@ -215,7 +215,7 @@ class Deploy(tasks.Task):
                 step_mappings[k](**{"qc_step": v})
         else:
             # QC_INST, QC_UPGRADE
-            #self._install()
+            # self._install()
 
             self._config()
 
