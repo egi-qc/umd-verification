@@ -18,7 +18,6 @@ class CloudInfoProviderDeploy(base.Deploy):
 cloud_info_provider = CloudInfoProviderDeploy(
     name="cloud-info-provider",
     doc="cloud-info-provider deployment using Ansible.",
-    metapkg="cloud-info-provider",
     has_infomodel=True,
     cfgtool=AnsibleConfig(
         role = "https://github.com/egi-qc/ansible-role-cloud-info-provider",
