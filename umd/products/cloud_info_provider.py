@@ -9,10 +9,10 @@ class CloudInfoProviderDeploy(base.Deploy):
         # extra vars
         extra_vars = ("distribution=cmd "
                       "verification_repofile=%s "
-                      "cloud_info_provider_os_release=%s"
-                      "cloud_info_provider_middleware=openstack"
-                      "cloud_info_provider_conf_dir=/etc/cloud-info-provider "
-                      % (config.CFG["repository_file"],
+                      "cloud_info_provider_os_release=%s "
+                      "cloud_info_provider_middleware=openstack "
+                      "cloud_info_provider_conf_dir=/etc/cloud-info-provider"
+                      % (config.CFG["repository_file"][0], # FIXME(orviz)
                          config.CFG["openstack_release"]))
         self.cfgtool.extra_vars = extra_vars
 
