@@ -11,6 +11,7 @@ from fabric import state
 # from umd.products.bdii import bdii_top_puppet               	# NOQA
 # from umd.products.ca import ca, crl                         	# NOQA
 # from umd.products.canl import canl                          	# NOQA
+from umd.products.cloud_info_provider import cloud_info_provider # NOQA
 # from umd.products.cream import gridenginerized              	# NOQA
 # from umd.products.cream import standalone                   	# NOQA
 # from umd.products.dcache import dcache                      	# NOQA
@@ -28,7 +29,7 @@ from fabric import state
 # from umd.products.keystone_voms import keystone_voms_liberty    # NOQA
 # from umd.products.keystone_voms import keystone_voms_mitaka     # NOQA
 # from umd.products.myproxy import myproxy                    	# NOQA
-from umd.products.ooi import ooi                    	        # NOQA
+from umd.products.ooi import ooi                    	         # NOQA
 # from umd.products.rc import rc                              	# NOQA
 # from umd.products.storm import storm                        	# NOQA
 # from umd.products.ui import ui, ui_myproxy, ui_gfal         	# NOQA
