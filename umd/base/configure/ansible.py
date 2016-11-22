@@ -5,23 +5,29 @@ from umd import utils
 
 
 class AnsibleConfig(BaseConfig):
-    def __init__(self, role, extra_vars=None):
+    def __init__(self, role, checkout="master", extra_vars=None, tags="all"):
         """Runs Ansible configurations.
 
         :role: Galaxy name or GitHub repository where the role is located.
+        :checkout: Branch/tag/commit to checkout (see ansible-pull manpage).
         :extra_vars: Extra variables added to Ansible execution (usually
         filled in pre_config()).
+        :tags: Run only tasks tagged with this value.
         """
         super(AnsibleConfig, self).__init__()
         self.role = role
+        self.checkout = checkout
         self.extra_vars = extra_vars
+        self.tags = tags
 
     def _run(self):
         if self.role.find("://") != -1:
             repo_location = os.path.join("/tmp", os.path.basename(self.role))
-            cmd = "ansible-pull -C master -d %s -i %s -U %s" % (
+            cmd = "ansible-pull -C %s -d %s -i %s -U %s --tags=%s" % (
+                  self.checkout,
                   repo_location,
-                  os.path.join(repo_location, "hosts"), self.role)
+                  os.path.join(repo_location, "hosts"), self.role,
+                  self.tags)
             if self.extra_vars:
                 cmd += " -e '%s'" % self.extra_vars
         # else:
