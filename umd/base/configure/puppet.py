@@ -32,6 +32,15 @@ class PuppetConfig(BaseConfig):
         self.puppetfile = "etc/puppet/Puppetfile"
         self.params_files = []
 
+    def _deploy(self):
+        # Install puppet client
+        r = utils.install("puppet")
+        if r.failed:
+            api.fail("Puppet installation failed", stop_on_error=True)
+        # Set hiera environment - required before pre_config() method
+        if not os.path.exists(self.hiera_data_dir):
+            utils.runcmd("mkdir %s" % self.hiera_data_dir)
+
     def _add_hiera_param_file(self, fname):
         self.params_files.append(fname.split('.')[0])
 
@@ -89,21 +98,14 @@ class PuppetConfig(BaseConfig):
         return utils.render_jinja("Puppetfile", {"modules": d}, puppetfile)
 
     def _install_modules(self):
-        """Installs required Puppet modules through librarian-puppet."""
-        utils.runcmd("gem install librarian-puppet")
-        puppetfile = self._set_puppetfile()
-        utils.runcmd_chdir(
-            "librarian-puppet install --path=%s" % self.module_path,
-            os.path.dirname(puppetfile),
-            log_to_file="qc_conf")
-
-    def _v3_workaround(self):
-        # Include hiera functions in Puppet environment
-        utils.install("rubygems")
-        utils.runcmd("gem install hiera-puppet --install-dir %s"
-                     % self.module_path)
-        utils.runcmd("mv %s %s" % (os.path.join(self.module_path, "gems/*"),
-                                   self.module_path))
+         """Installs required Puppet modules through librarian-puppet."""
+         utils.runcmd("gem install librarian-puppet")
+         puppetfile = self._set_puppetfile()
+         utils.runcmd_chdir(
+             "/usr/local/bin/librarian-puppet install --clean --path=%s"
+             % self.module_path,
+             os.path.dirname(puppetfile),
+             log_to_file="qc_conf")
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "puppet.log")
@@ -128,42 +130,10 @@ class PuppetConfig(BaseConfig):
             r.failed = True
         return r
 
-    def config(self, logfile=None):
+    def config(self):
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
-
-        r = utils.install("puppet", log_to_file=logfile)
-        if r.failed:
-            api.fail("Puppet installation failed", stop_on_error=True)
-
-        # Puppet versions <3 workarounds
-        puppet_version = utils.runcmd("facter -p puppetversion")
-        if puppet_version and (version.StrictVersion(puppet_version)
-           < version.StrictVersion("3.0")):
-            # self._v3_workaround()
-            pkg_url = config.CFG["puppet_release"]
-            pkg_loc = "/tmp/puppet-release.rpm"
-            r = utils.runcmd("wget %s -O %s" % (pkg_url, pkg_loc))
-            if r.failed:
-                api.fail("Could not fetch Puppet package from '%s'" % pkg_url,
-                         stop_on_error=True)
-            else:
-                api.info("Fetched Puppet release package from '%s'." % pkg_url)
-            utils.install(pkg_loc)
-            utils.runcmd(("sed '/enabled=1/a\priority=1' "
-                          "/etc/yum.repos.d/puppet*"))
-
-            # FIXME (orviz) Remove this check when dropping redhat5 support
-            if system.distro_version == "redhat5":
-                pkg = ("ftp://rpmfind.net/linux/centos/5.11/os/x86_64/CentOS/"
-                       "virt-what-1.11-2.el5.x86_64.rpm")
-                utils.runcmd(("wget %s -O /tmp/virt-what.rpm && yum -y "
-                              "install /tmp/virt-what.rpm") % pkg)
-
-            utils.install("puppet")
-
-        # Hiera environment
-        if not os.path.exists(self.hiera_data_dir):
-            utils.runcmd("mkdir %s" % self.hiera_data_dir)
+        
+        # Set hiera
         self._set_hiera_params()
         self._set_hiera()
 

@@ -7,6 +7,10 @@ class BaseConfig(object):
         self.has_run = False
         self.logfile = None
 
+    def _deploy(self):
+        """Method where the client tool is deployed."""
+        pass
+
     def pre_config(self):
         pass
 
@@ -17,6 +21,8 @@ class BaseConfig(object):
         pass
 
     def run(self):
+        self._deploy()        
+
         self.pre_config()
         r = self.config()
         self.post_config()
