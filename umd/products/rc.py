@@ -81,6 +81,7 @@ class RCDeploy(base.Deploy):
         "lcas": ["lcas", "lcas-lcmaps-gt4-interface", "lcas-plugins-basic", "lcas-plugins-check-executable", "lcas-plugins-voms"],
         "lcmaps": ["lcmaps"],
         "lcmaps-plugins": ["lcmaps-plugins-basic", "lcmaps-plugins-c-pep", "lcmaps-plugins-voms", "lcmaps-plugins-vo-ca-ap"],
+        "lcmaps-plugins-vo-ca-ap": ["lcmaps-plugins-vo-ca-ap"],
         "lfc": ["lfc", "lfc-server-mysql"],
         "myproxy": ui.ui_myproxy.metapkg,
         "site-bdii": bdii.bdii_site_puppet.metapkg,
