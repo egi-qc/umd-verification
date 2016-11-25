@@ -27,4 +27,4 @@ cloud_info_provider = CloudInfoProviderDeploy(
     cfgtool=AnsibleConfig(
         role = "https://github.com/egi-qc/ansible-role-cloud-info-provider",
         checkout = "umd",
-        tags = "untagged"))
+        tags = ["untagged", "cmd"]))

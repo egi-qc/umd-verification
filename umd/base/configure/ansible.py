@@ -18,19 +18,20 @@ class AnsibleConfig(BaseConfig):
         self.role = role
         self.checkout = checkout
         self.extra_vars = extra_vars
-        self.tags = tags
+        self.tags = utils.to_list(tags)
 
     def _run(self):
         if self.role.find("://") != -1:
             repo_location = os.path.join("/etc/ansible/roles", os.path.basename(self.role))
-            cmd = "ansible-pull -C %s -d %s -i %s -U %s --tags=%s" % (
+            cmd = "ansible-pull -C %s -d %s -i %s -U %s" % (
                   self.checkout,
                   repo_location,
                   os.path.join(repo_location, "hosts"),
-                  self.role,
-                  self.tags)
+                  self.role)
             if self.extra_vars:
                 cmd += " -e '%s'" % self.extra_vars
+            if self.tags:
+                cmd += " --tags '%s'" % ','.join(self.tags)
         # else:
         #     cmd = "ansible-galaxy install %s" % self.role
 
