@@ -17,9 +17,10 @@ gridsite = GridSiteDeploy(
     metapkg=[
         "gridsite",
         # "gridsite-clients",
-        "gridsite-devel",
-        "gridsite-doc",
-        "gridsite-libs",
+        #"gridsite-devel",
+        #"gridsite-doc",
+        "gridsite-service-clients",
+        "gridsite-commands",
         #"gridsite1.7-compat",
     ],
     need_cert=True,
