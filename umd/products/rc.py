@@ -16,6 +16,10 @@ class RCDeploy(base.Deploy):
     from umd.products import storm, argus, dcache, ca, frontier_squid   # NOQA
     from umd.products import dpm, keystone_voms  			# NOQA
 
+    cmd_mapping = {
+        "1.0.0": "mitaka",
+    }
+
     product_mapping = {
         "apel": ["apel-parsers", "apel-server", "apel-client", "apel-lib"],
         "apel-ssm": ["apel-ssm"],
@@ -187,6 +191,10 @@ class RCDeploy(base.Deploy):
         utils.add_repo_key(config.CFG["repo_keys"])
         utils.enable_repo(config.CFG["igtf_repo"])
         utils.add_repo_key(config.CFG["igtf_repo_key"])
+	if config.CFG.get("cmd_release", None):
+            rc_release_version = config.CFG.get("rc_release").split('-')[-1]
+	    product_utils.add_openstack_distro_repos(
+               self.cmd_mapping[rc_release_version])
 
         # Products from production
         url_production = "http://admin-repo.egi.eu/feeds/production/"
@@ -207,8 +215,6 @@ class RCDeploy(base.Deploy):
         for product in products:
             if isinstance(product, tuple):
                 _name, _version = product
-                if config.CFG.get("cmd_release", None):
-                    product_utils.add_openstack_distro_repos(_version)
                 product = _name
             product = product.lower()
             try:
