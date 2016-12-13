@@ -20,7 +20,7 @@ gridsite = GridSiteDeploy(
         "gridsite-devel",
         "gridsite-doc",
         "gridsite-libs",
-        "gridsite1.7-compat",
+        #"gridsite1.7-compat",
     ],
     need_cert=True,
     cfgtool=ScriptConfig("./bin/gridsite/configure.sh"),
