@@ -33,7 +33,8 @@ class RCDeploy(base.Deploy):
         "canl32": canl.canl.metapkg,
         "cgsi-gsoap": ["CGSI-gSOAP"],
         "classads-libs": ["classads"],
-        "cmd-release": ["cmd-os-release"],
+        # FIXME(orviz): Uncomment it when the repository cmd-os-1 exists
+        # "cmd-release": ["cmd-os-release"],
         "cream": cream.standalone.metapkg,
         "cream-ge": cream.gridenginerized.metapkg,
         "cream-ge-utils": cream.gridenginerized.metapkg,
