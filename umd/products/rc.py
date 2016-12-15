@@ -15,6 +15,7 @@ class RCDeploy(base.Deploy):
     from umd.products import glexec, cream, arc, ui, canl, xrootd       # NOQA
     from umd.products import storm, argus, dcache, ca, frontier_squid   # NOQA
     from umd.products import dpm, keystone_voms  			# NOQA
+    from umd.products import cloud_info_provider                        # NOQA
 
     cmd_mapping = {
         "1.0.0": "mitaka",
@@ -29,6 +30,7 @@ class RCDeploy(base.Deploy):
         "bdii core": ["bdii"],
         "bdii site": bdii.bdii_site_puppet.metapkg,
         "bdii top": bdii.bdii_top_puppet.metapkg,
+        "bdii-infoprovider": cloud_info_provider.package,
         "canl": canl.canl.metapkg,
         "canl32": canl.canl.metapkg,
         "cgsi-gsoap": ["CGSI-gSOAP"],
