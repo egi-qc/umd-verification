@@ -80,6 +80,7 @@ class PuppetConfig(BaseConfig):
         puppetfile = "/tmp/Puppetfile"
         # Build dict to be rendered
         d = {}
+        print "---- ", self.module
         for mod in self.module:
             if isinstance(mod, tuple):
                 mod, version = mod
@@ -102,8 +103,8 @@ class PuppetConfig(BaseConfig):
          utils.runcmd("gem install librarian-puppet")
          puppetfile = self._set_puppetfile()
          utils.runcmd_chdir(
-             "/usr/local/bin/librarian-puppet install --clean --path=%s"
-             % self.module_path,
+             ("/usr/local/bin/librarian-puppet install --clean "
+              "--path=%s --verbose") % self.module_path,
              os.path.dirname(puppetfile),
              log_to_file="qc_conf")
 
