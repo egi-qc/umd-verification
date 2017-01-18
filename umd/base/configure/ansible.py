@@ -22,7 +22,9 @@ class AnsibleConfig(BaseConfig):
 
     def _run(self):
         if self.role.find("://") != -1:
-            repo_location = os.path.join("/etc/ansible/roles", os.path.basename(self.role))
+            repo_location = os.path.join(
+                "/etc/ansible/roles",
+                os.path.basename(self.role))
             cmd = "ansible-pull -C %s -d %s -i %s -U %s" % (
                   self.checkout,
                   repo_location,

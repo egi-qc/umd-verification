@@ -787,7 +787,7 @@ def to_yaml(fname, lines):
     """Creates a YAML file with the content given (string)."""
     lines = to_list(lines)
     with open(fname, 'a') as f:
-        for line in lines: 
+        for line in lines:
             f.write(yaml.dump(yaml.safe_load(line), default_flow_style=False))
     return fname
 

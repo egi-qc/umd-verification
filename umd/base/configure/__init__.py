@@ -21,7 +21,7 @@ class BaseConfig(object):
         pass
 
     def run(self):
-        self._deploy()        
+        self._deploy()
 
         self.pre_config()
         r = self.config()

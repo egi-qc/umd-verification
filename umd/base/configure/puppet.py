@@ -1,11 +1,9 @@
-from distutils import version
 import os.path
 import shutil
 
 from umd import api
 from umd.base.configure import BaseConfig
 from umd import config
-from umd import system
 from umd import utils
 
 
@@ -71,7 +69,7 @@ class PuppetConfig(BaseConfig):
             "openstack_release": config.CFG.get("openstack_release", ""),
         }
         utils.render_jinja(
-            "umd.yaml", 
+            "umd.yaml",
             _data,
             output_file=os.path.join(self.hiera_data_dir, "umd.yaml"))
         self._add_hiera_param_file("umd.yaml")
@@ -106,14 +104,14 @@ class PuppetConfig(BaseConfig):
         return utils.render_jinja("Puppetfile", {"modules": d}, puppetfile)
 
     def _install_modules(self):
-         """Installs required Puppet modules through librarian-puppet."""
-         utils.runcmd("gem install librarian-puppet")
-         puppetfile = self._set_puppetfile()
-         utils.runcmd_chdir(
-             ("/usr/local/bin/librarian-puppet install --clean "
-              "--path=%s --verbose") % self.module_path,
-             os.path.dirname(puppetfile),
-             log_to_file="qc_conf")
+        """Installs required Puppet modules through librarian-puppet."""
+        utils.runcmd("gem install librarian-puppet")
+        puppetfile = self._set_puppetfile()
+        utils.runcmd_chdir(
+            ("/usr/local/bin/librarian-puppet install --clean "
+             "--path=%s --verbose") % self.module_path,
+            os.path.dirname(puppetfile),
+            log_to_file="qc_conf")
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "puppet.log")
@@ -140,7 +138,7 @@ class PuppetConfig(BaseConfig):
 
     def config(self):
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
-        
+
         # Set hiera
         self._set_hiera_params()
         self._set_hiera()
