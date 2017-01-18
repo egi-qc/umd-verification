@@ -2,11 +2,6 @@ base:
     log_path: "/var/tmp/umd-verification"
     jinja_template_dir: "etc/jinja_templates"
 
-epel_release:
-    redhat5: "http://download.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm"
-    redhat6: "http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm"
-    centos7: "http://mirror.uv.es/mirror/fedora-epel//epel-release-latest-7.noarch.rpm"
-
 umd_release:
     3:
         redhat5:  "http://repository.egi.eu/sw/production/umd/3/sl5/x86_64/updates/umd-release-3.0.1-1.el5.noarch.rpm"
@@ -15,6 +10,16 @@ umd_release:
         redhat6:  "http://repository.egi.eu/sw/production/umd/4/sl6/x86_64/updates/umd-release-4.0.0-1.el6.noarch.rpm"
         ubuntu14: ""
         centos7:  "http://repository.egi.eu/sw/production/umd/4/centos7/x86_64/base/umd-release-4.0.0-1.el7.noarch.rpm" 
+
+cmd_release:
+    1:
+        ubuntu14: "http://repository.egi.eu/sw/production/cmd-os/1/ubuntu/dists/trusty/main/binary-amd64/cmd-os-release-1.0.0_all.deb"
+        centos7:  "http://repository.egi.eu/sw/production/cmd-os/1/centos7/x86_64/base/cmd-os-release-1.0.1-1.el7.centos.noarch.rpm"
+
+epel_release:
+    redhat5: "http://download.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm"
+    redhat6: "http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm"
+    centos7: "http://mirror.uv.es/mirror/fedora-epel//epel-release-latest-7.noarch.rpm"
 
 puppet_release:
     redhat5:  "https://yum.puppetlabs.com/puppetlabs-release-el-5.noarch.rpm" 
