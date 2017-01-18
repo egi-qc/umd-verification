@@ -145,24 +145,29 @@ class Yum(object):
         return r
 
     def run(self, action, dryrun, pkgs=None):
-        opts = ''
-        if dryrun:
-            if system.distro_version == "redhat5":
-                runcmd("yum -y install yum-downloadonly")
-            elif system.distro_version == "redhat6":
-                runcmd("yum -y install yum-plugin-downloadonly")
-            opts = "--downloadonly"
-
-        if action == "refresh":
-            runcmd("yum clean all")
-            action = "makecache fast"
-
-        if pkgs:
-            r = runcmd("yum -y %s %s %s" % (opts, action, " ".join(pkgs)))
+        if action == "install-remote":
+            for _pkg in pkgs:
+                r = runcmd("rpm -ivh %s" % _pkg)
+            return r
         else:
-            r = runcmd("yum -y %s %s" % (opts, action))
+            opts = ''
+            if dryrun:
+                if system.distro_version == "redhat5":
+                    runcmd("yum -y install yum-downloadonly")
+                elif system.distro_version == "redhat6":
+                    runcmd("yum -y install yum-plugin-downloadonly")
+                opts = "--downloadonly"
 
-        return self._validate_output(r)
+            if action == "refresh":
+                runcmd("yum clean all")
+                action = "makecache fast"
+
+            if pkgs:
+                r = runcmd("yum -y %s %s %s" % (opts, action, " ".join(pkgs)))
+            else:
+                r = runcmd("yum -y %s %s" % (opts, action))
+
+            return self._validate_output(r)
 
     def get_pkglist(self, r):
         """Gets the list of packages being installed parsing yum output."""
@@ -329,6 +334,9 @@ class Yum(object):
     def join_pkg_version(self, pkgs):
         return ['-'.join(list(pkg)) for pkg in pkgs if isinstance(pkg, tuple)]
 
+    def is_pkg_installed(self, pkg):
+        return not runcmd("rpm --quiet -q %s" % pkg).failed
+
 
 class Apt(object):
     def __init__(self):
@@ -337,6 +345,15 @@ class Apt(object):
         self.pkg_extension = ".deb"
 
     def run(self, action, dryrun, pkgs=None):
+        def _download_pkg(l):
+            _l = []
+            for _pkg in l:
+                _dest = os.path.join("/tmp", os.path.basename(_pkg))
+                runcmd("wget %s -O %s" % (_pkg, _dest))
+                if os.path.exists(_dest):
+                    _l.append(_dest)
+            return _l
+
         cmd = None
         opts = ''
 
@@ -345,6 +362,9 @@ class Apt(object):
 
         if action == "refresh":
             action = "update"
+        elif action == "install-remote":
+            action = "install"
+            pkgs = _download_pkg(pkgs)
 
         if pkgs:
             if os.path.exists(pkgs[0]):
@@ -452,6 +472,9 @@ class Apt(object):
     def join_pkg_version(self, pkgs):
         return ['='.join(list(pkg)) for pkg in pkgs if isinstance(pkg, tuple)]
 
+    def is_pkg_installed(self, pkg):
+        return not runcmd("dpkg -l %s" % pkg).failed
+
     def handle_repo_ssl(self):
         raise NotImplementedError
 
@@ -525,6 +548,15 @@ class PkgTool(object):
         return self._exec(action="install", pkgs=pkgs)
 
     @filelog
+    def install_remote(self, pkgs, enable_repo=[], key_repo=[]):
+        if enable_repo:
+            self.enable_repo(enable_repo)
+            if key_repo:
+                self.add_repo_key(to_list(key_repo))
+            self.refresh()
+        return self._exec(action="install-remote", pkgs=pkgs)
+
+    @filelog
     def refresh(self):
         return self._exec(action="refresh")
 
@@ -555,6 +587,10 @@ class PkgTool(object):
         """Returns a list of strings with the 'pkg:version' format name."""
         pkgs = to_list(pkgs)
         return self.client.join_pkg_version(pkgs)
+
+    def is_pkg_installed(self, pkg):
+        """Checks if the package (name) is installed."""
+        return self.client.is_pkg_installed(pkg)
 
 
 def show_exec_banner_ascii():
@@ -682,6 +718,13 @@ def install(pkgs, enable_repo=[], key_repo=[]):
     return pkgtool.install(pkgs, enable_repo, key_repo)
 
 
+@filelog
+def install_remote(pkgs, enable_repo=[], key_repo=[]):
+    """Shortcut for remote package installations."""
+    pkgtool = PkgTool()
+    return pkgtool.install_remote(pkgs, enable_repo, key_repo)
+
+
 def get_repos():
     """Shortcut for getting enabled repositories in the system."""
     pkgtool = PkgTool()
@@ -745,6 +788,11 @@ def add_repo_key(keyurl):
 def join_pkg_version(pkg):
     pkgtool = PkgTool()
     return pkgtool.join_pkg_version(pkg)
+
+
+def is_pkg_installed(pkg):
+    pkgtool = PkgTool()
+    return pkgtool.is_pkg_installed(pkg)
 
 
 def load_from_hiera(fname):
