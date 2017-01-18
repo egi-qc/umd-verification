@@ -115,6 +115,11 @@ class ConfigDict(dict):
                         pkg = self.defaults[(
                             "umd_release")][int(v)][system.distro_version]
                         d_tmp["umd_release_pkg"] = pkg
+                    # set 'distribution'
+                    d_tmp["distribution"] = "umd"
+                elif k.startswith("cmd_release"):
+                    # set 'distribution'
+                    d_tmp["distribution"] = "cmd"
                 elif k.startswith("package"):
                     item = "metapkg"
                     append_arg = True

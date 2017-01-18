@@ -783,10 +783,12 @@ def remove_logs():
         shutil.rmtree(config.CFG["log_path"])
 
 
-def to_yaml(fname, str):
+def to_yaml(fname, lines):
     """Creates a YAML file with the content given (string)."""
-    with open(fname, 'w') as f:
-        f.write(yaml.dump(yaml.safe_load(str), default_flow_style=False))
+    lines = to_list(lines)
+    with open(fname, 'a') as f:
+        for line in lines: 
+            f.write(yaml.dump(yaml.safe_load(line), default_flow_style=False))
     return fname
 
 

@@ -58,17 +58,24 @@ class PuppetConfig(BaseConfig):
 
     def _set_hiera_params(self):
         """Sets hiera parameter files (repository deploy and custom params)."""
-        # umd
+        # umd file
+        _distribution = config.CFG["distribution"]
+        if _distribution == "umd":
+            _release = "umd_release"
+        elif _distribution == "cmd":
+            _release = "cmd_release"
+        _data = {
+            "release": config.CFG[_release],
+            "distribution": _distribution,
+            "repository_file": config.CFG.get("repository_file", ""),
+            "openstack_release": config.CFG.get("openstack_release", ""),
+        }
         utils.render_jinja(
-            "umd.yaml",
-            {
-                "umd_release": config.CFG["umd_release"],
-                "repository_file": config.CFG.get("repository_file", ""),
-                "openstack_release": config.CFG.get("openstack_release", ""),
-            },
+            "umd.yaml", 
+            _data,
             output_file=os.path.join(self.hiera_data_dir, "umd.yaml"))
         self._add_hiera_param_file("umd.yaml")
-        # service (static parameter files)
+        # custom (static) files
         if self.hiera_data:
             for f in self.hiera_data:
                 target = os.path.join(self.hiera_data_dir, f)
@@ -80,8 +87,8 @@ class PuppetConfig(BaseConfig):
         puppetfile = "/tmp/Puppetfile"
         # Build dict to be rendered
         d = {}
-        print "---- ", self.module
         for mod in self.module:
+            version = None
             if isinstance(mod, tuple):
                 mod, version = mod
             mod_name = mod

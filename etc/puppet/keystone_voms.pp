@@ -1,12 +1,41 @@
+include umd
+
 ## Base Keystone
 
 Exec { logoutput => 'on_failure' }
 
 if $::osfamily == 'Debian' {
+    $trust_dir = "/usr/share/ca-certificates/"
+    $trust_cmd = "update-ca-certificates"
     $pkgname = 'mariadb-client'
 }
 else {
+    $trust_dir = "/etc/pki/ca-trust/source/anchors/"
+    $trust_cmd = "update-ca-trust"
     $pkgname = 'mariadb'
+}
+
+$cacert = hiera("cacert")
+file {
+    "${trust_dir}/0d2a3bdd.crt":
+        ensure => present,
+        source => "file:///${cacert}",
+}
+
+exec {
+    "Add CA cert to configuration":
+        command => "/bin/grep -q \"0d2a3bdd.crt\" /etc/ca-certificates.conf || /bin/echo \"0d2a3bdd.crt\" >> /etc/ca-certificates.conf",
+        unless  => "/bin/grep \"0d2a3bdd.crt\" /etc/ca-certificates.conf",
+        notify  => Exec["Update CA trust"],
+        require => File["${trust_dir}/0d2a3bdd.crt"],
+}
+
+exec {
+    "Update CA trust":
+        command => $trust_cmd,
+        path    => ["/bin", "/usr/bin"],
+        refreshonly => true,
+        require => [File["${trust_dir}/0d2a3bdd.crt"], Exec["Add CA cert to configuration"]]
 }
 
 class { '::mysql::client':
@@ -14,7 +43,7 @@ class { '::mysql::client':
 }
 
 class { '::mysql::server':
-    package_name => 'mariadb-server',
+    package_name            => 'mariadb-server',
     root_password           => 'TESTOWY',
     remove_default_accounts => true,
 }
@@ -34,6 +63,7 @@ class { 'keystone':
     #mysql_module        => '2.2',
     public_endpoint     => "https://${::fqdn}:5000/",
     admin_endpoint      => "https://${::fqdn}:35357/",
+    require             => File["${trust_dir}/0d2a3bdd.crt"],
 }
 
 class { 'keystone::endpoint':
@@ -157,6 +187,11 @@ file {
         notify  => Class['Apache::Service']
 }
 
+package {
+    "ca-policy-egi-core":
+        ensure => installed
+}
+
 voms::client{
     "dteam":
         vo => "dteam",
@@ -171,7 +206,8 @@ voms::client{
             dn     => "/C=GR/O=HellasGrid/OU=hellasgrid.gr/CN=voms2.hellasgrid.gr",
             ca_dn  => "/C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2016"
 
-        }]
+        }],
+        require => Package["ca-policy-egi-core"]
 }
 
 voms::client{
@@ -187,23 +223,25 @@ voms::client{
             port   => "15004",
             dn     => "/DC=es/DC=irisgrid/O=ifca/CN=host/ibergrid-voms.ifca.es",
             ca_dn  => "/DC=es/DC=irisgrid/CN=IRISGridCA"
-        }]
+        }],
+        require => Package["ca-policy-egi-core"]
 }
 
 
 ## Misc
 
-package {
-    "fetch-crl":
-        ensure => latest,
-}
-
-cron {
-    "fetch-crl":
-        command => "/usr/sbin/fetch-crl",
-        user    => "root",
-        minute  => "12",
-        hour    => [6,12,18,0],
-        weekday => "*",
-        require => Package["fetch-crl"],
-}
+#package {
+#    "fetch-crl":
+#        ensure => latest,
+#        require => Package["ca-policy-egi-core"]
+#}
+#
+#cron {
+#    "fetch-crl":
+#        command => "/usr/sbin/fetch-crl",
+#        user    => "root",
+#        minute  => "12",
+#        hour    => [6,12,18,0],
+#        weekday => "*",
+#        require => Package["fetch-crl"],
+#}
