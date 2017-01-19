@@ -1,1 +1,7 @@
-include fts
+include umd
+
+class {
+    "fts":
+        require           => Class["umd"],
+}
+

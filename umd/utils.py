@@ -80,7 +80,7 @@ def filelog(f):
 
 
 @filelog
-def runcmd(cmd, stderr_to_stdout=False, nosudo=False):
+def runcmd(cmd, stderr_to_stdout=False, nosudo=False, envvars=[]):
     """Runs a generic command.
 
     :cmd: command to execute
@@ -89,7 +89,8 @@ def runcmd(cmd, stderr_to_stdout=False, nosudo=False):
         cmd = ' '.join([cmd, "2>&1"])
     qc_envvars = config.CFG.get("qc_envvars", {})
     env_d = dict(qc_envvars.items()
-                 + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")])
+                 + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
+                 + envvars)
     with fabric_api.settings(warn_only=True):
         with fabric_api.shell_env(**env_d):
             # FIXME(orviz) use sudo fabric function
@@ -335,7 +336,8 @@ class Yum(object):
         return ['-'.join(list(pkg)) for pkg in pkgs if isinstance(pkg, tuple)]
 
     def is_pkg_installed(self, pkg):
-        return not runcmd("rpm --quiet -q %s" % pkg).failed
+        return not runcmd("rpm --quiet -q %s" % pkg,
+                          stop_on_error=False).failed
 
 
 class Apt(object):
@@ -377,6 +379,7 @@ class Apt(object):
             cmd = "apt-get -y %s %s" % (opts, action)
 
         return runcmd(cmd,
+                      envvars=[("DEBIAN_FRONTEND", "noninteractive")],
                       stop_on_error=False)
 
     def get_repos(self):
@@ -473,7 +476,7 @@ class Apt(object):
         return ['='.join(list(pkg)) for pkg in pkgs if isinstance(pkg, tuple)]
 
     def is_pkg_installed(self, pkg):
-        return not runcmd("dpkg -l %s" % pkg).failed
+        return not runcmd("dpkg -l %s" % pkg, stop_on_error=False).failed
 
     def handle_repo_ssl(self):
         raise NotImplementedError
