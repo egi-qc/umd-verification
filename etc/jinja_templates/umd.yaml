@@ -2,3 +2,4 @@ umd::release: {{ release }}
 umd::distribution: {{ distribution }} 
 umd::verification_repofile: {{ repository_file }}
 umd::openstack_release: {{ openstack_release }}
+umd::igtf_repo: {{ igtf_repo }}

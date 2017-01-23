@@ -601,8 +601,6 @@ def show_exec_banner_ascii():
     cfg = config.CFG.copy()
 
     basic_repo = ["umd_release_pkg", "igtf_repo"]
-    if system.distname in ["redhat", "centos"]:
-        basic_repo.append("epel_release")
 
     print(u'\n')
     print(colors.green(u'UMD verification tool').center(120))
@@ -679,8 +677,6 @@ def show_exec_banner():
     print(u'\u2502')
     print(u'\u2502 Repository basic configuration:')
     basic_repo = ["umd_release", "igtf_repo"]
-    if system.distname in ["redhat", "centos"]:
-        basic_repo.append("epel_release")
     for k in basic_repo:
         v = cfg.pop(k)
         leftjust = len(max(basic_repo, key=len)) + 5
