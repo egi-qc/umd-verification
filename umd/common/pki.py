@@ -1,8 +1,10 @@
 import os.path
 
 import fabric
+from fabric import operations as fabric_ops
 
 from umd import api
+from umd import config
 from umd import system
 from umd import utils
 
@@ -38,6 +40,50 @@ subjectAltName = @alt_names
 IP.1 = 127.0.0.1
 """
 
+
+def certify():
+    """Create host certificate and private key."""
+    cert_path = "/etc/grid-security/hostcert.pem"
+    key_path = "/etc/grid-security/hostkey.pem"
+    do_cert = True
+    if os.path.isfile(cert_path) and os.path.isfile(key_path):
+        r = fabric_ops.prompt(("Certificate already exists under "
+                               "'/etc/grid-security'. Do you want to "
+                               "overwrite them? (y/N)"))
+        if r.lower() == "y":
+            api.info("Overwriting already existant certificate")
+        else:
+            do_cert = False
+            api.info("Using already existant certificate")
+
+    cert_for_subject = None
+    if do_cert:
+        hostcert = config.CFG.get("hostcert", None)
+        hostkey = config.CFG.get("hostkey", None)
+        if hostkey and hostcert:
+            api.info("Using provided host certificates")
+            utils.runcmd("cp %s %s" % (hostkey, key_path))
+            utils.runcmd("chmod 600 %s" % key_path)
+            utils.runcmd("cp %s %s" % (hostcert, cert_path))
+            cert_for_subject = hostcert
+        else:
+            api.info("Generating own certificates")
+            config.CFG["ca"] = OwnCA(
+                domain_comp_country="es",
+                domain_comp="UMDverification",
+                common_name="UMDVerificationOwnCA")
+            config.CFG["ca"].create(
+                trusted_ca_dir="/etc/grid-security/certificates")
+            config.CFG["cert"] = config.CFG["ca"].issue_cert(
+                hash="2048",
+                key_prv=key_path,
+                key_pub=cert_path)
+    else:
+        cert_for_subject = cert_path
+
+    if cert_for_subject:
+        subject = get_subject(cert_for_subject)
+        config.CFG["cert"] = OwnCACert(subject)
 
 def get_subject(hostcert):
     return utils.runcmd(("openssl x509 -in %s -noout "

@@ -32,20 +32,8 @@ class ConfigDict(dict):
         self.__setitem__("puppet_path", self.defaults["puppet"]["path"])
         self.__setitem__("umdnsu_url", self.defaults["nagios"]["umdnsu_url"])
         self.__setitem__(
-            "igtf_repo",
-            self.defaults["igtf_repo"][system.distname])
-        self.__setitem__(
-            "igtf_repo_key",
-            self.defaults["igtf_repo_key"][system.distname])
-        self.__setitem__(
-            "repo_keys",
-            self.defaults["repo_keys"][system.distname])
-        self.__setitem__(
             "puppet_release",
             self.defaults["puppet_release"][system.distro_version])
-        self.__setitem__(
-            "epel_release",
-            self.defaults["epel_release"][system.distro_version])
 
     def validate(self):
         # Strong validations first: (umd_release, repository_url)
@@ -73,27 +61,6 @@ class ConfigDict(dict):
                 api.fail(("No Puppet release package defined for '%s' "
                           "distribution" % system.distname),
                          stop_on_error=True)
-        # EPEL release
-        if system.distname in ["centos", "redhat"]:
-            if not self.__getitem__("epel_release"):
-                api.fail(("EPEL release package not provided for '%s' "
-                          "distribution" % system.distname),
-                         stop_on_error=True)
-        # Type of installation
-        if not self.__getitem__("installation_type"):
-            api.warn("No installation type provided: performing installation.")
-            self.__setitem__("installation_type", "install")
-        # Metapackage
-        v = self.__getitem__("metapkg")
-        for pkg in v:                       # check if version is added
-            if isinstance(pkg, tuple):
-                t = v.pop(v.index(pkg))
-                from umd import utils
-                v.extend(utils.join_pkg_version(t))
-        if v:
-            msg = "Metapackage/s selected: %s" % ''.join([
-                "\n\t+ %s" % mpkg for mpkg in v])
-            api.info(msg)
 
     def update(self, d):
         d_tmp = {}

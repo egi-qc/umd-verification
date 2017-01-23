@@ -65,11 +65,16 @@ class PuppetConfig(BaseConfig):
             _release = "umd_release"
         elif _distribution == "cmd":
             _release = "cmd_release"
+        if config.CFG.get("need_cert", ""):
+            _igtf_repo = "true"
+        else:
+            _igtf_repo = "false"
         _data = {
             "release": config.CFG[_release],
             "distribution": _distribution,
             "repository_file": config.CFG.get("repository_file", ""),
             "openstack_release": config.CFG.get("openstack_release", ""),
+            "igtf_repo": _igtf_repo,
         }
         utils.render_jinja(
             "umd.yaml",
