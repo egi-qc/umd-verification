@@ -3,13 +3,7 @@ from umd.base.configure.ansible import AnsibleConfig
 from umd import utils
 
 
-class MyProxyDeploy(base.Deploy):
-    def pre_config(self):
-        utils.install("fetch-crl")
-
-
-# argus = ArgusDeploy(
-argus = base.Deploy(
+myproxy = base.Deploy(
     name="myproxy",
     doc="MyProxy server deployment using Ansible.",
     need_cert=True,
