@@ -116,7 +116,7 @@ class Deploy(tasks.Task):
 
         # Show configuration summary
         utils.show_exec_banner_ascii()
- 
+
         # Workspace
         utils.remove_logs()
 

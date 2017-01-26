@@ -1,5 +1,5 @@
 from umd import base
-from umd.base.configure.script import ScriptConfig
+from umd.base.configure.ansible import AnsibleConfig
 from umd import utils
 
 
@@ -8,9 +8,11 @@ class MyProxyDeploy(base.Deploy):
         utils.install("fetch-crl")
 
 
-myproxy = MyProxyDeploy(
+# argus = ArgusDeploy(
+argus = base.Deploy(
     name="myproxy",
-    doc="MyProxy server deployment.",
-    metapkg=["myproxy", "myproxy-server"],
+    doc="MyProxy server deployment using Ansible.",
     need_cert=True,
-    cfgtool=ScriptConfig("./bin/myproxy/configure.sh"))
+    has_infomodel=True,
+    cfgtool=AnsibleConfig(
+        role="https://github.com/egi-qc/ansible-myproxy"),)
