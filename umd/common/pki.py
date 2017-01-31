@@ -55,6 +55,10 @@ def certify():
         else:
             do_cert = False
             api.info("Using already existant certificate")
+    elif not os.path.exists("/etc/grid-security"):
+        utils.runcmd("mkdir -p /etc/grid-security")
+        utils.runcmd("chown root:root /etc/grid-security")
+        utils.runcmd("chmod 0755 /etc/grid-security")
 
     cert_for_subject = None
     if do_cert:
