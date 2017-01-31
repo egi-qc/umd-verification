@@ -116,7 +116,7 @@ class Deploy(tasks.Task):
 
         # Show configuration summary
         utils.show_exec_banner_ascii()
- 
+
         # Workspace
         utils.remove_logs()
 
@@ -129,6 +129,9 @@ class Deploy(tasks.Task):
         if self.need_cert:
             pki.certify()
         
+        # Run deployment
+        self._config()
+
         # Run deployment
         self._config()
 

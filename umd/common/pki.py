@@ -89,6 +89,7 @@ def certify():
         subject = get_subject(cert_for_subject)
         config.CFG["cert"] = OwnCACert(subject)
 
+
 def get_subject(hostcert):
     return utils.runcmd(("openssl x509 -in %s -noout "
                          "-subject" % hostcert)).split()[1]
