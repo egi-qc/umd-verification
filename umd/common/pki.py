@@ -46,6 +46,10 @@ def certify():
     cert_path = "/etc/grid-security/hostcert.pem"
     key_path = "/etc/grid-security/hostkey.pem"
     do_cert = True
+
+    utils.runcmd("mkdir -p /etc/grid-security/certificates")
+    utils.runcmd("chown root:root /etc/grid-security")
+    utils.runcmd("chmod 0755 /etc/grid-security")
     if os.path.isfile(cert_path) and os.path.isfile(key_path):
         r = fabric_ops.prompt(("Certificate already exists under "
                                "'/etc/grid-security'. Do you want to "
@@ -55,10 +59,6 @@ def certify():
         else:
             do_cert = False
             api.info("Using already existant certificate")
-    elif not os.path.exists("/etc/grid-security"):
-        utils.runcmd("mkdir -p /etc/grid-security")
-        utils.runcmd("chown root:root /etc/grid-security")
-        utils.runcmd("chmod 0755 /etc/grid-security")
 
     cert_for_subject = None
     if do_cert:
