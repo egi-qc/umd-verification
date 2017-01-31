@@ -125,11 +125,12 @@ class Deploy(tasks.Task):
             config.CFG["cfgtool"].pre_config = self.pre_config
             config.CFG["cfgtool"].post_config = self.post_config
 
+        # Create private & public key
+        if self.need_cert:
+            pki.certify()
+        
         # Run deployment
         self._config()
-        if self.need_cert:
-            # Create private & public key
-            pki.certify()
 
         if config.CFG["qc_step"]:
             for step in config.CFG["qc_step"]:

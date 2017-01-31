@@ -4,6 +4,7 @@ import shutil
 from umd import api
 from umd.base.configure import BaseConfig
 from umd import config
+from umd import system
 from umd import utils
 
 
@@ -29,6 +30,7 @@ class PuppetConfig(BaseConfig):
         self.module_path = "/etc/puppet/modules"
         self.puppetfile = "etc/puppet/Puppetfile"
         self.params_files = []
+        self.use_rvmsudo = False
 
     def _deploy(self):
         # Install release package
@@ -113,13 +115,15 @@ class PuppetConfig(BaseConfig):
 
     def _install_modules(self):
         """Installs required Puppet modules through librarian-puppet."""
-        utils.runcmd("gem install librarian-puppet")
+        if utils.runcmd("librarian-puppet", nosudo=True).failed:
+            utils.runcmd("gem install librarian-puppet", nosudo=True)
         puppetfile = self._set_puppetfile()
         utils.runcmd_chdir(
-            ("/usr/local/bin/librarian-puppet install --clean "
-             "--path=%s --verbose") % self.module_path,
+            "librarian-puppet install --clean --path=%s --verbose"
+            % self.module_path,
             os.path.dirname(puppetfile),
-            log_to_file="qc_conf")
+            log_to_file="qc_conf",
+            nosudo=True)
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "puppet.log")
@@ -145,6 +149,9 @@ class PuppetConfig(BaseConfig):
         return r
 
     def config(self):
+        if system.distro_version == "redhat6":
+            self.use_rvmsudo = True
+
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
 
         # Set hiera
