@@ -18,7 +18,11 @@ class fts_mysql {
         $pkg = ["mysql-server", "mod_ssl"]
         $srv = "mysql"
     }
-    elsif $::osfamily in ["RedHat", "CentOS"] {
+    elsif $::osfamily in ["RedHat"] {
+        $pkg = ["mysql-server", "mod_ssl"]
+        $srv = "mysqld"
+    }
+    elsif $::osfamily in ["CentOS"] {
         $pkg = ["mariadb-server", "mod_ssl"]
         $srv = "mariadb"
     }
