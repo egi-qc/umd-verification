@@ -6,7 +6,7 @@ from umd import api
 from umd.base.infomodel import utils as info_utils
 from umd.common import qc
 from umd import config
-from umd import exception
+# from umd import exception
 from umd import system
 from umd import utils
 
@@ -48,14 +48,18 @@ class InfoModel(object):
 
         port = config.CFG.get("info_port", "2170")
         if glue_version == "glue1":
-            cmd = ("glue-validator -H localhost -p %s -b "
-                   "mds-vo-name=resource,o=grid -g glue1 -s "
-                   "general -v 3" % port)
+            # cmd = ("glue-validator -H localhost -p %s -b "
+            #        "mds-vo-name=resource,o=grid -g glue1 -s "
+            #        "general -v 3" % port)
+            cmd = ("glue-validator -h localhost -p %s -b "
+                   "mds-vo-name=resource,o=grid -t glue1" % port)
             version = "1.3"
         elif glue_version == "glue2":
-            cmd = ("glue-validator -H localhost -p %s -b "
-                   "GLUE2GroupID=resource,o=glue -g glue2 -s general -v 3"
-                   % port)
+            # cmd = ("glue-validator -H localhost -p %s -b "
+            #        "GLUE2GroupID=resource,o=glue -g glue2 -s general -v 3"
+            #        % port)
+            cmd = ("glue-validator -h localhost -p %s -b "
+                   "GLUE2GroupID=resource,o=glue -t glue2" % port)
             version = "2.0"
 
         time.sleep(self.attempt_sleep)
@@ -65,11 +69,12 @@ class InfoModel(object):
         summary = None
         for attempt in xrange(self.attempt_no):
             r = utils.runcmd(cmd, log_to_file=logfile)
-            if r:
-                summary = info_utils.get_gluevalidator_summary(r)
-                if summary:
-                    slapd_working = True
-                    break
+            if not r.failed:
+                summary = {}
+                if r:
+                    summary = info_utils.get_gluevalidator_summary(r)
+                slapd_working = True
+                break
             else:
                 if not breathe_time_set:
                     self._set_breathe_time()
@@ -89,10 +94,10 @@ class InfoModel(object):
             else:
                 api.ok(("Found no errors or warnings while validating "
                         "GlueSchema v%s support" % version))
-        else:
-            raise exception.InfoModelException(("Cannot parse "
-                                                "glue-validator output: %s"
-                                                % r))
+        # else:
+        #     raise exception.InfoModelException(("Cannot parse "
+        #                                         "glue-validator output: %s"
+        #                                         % r))
 
     def _run_version_check(self, logfile):
         port = config.CFG.get("info_port", "2170")
