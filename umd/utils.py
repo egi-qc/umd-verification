@@ -1,3 +1,4 @@
+import contextlib
 import inspect
 import os
 import os.path
@@ -83,7 +84,6 @@ def filelog(f):
 def runcmd(cmd,
            stderr_to_stdout=False,
            nosudo=False,
-           rvmsudo=False,
            envvars=[]):
     """Runs a generic command.
 
@@ -95,21 +95,13 @@ def runcmd(cmd,
     env_d = dict(qc_envvars.items()
                  + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
                  + envvars)
-    print ">>>>>>> ENV_D: ", env_d
-
     
-    from contextlib import nested
-    with nested(fabric_api.settings(warn_only=True), fabric_api.shell_env(**env_d)):
+    with contextlib.nested(fabric_api.settings(warn_only=True),
+                           fabric_api.shell_env(**env_d)):
+        if not nosudo:
+            cmd = "sudo -E " + cmd
 
-    #with fabric_api.settings(warn_only=True):
-    #    with fabric_api.shell_env(**env_d):
-    #        print ">>>> ", fabric_api.local("echo $PATH", capture=True)
-    #        if rvmsudo:
-    #            cmd = "/usr/local/rvm/bin/rvmsudo " + cmd
-    #        elif not nosudo:
-    #            cmd = "sudo -E " + cmd
-    #    
-            r = fabric_api.local(cmd, capture=True)
+        r = fabric_api.local(cmd, capture=True)
     return r
 
 
@@ -118,7 +110,6 @@ def runcmd_chdir(cmd,
                  chdir,
                  stderr_to_stdout=False,
                  nosudo=False,
-                 rvmsudo=False,
                  envvars=[]):
     """Runs a generic command based on a given directory
 
@@ -131,16 +122,13 @@ def runcmd_chdir(cmd,
     env_d = dict(qc_envvars.items()
                  + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
                  + envvars)
-    with fabric.context_managers.lcd(chdir):
-        with fabric_api.settings(warn_only=True):
-            with fabric_api.shell_env(**env_d):
-                import os
-                if rvmsudo:
-                    cmd = "/usr/local/rvm/bin/rvmsudo " + cmd
-                elif not nosudo:
-                    cmd = "sudo -E " + cmd
+    with nested(fabric.context_managers.lcd(chdir),
+                fabric_api.settings(warn_only=True),
+                fabric_api.shell_env(**env_d)):
+         if not nosudo:
+             cmd = "sudo -E " + cmd
 
-                r = fabric_api.local(cmd, capture=True)
+         r = fabric_api.local(cmd, capture=True)
     return r
 
 
