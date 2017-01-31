@@ -128,7 +128,7 @@ class Deploy(tasks.Task):
         # Create private & public key
         if self.need_cert:
             pki.certify()
-        
+
         # Run deployment
         self._config()
 

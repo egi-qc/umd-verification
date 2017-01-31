@@ -1,6 +1,5 @@
 from umd import base
 from umd.base.configure.ansible import AnsibleConfig
-from umd import utils
 
 
 myproxy = base.Deploy(
