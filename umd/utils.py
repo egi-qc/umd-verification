@@ -95,7 +95,7 @@ def runcmd(cmd,
     env_d = dict(qc_envvars.items()
                  + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
                  + envvars)
-    
+
     with contextlib.nested(fabric_api.settings(warn_only=True),
                            fabric_api.shell_env(**env_d)):
         if not nosudo:
@@ -122,13 +122,13 @@ def runcmd_chdir(cmd,
     env_d = dict(qc_envvars.items()
                  + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
                  + envvars)
-    with nested(fabric.context_managers.lcd(chdir),
-                fabric_api.settings(warn_only=True),
-                fabric_api.shell_env(**env_d)):
-         if not nosudo:
-             cmd = "sudo -E " + cmd
+    with contextlib.nested(fabric.context_managers.lcd(chdir),
+                           fabric_api.settings(warn_only=True),
+                           fabric_api.shell_env(**env_d)):
+        if not nosudo:
+            cmd = "sudo -E " + cmd
 
-         r = fabric_api.local(cmd, capture=True)
+        r = fabric_api.local(cmd, capture=True)
     return r
 
 
