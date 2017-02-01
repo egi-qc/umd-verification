@@ -115,7 +115,9 @@ class PuppetConfig(BaseConfig):
 
     def _install_modules(self):
         """Installs required Puppet modules through librarian-puppet."""
-        if utils.runcmd("librarian-puppet", nosudo=True).failed:
+        if utils.runcmd("librarian-puppet",
+                        nosudo=True,
+                        stop_on_error=False).failed:
             utils.runcmd("gem install librarian-puppet", nosudo=True)
         puppetfile = self._set_puppetfile()
         utils.runcmd_chdir(
