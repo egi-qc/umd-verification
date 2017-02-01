@@ -43,7 +43,7 @@ class AnsibleConfig(BaseConfig):
         return r
 
     def config(self, logfile=None):
-        if utils.runcmd("ansible", stop_on_error=False).failed:
+        if utils.runcmd("ansible --help", stop_on_error=False).failed:
             utils.install("ansible")
 
         r = self._run()
