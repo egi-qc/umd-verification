@@ -116,21 +116,24 @@ class PuppetConfig(BaseConfig):
     def _install_modules(self):
         """Installs required Puppet modules through librarian-puppet."""
         if utils.runcmd("librarian-puppet",
-                        nosudo=True,
+                        envvars=[("PATH", "$PATH:/usr/local/bin")],
+                        nosudo=self.use_rvmsudo,
                         stop_on_error=False).failed:
-            utils.runcmd("gem install librarian-puppet", nosudo=True)
+            utils.runcmd("gem install librarian-puppet",
+                         nosudo=self.use_rvmsudo)
         puppetfile = self._set_puppetfile()
         utils.runcmd_chdir(
             "librarian-puppet install --clean --path=%s --verbose"
             % self.module_path,
             os.path.dirname(puppetfile),
+            envvars=[("PATH", "$PATH:/usr/local/bin")],
             log_to_file="qc_conf",
             nosudo=True)
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "puppet.log")
         module_path = utils.runcmd("puppet config print modulepath",
-                                   nosudo=True)
+                                   nosudo=self.use_rvmsudo)
 
         cmd = "puppet apply --modulepath %s %s --detail-exitcodes" % (
             module_path,
@@ -138,7 +141,7 @@ class PuppetConfig(BaseConfig):
         r = utils.runcmd(cmd,
                          log_to_file="qc_conf",
                          stop_on_error=False,
-                         nosudo=True)
+                         nosudo=self.use_rvmsudo)
         if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
         elif r.return_code == 2:
