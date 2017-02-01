@@ -14,6 +14,8 @@ gridsite:
     - Apache 2.0
 keystone-voms:
     - Apache 2.0
+myproxy:
+    - Apache 2.0
 ooi:
     - Apache 2.0
 xrootd:
