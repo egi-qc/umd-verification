@@ -9,7 +9,7 @@ repostr=''
 for i in $(echo $IN | tr "," "\n"); do
     c=$((c+1))
     [ -n "$repostr" ] && repostr=$repostr','
-    repostr=$repostr"repository_url_$c=$i"
+    repostr=$repostr"repository_file_$c=$i"
 done
 
 echo $repostr
