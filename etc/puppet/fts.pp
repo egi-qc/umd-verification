@@ -14,15 +14,15 @@ class fts_mysql {
     $db_pass = hiera("fts3_db_password")
     $schema  = hiera("fts_schema", "/usr/share/fts-mysql/fts-schema-1.0.0.sql")
 
-    if $::osfamily in ["Debian"] {
+    if $::operatingsystem in ["Ubuntu"] {
         $pkg = ["mysql-server", "mod_ssl"]
         $srv = "mysql"
     }
-    elsif $::osfamily in ["RedHat"] {
+    elsif $::operatingsystem in ["Scientific"] {
         $pkg = ["mysql-server", "mod_ssl"]
         $srv = "mysqld"
     }
-    elsif $::osfamily in ["CentOS"] {
+    elsif $::operatingsystem in ["CentOS"] {
         $pkg = ["mariadb-server", "mod_ssl"]
         $srv = "mariadb"
     }
