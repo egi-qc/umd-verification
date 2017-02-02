@@ -9,7 +9,6 @@ class Security(object):
     def __init__(self):
         self.cfgtool = config.CFG["cfgtool"]
         self.need_cert = config.CFG["need_cert"]
-        self.ca = config.CFG["ca"]
         # exceptions
         #   'known_worldwritable_filelist': already-known world writable files
         self.exceptions = config.CFG["exceptions"]
