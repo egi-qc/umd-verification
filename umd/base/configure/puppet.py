@@ -11,7 +11,7 @@ from umd import utils
 class PuppetConfig(BaseConfig):
     def __init__(self,
                  manifest,
-                 module,
+                 module=[],
                  hiera_data=[]):
         """Runs Puppet configurations.
 

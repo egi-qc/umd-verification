@@ -11,6 +11,7 @@ from fabric import state
 # from umd.products.bdii import bdii_top_puppet               	# NOQA
 # from umd.products.ca import ca, crl                         	# NOQA
 # from umd.products.canl import canl                          	# NOQA
+from umd.products.clients_solo import clients_solo                # NOQA
 from umd.products.cloud_info_provider import cloud_info_provider  # NOQA
 # from umd.products.cream import gridenginerized              	# NOQA
 # from umd.products.cream import standalone                   	# NOQA
