@@ -38,6 +38,7 @@ ui_gfal = base.Deploy(
         "gfal2-plugin-xrootd",
         "gfal2-plugin-file",
         "gfal2-plugin-dcap",
+        "gfalFS",
         "davix",
         "davix-libs"],
     cfgtool=YaimConfig(
@@ -62,6 +63,7 @@ gfal_solo = base.Deploy(
         "gfal2-plugin-xrootd",
         "gfal2-plugin-file",
         "gfal2-plugin-dcap",
+        "gfalFS",
         "davix",
         "davix-libs",
         # tests
