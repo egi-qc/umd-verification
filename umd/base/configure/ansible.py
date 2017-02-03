@@ -1,6 +1,7 @@
 import os.path
 
 from umd.base.configure import BaseConfig
+from umd import config
 from umd import utils
 
 
@@ -18,6 +19,7 @@ class AnsibleConfig(BaseConfig):
         self.role = role
         self.checkout = checkout
         self.extra_vars = extra_vars
+        self.extra_vars_yaml_file = "/tmp/umd.yaml"
         self.tags = utils.to_list(tags)
 
     def _run(self):
@@ -30,8 +32,9 @@ class AnsibleConfig(BaseConfig):
                   repo_location,
                   os.path.join(repo_location, "hosts"),
                   self.role)
-            if self.extra_vars:
-                cmd += " -e '%s'" % self.extra_vars
+            if self.extra_vars or self.extra_vars_yaml_file:
+                #cmd += " -e '%s'" % self.extra_vars
+                cmd += " --extra-vars '@%s'" % self.extra_vars_yaml_file
             if self.tags:
                 cmd += " --tags '%s'" % ','.join(self.tags)
         # else:
@@ -42,17 +45,29 @@ class AnsibleConfig(BaseConfig):
                          stop_on_error=False)
         return r
 
-    def config(self, logfile=None):
-        if utils.runcmd("ansible --help", stop_on_error=False).failed:
-            utils.install("ansible")
-
-        r = self._run()
-        self.has_run = True
-
-        return r
-
     def add_extra_vars(self, extra_vars):
+        if isinstance(extra_vars, list):
+            extra_vars = ' '.join(extra_vars)
         if self.extra_vars:
             self.extra_vars = ' '.join([self.extra_vars, extra_vars])
         else:
             self.extra_vars = extra_vars
+
+    def config(self, logfile=None):
+        # Install ansible if it does not exist
+        if utils.runcmd("ansible --help", stop_on_error=False).failed:
+            utils.install("ansible")
+        
+        # Add verification repofiles as extra_vars
+        if config.CFG.get("repository_file", ""):
+            #self.add_extra_vars(config.CFG.get("repository_file"))
+            utils.render_jinja(
+                "umd_ansible.yaml",
+                {"repository_file": config.CFG["repository_file"]},
+                output_file=self.extra_vars_yaml_file)
+ 
+        # Run ansible
+        r = self._run()
+        self.has_run = True
+
+        return r
