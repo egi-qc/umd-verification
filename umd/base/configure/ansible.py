@@ -50,3 +50,9 @@ class AnsibleConfig(BaseConfig):
         self.has_run = True
 
         return r
+
+    def add_extra_vars(self, extra_vars):
+        if self.extra_vars:
+            self.extra_vars = ' '.join([self.extra_vars, extra_vars])
+        else:
+            self.extra_vars = extra_vars

@@ -18,7 +18,7 @@ class ArgusDeploy(base.Deploy):
                      config.CFG["cert"].subject,
                      system.fqdn,
                      system.fqdn)
-        self.cfgtool.extra_vars = extra_vars
+        self.cfgtool.add_extra_vars(extra_vars)
 
 
 class ArgusPuppetDeploy(base.Deploy):
