@@ -132,9 +132,6 @@ class Deploy(tasks.Task):
         # Run deployment
         self._config()
 
-        # Run deployment
-        self._config()
-
         if config.CFG["qc_step"]:
             for step in config.CFG["qc_step"]:
                 k, v = (step.rsplit('_', 1)[0], step)
