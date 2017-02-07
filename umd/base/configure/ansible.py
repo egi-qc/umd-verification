@@ -27,18 +27,15 @@ class AnsibleConfig(BaseConfig):
             repo_location = os.path.join(
                 "/etc/ansible/roles",
                 os.path.basename(self.role))
-            cmd = "ansible-pull -C %s -d %s -i %s -U %s" % (
+            cmd = "ansible-pull -vvv -C %s -d %s -i %s -U %s" % (
                   self.checkout,
                   repo_location,
                   os.path.join(repo_location, "hosts"),
                   self.role)
             if self.extra_vars or self.extra_vars_yaml_file:
-                #cmd += " -e '%s'" % self.extra_vars
                 cmd += " --extra-vars '@%s'" % self.extra_vars_yaml_file
             if self.tags:
                 cmd += " --tags '%s'" % ','.join(self.tags)
-        # else:
-        #     cmd = "ansible-galaxy install %s" % self.role
 
         r = utils.runcmd(cmd,
                          log_to_file="qc_conf",
