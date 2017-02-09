@@ -54,15 +54,14 @@ class AnsibleConfig(BaseConfig):
         # Install ansible if it does not exist
         if utils.runcmd("ansible --help", stop_on_error=False).failed:
             utils.install("ansible")
-        
+
         # Add verification repofiles as extra_vars
         if config.CFG.get("repository_file", ""):
-            #self.add_extra_vars(config.CFG.get("repository_file"))
             utils.render_jinja(
                 "umd_ansible.yaml",
                 {"repository_file": config.CFG["repository_file"]},
                 output_file=self.extra_vars_yaml_file)
- 
+
         # Run ansible
         r = self._run()
         self.has_run = True
