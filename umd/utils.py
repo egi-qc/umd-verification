@@ -305,6 +305,10 @@ class Yum(object):
     def join_pkg_version(self, pkgs):
         return ['-'.join(list(pkg)) for pkg in pkgs if isinstance(pkg, tuple)]
 
+    def is_pkg_installed(self, pkg):
+        return not runcmd("rpm --quiet -q %s" % pkg,
+                          stop_on_error=False).failed
+
 
 class Apt(object):
     def __init__(self):
@@ -428,6 +432,9 @@ class Apt(object):
     def join_pkg_version(self, pkgs):
         return ['='.join(list(pkg)) for pkg in pkgs if isinstance(pkg, tuple)]
 
+    def is_pkg_installed(self, pkg):
+        return not runcmd("dpkg -l %s" % pkg, stop_on_error=False).failed
+
     def handle_repo_ssl(self):
         raise NotImplementedError
 
@@ -531,6 +538,10 @@ class PkgTool(object):
         """Returns a list of strings with the 'pkg:version' format name."""
         pkgs = to_list(pkgs)
         return self.client.join_pkg_version(pkgs)
+
+    def is_pkg_installed(self, pkg):
+        """Checks if the package (name) is installed."""
+        return self.client.is_pkg_installed(pkg)
 
 
 def show_exec_banner_ascii():
@@ -721,6 +732,11 @@ def add_repo_key(keyurl):
 def join_pkg_version(pkg):
     pkgtool = PkgTool()
     return pkgtool.join_pkg_version(pkg)
+
+
+def is_pkg_installed(pkg):
+    pkgtool = PkgTool()
+    return pkgtool.is_pkg_installed(pkg)
 
 
 def load_from_hiera(fname):

@@ -122,6 +122,10 @@ class PuppetConfig(BaseConfig):
     def config(self, logfile=None):
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
 
+        # Install release package
+        if not utils.is_pkg_installed("puppetlabs-release"):
+            utils.install_remote(config.CFG["puppet_release"])
+
         r = utils.install("puppet", log_to_file=logfile)
         if r.failed:
             api.fail("Puppet installation failed", stop_on_error=True)
