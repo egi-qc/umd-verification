@@ -111,16 +111,6 @@ myproxy-client:
           description: "myproxy client commands testing."
           user: "umd"
 
-gridftp:
-    qc_func_1: 
-        - test: "bin/myproxy/client-test.sh"
-          description: "Retrieve myproxy for ops.vo.ibergrid.eu VO."
-          user: "jenkins"
-          args: "retrieve"
-        - test: "bin/gridftp/client-test.sh"
-          description: "GridFTP transfer check using globus-url-copy."
-          user: "jenkins"
-
 arc:
     qc_func_1:
         - test: "bin/myproxy/client-test.sh"
@@ -163,6 +153,12 @@ frontier-squid:
           description: "Frontier squid cache test."
           source: "https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Testing_the_installation"
           user: "umd"
+
+gridftp:
+    qc_func_1: 
+        - test: "bin/gridftp/client-test.sh"
+          description: "GridFTP transfer check using globus-url-copy."
+          args: "/tmp/umd_proxy"
 
 keystone-voms:
     qc_func_1: 

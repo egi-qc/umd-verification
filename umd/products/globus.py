@@ -5,7 +5,13 @@ from umd import utils
 
 class GridFTPDeploy(base.Deploy):
     def pre_validate(self):
-        utils.install(["myproxy", "globus-gass-copy-progs", "voms-clients"])
+        # voms packages
+        #utils.install(["myproxy", "globus-gass-copy-progs", "voms-clients"])
+        voms.client_install()
+        # fake proxy
+        product_utils.create_fake_proxy()
+        # fake voms server - lsc
+        product_utils.add_fake_lsc()
 
 
 gridftp_pkgs = [

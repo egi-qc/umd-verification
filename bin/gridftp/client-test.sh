@@ -2,6 +2,8 @@
 
 set -x
 
+export X509_USER_PROXY=$1
+
 subject=`voms-proxy-info -acsubject`
 sudo bash -c "echo \"$subject $USER\" >> /etc/grid-security/grid-mapfile"
 
