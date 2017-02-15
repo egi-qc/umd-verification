@@ -82,8 +82,8 @@ class Validate(object):
             if user:
                 _user = user
             elif sudo_user:
-		_user = sudo_user
-            
+                _user = sudo_user
+
             if _user:
                 cmd = "su %s -c \"%s\"" % (_user, cmd)
 
