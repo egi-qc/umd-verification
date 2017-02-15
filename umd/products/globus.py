@@ -1,5 +1,7 @@
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
+from umd.products import utils as product_utils
+from umd.products import voms
 from umd import utils
 
 
