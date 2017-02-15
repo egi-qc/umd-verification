@@ -159,7 +159,6 @@ gridftp:
         - test: "bin/gridftp/client-test.sh"
           description: "GridFTP transfer check using globus-url-copy."
           args: "/tmp/umd_proxy"
-          user: "jenkins"
 
 keystone-voms:
     qc_func_1: 
