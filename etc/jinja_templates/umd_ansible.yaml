@@ -1,3 +1,6 @@
+---
+distribution: {{ distribution }}
+
 {% if repository_file %}
 verification_repofile:
 {% for repo in repository_file %}

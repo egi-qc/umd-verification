@@ -56,11 +56,13 @@ class AnsibleConfig(BaseConfig):
             utils.install("ansible")
 
         # Add verification repofiles as extra_vars
-        if config.CFG.get("repository_file", ""):
-            utils.render_jinja(
-                "umd_ansible.yaml",
-                {"repository_file": config.CFG["repository_file"]},
-                output_file=self.extra_vars_yaml_file)
+        utils.render_jinja(
+            "umd_ansible.yaml",
+            {
+                "distribution": config.CFG["distribution"],
+                "repository_file": config.CFG.get("repository_file", None)
+            },
+            output_file=self.extra_vars_yaml_file)
 
         # Run ansible
         r = self._run()
