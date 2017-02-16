@@ -121,24 +121,29 @@ class Yum(object):
         return r
 
     def run(self, action, dryrun, pkgs=None):
-        opts = ''
-        if dryrun:
-            if system.distro_version == "redhat5":
-                runcmd("yum -y install yum-downloadonly")
-            elif system.distro_version == "redhat6":
-                runcmd("yum -y install yum-plugin-downloadonly")
-            opts = "--downloadonly"
-
-        if action == "refresh":
-            runcmd("yum clean all")
-            action = "makecache fast"
-
-        if pkgs:
-            r = runcmd("yum -y %s %s %s" % (opts, action, " ".join(pkgs)))
+        if action == "install-remote":
+            for _pkg in pkgs:
+                r = runcmd("rpm -ivh %s" % _pkg)
+            return r
         else:
-            r = runcmd("yum -y %s %s" % (opts, action))
+            opts = ''
+            if dryrun:
+                if system.distro_version == "redhat5":
+                    runcmd("yum -y install yum-downloadonly")
+                elif system.distro_version == "redhat6":
+                    runcmd("yum -y install yum-plugin-downloadonly")
+                opts = "--downloadonly"
 
-        return self._validate_output(r)
+            if action == "refresh":
+                runcmd("yum clean all")
+                action = "makecache fast"
+
+            if pkgs:
+                r = runcmd("yum -y %s %s %s" % (opts, action, " ".join(pkgs)))
+            else:
+                r = runcmd("yum -y %s %s" % (opts, action))
+
+            return self._validate_output(r)
 
     def get_pkglist(self, r):
         """Gets the list of packages being installed parsing yum output."""
@@ -317,6 +322,15 @@ class Apt(object):
         self.pkg_extension = ".deb"
 
     def run(self, action, dryrun, pkgs=None):
+        def _download_pkg(l):
+            _l = []
+            for _pkg in l:
+                _dest = os.path.join("/tmp", os.path.basename(_pkg))
+                runcmd("wget %s -O %s" % (_pkg, _dest))
+                if os.path.exists(_dest):
+                    _l.append(_dest)
+            return _l
+
         cmd = None
         opts = ''
 
@@ -325,6 +339,9 @@ class Apt(object):
 
         if action == "refresh":
             action = "update"
+        elif action == "install-remote":
+            action = "install"
+            pkgs = _download_pkg(pkgs)
 
         if pkgs:
             if os.path.exists(pkgs[0]):
