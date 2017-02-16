@@ -669,6 +669,13 @@ def install(pkgs, enable_repo=[], key_repo=[]):
     return pkgtool.install(pkgs, enable_repo, key_repo)
 
 
+@filelog
+def install_remote(pkgs, enable_repo=[], key_repo=[]):
+    """Shortcut for remote package installations."""
+    pkgtool = PkgTool()
+    return pkgtool.install_remote(pkgs, enable_repo, key_repo)
+
+
 def get_repos():
     """Shortcut for getting enabled repositories in the system."""
     pkgtool = PkgTool()
