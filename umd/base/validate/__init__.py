@@ -77,18 +77,25 @@ class Validate(object):
             if isinstance(args, list):
                 args = ' '.join(args)
             cmd = "./%s" % " ".join([f, args])
+            sudo_user = os.environ.get("SUDO_USER", None)
+            _user = None
             if user:
-                cmd = "su %s -c \"%s\"" % (user, cmd)
+                _user = user
+            elif sudo_user:
+                _user = sudo_user
+
+            if _user:
+                cmd = "su %s -c \"%s\"" % (_user, cmd)
 
             if not self._is_executable(f):
                 api.info("Could not run check '%s': file is not executable"
                          % f)
             else:
-                self._handle_user(user, logfile)
+                self._handle_user(_user, logfile)
                 r = utils.runcmd(cmd,
                                  stderr_to_stdout=True,
                                  log_to_file=logfile,
-                                 nosudo=user)
+                                 nosudo=_user)
                 if r.failed:
                     failed_checks.append(cmd)
                 else:

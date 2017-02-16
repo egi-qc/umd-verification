@@ -135,9 +135,8 @@ class PuppetConfig(BaseConfig):
         module_path = utils.runcmd("puppet config print modulepath",
                                    nosudo=self.use_rvmsudo)
 
-        cmd = "puppet apply --verbose --debug --modulepath %s %s --detail-exitcodes" % (
-            module_path,
-            self.manifest)
+        cmd = ("puppet apply --verbose --debug --modulepath %s %s "
+               "--detail-exitcodes") % (module_path, self.manifest)
         r = utils.runcmd(cmd,
                          log_to_file="qc_conf",
                          stop_on_error=False,
