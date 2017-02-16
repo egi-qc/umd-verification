@@ -111,16 +111,6 @@ myproxy-client:
           description: "myproxy client commands testing."
           user: "umd"
 
-arc:
-    qc_func_1:
-        - test: "bin/myproxy/client-test.sh"
-          description: "Retrieve myproxy for ops.vo.ibergrid.eu VO."
-          user: "umd"
-          args: "retrieve"
-        - test: "bin/arc/client-test.sh"
-          description: "Check job submission."
-          user: "umd"
-
 dpm:
     qc_func_1:
         - test: "bin/myproxy/client-test.sh"
@@ -158,6 +148,12 @@ gridftp:
     qc_func_1: 
         - test: "bin/gridftp/client-test.sh"
           description: "GridFTP transfer check using globus-url-copy."
+          args: "/tmp/umd_proxy"
+
+arc:
+    qc_func_1:
+        - test: "bin/arc/client-test.sh"
+          description: "Check job submission."
           args: "/tmp/umd_proxy"
 
 keystone-voms:

@@ -128,7 +128,13 @@ class ArcCEDeploy(base.Deploy):
         self._set_pbs()
 
     def pre_validate(self):
-        utils.install(["myproxy", "nordugrid-arc-client"])
+        utils.install("nordugrid-arc-client")
+        # voms packages
+        voms.client_install()
+        # fake proxy
+        product_utils.create_fake_proxy()
+        # fake voms server - lsc
+        product_utils.add_fake_lsc()
 
 
 arc_ce = ArcCEDeploy(
