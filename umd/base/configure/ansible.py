@@ -1,6 +1,7 @@
 import os.path
 
 from umd.base.configure import BaseConfig
+from umd.base.configure import utils as cfg_utils
 from umd import config
 from umd import utils
 
@@ -56,13 +57,15 @@ class AnsibleConfig(BaseConfig):
             utils.install("ansible")
 
         # Add verification repofiles as extra_vars
-        utils.render_jinja(
-            "umd_ansible.yaml",
-            {
-                "distribution": config.CFG["distribution"],
-                "repository_file": config.CFG.get("repository_file", None)
-            },
-            output_file=self.extra_vars_yaml_file)
+        #utils.render_jinja(
+        #    "umd_ansible.yaml",
+        #    {
+        #        "distribution": config.CFG["distribution"],
+        #        "repository_file": config.CFG.get("repository_file", None)
+        #    },
+        #    output_file=self.extra_vars_yaml_file)
+        cfg_utils.set_runtime_params(
+            "umd_ansible.yaml", self.extra_vars_yaml_file)
 
         # Run ansible
         r = self._run()
