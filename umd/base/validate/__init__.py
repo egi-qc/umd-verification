@@ -91,7 +91,7 @@ class Validate(object):
                 api.info("Could not run check '%s': file is not executable"
                          % f)
             else:
-                self._handle_user(_user, logfile)
+                # self._handle_user(_user, logfile)
                 r = utils.runcmd(cmd,
                                  stderr_to_stdout=True,
                                  log_to_file=logfile,

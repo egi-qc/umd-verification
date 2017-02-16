@@ -20,8 +20,11 @@ class CloudInfoProviderDeploy(base.Deploy):
 cloud_info_provider = CloudInfoProviderDeploy(
     name="cloud-info-provider",
     doc="cloud-info-provider deployment using Ansible.",
-    has_infomodel=True,
+    # NOTE(orviz) glue-validator is not yet available in CMD
+    # The check is done in QC_FUNC_1
+    # has_infomodel=True,
     cfgtool=AnsibleConfig(
         role="https://github.com/egi-qc/ansible-role-cloud-info-provider",
         checkout="umd",
-        tags=["untagged", "cmd"]))
+        tags=["untagged", "cmd"]),
+    qc_specific_id="cloud-info-provider")
