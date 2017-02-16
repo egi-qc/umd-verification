@@ -1,6 +1,8 @@
 ---
 distribution: {{ distribution }}
-
+release: {{ release }}
+openstack_release: {{ openstack_release }}
+igtf_repo: {{ igtf_repo }}
 {% if repository_file %}
 verification_repofile:
 {% for repo in repository_file %}

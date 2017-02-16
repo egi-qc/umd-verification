@@ -2,7 +2,7 @@ from umd import config
 from umd import utils as base_utils
 
 
-def set_runtime_params(template_file, output_file):
+def set_umd_params(template_file, output_file):
     _distribution = config.CFG["distribution"]
     if _distribution == "umd":
         _release = "umd_release"
@@ -22,4 +22,4 @@ def set_runtime_params(template_file, output_file):
     base_utils.render_jinja(
         template_file,
         _data,
-        output_file=os.path.join(self.hiera_data_dir, output_file))
+        output_file=output_file)

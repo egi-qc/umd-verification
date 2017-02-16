@@ -2,8 +2,11 @@ import os.path
 
 from umd.base.configure import BaseConfig
 from umd.base.configure import utils as cfg_utils
-from umd import config
 from umd import utils
+
+
+UMD_VARS_FILE = "/tmp/umd.yaml"
+EXTRA_VARS_FILE = "/tmp/ansible_extra_vars.yaml"
 
 
 class AnsibleConfig(BaseConfig):
@@ -20,7 +23,6 @@ class AnsibleConfig(BaseConfig):
         self.role = role
         self.checkout = checkout
         self.extra_vars = extra_vars
-        self.extra_vars_yaml_file = "/tmp/umd.yaml"
         self.tags = utils.to_list(tags)
 
     def _run(self):
@@ -33,8 +35,12 @@ class AnsibleConfig(BaseConfig):
                   repo_location,
                   os.path.join(repo_location, "hosts"),
                   self.role)
-            if self.extra_vars or self.extra_vars_yaml_file:
-                cmd += " --extra-vars '@%s'" % self.extra_vars_yaml_file
+            # extra vars
+            cmd += " --extra-vars '@%s'" % UMD_VARS_FILE
+            if self.extra_vars:
+                self._add_extra_vars()
+                cmd += " --extra-vars '@%s'" % EXTRA_VARS_FILE
+            # tags
             if self.tags:
                 cmd += " --tags '%s'" % ','.join(self.tags)
 
@@ -43,29 +49,16 @@ class AnsibleConfig(BaseConfig):
                          stop_on_error=False)
         return r
 
-    def add_extra_vars(self, extra_vars):
-        if isinstance(extra_vars, list):
-            extra_vars = ' '.join(extra_vars)
-        if self.extra_vars:
-            self.extra_vars = ' '.join([self.extra_vars, extra_vars])
-        else:
-            self.extra_vars = extra_vars
+    def _add_extra_vars(self):
+        utils.to_yaml(EXTRA_VARS_FILE, self.extra_vars)
 
     def config(self, logfile=None):
         # Install ansible if it does not exist
         if utils.runcmd("ansible --help", stop_on_error=False).failed:
             utils.install("ansible")
 
-        # Add verification repofiles as extra_vars
-        #utils.render_jinja(
-        #    "umd_ansible.yaml",
-        #    {
-        #        "distribution": config.CFG["distribution"],
-        #        "repository_file": config.CFG.get("repository_file", None)
-        #    },
-        #    output_file=self.extra_vars_yaml_file)
-        cfg_utils.set_runtime_params(
-            "umd_ansible.yaml", self.extra_vars_yaml_file)
+        cfg_utils.set_umd_params(
+            "umd_ansible.yaml", UMD_VARS_FILE)
 
         # Run ansible
         r = self._run()

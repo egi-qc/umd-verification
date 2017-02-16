@@ -13,12 +13,12 @@ from umd import utils
 class ArgusDeploy(base.Deploy):
     def pre_config(self):
         # extra vars
-        extra_vars = "pap_host=%s pap_host_dn=%s pdp_host=%s pepd_host=%s" % (
-                     system.fqdn,
-                     config.CFG["cert"].subject,
-                     system.fqdn,
-                     system.fqdn)
-        self.cfgtool.add_extra_vars(extra_vars)
+        extra_vars = [
+            "pap_host: %s" % system.fqdn,
+            "pap_host_dn: %s" % config.CFG["cert"].subject,
+            "pdp_host: %s" % system.fqdn,
+            "pepd_host: %s" % system.fqdn]
+        self.cfgtool.extra_vars = extra_vars
 
 
 class ArgusPuppetDeploy(base.Deploy):

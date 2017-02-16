@@ -63,27 +63,7 @@ class PuppetConfig(BaseConfig):
     def _set_hiera_params(self):
         """Sets hiera parameter files (repository deploy and custom params)."""
         # umd file
-        #_distribution = config.CFG["distribution"]
-        #if _distribution == "umd":
-        #    _release = "umd_release"
-        #elif _distribution == "cmd":
-        #    _release = "cmd_release"
-        #if config.CFG.get("need_cert", ""):
-        #    _igtf_repo = "true"
-        #else:
-        #    _igtf_repo = "false"
-        #_data = {
-        #    "release": config.CFG[_release],
-        #    "distribution": _distribution,
-        #    "repository_file": config.CFG.get("repository_file", ""),
-        #    "openstack_release": config.CFG.get("openstack_release", ""),
-        #    "igtf_repo": _igtf_repo,
-        #}
-        #utils.render_jinja(
-        #    "umd.yaml",
-        #    _data,
-        #    output_file=os.path.join(self.hiera_data_dir, "umd.yaml"))
-        cfg_utils.set_runtime_params(
+        cfg_utils.set_umd_params(
             "umd_puppet.yaml", os.path.join(self.hiera_data_dir, "umd.yaml"))
         self._add_hiera_param_file("umd.yaml")
         # custom (static) files
