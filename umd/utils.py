@@ -508,6 +508,15 @@ class PkgTool(object):
         return self._exec(action="install", pkgs=pkgs)
 
     @filelog
+    def install_remote(self, pkgs, enable_repo=[], key_repo=[]):
+        if enable_repo:
+            self.enable_repo(enable_repo)
+            if key_repo:
+                self.add_repo_key(to_list(key_repo))
+            self.refresh()
+        return self._exec(action="install-remote", pkgs=pkgs)
+
+    @filelog
     def refresh(self):
         return self._exec(action="refresh")
 
