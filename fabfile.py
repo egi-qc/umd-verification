@@ -9,7 +9,7 @@ from umd.products.argus import ees                          	# NOQA
 from umd.products.bdii import bdii_site_puppet              	# NOQA
 from umd.products.bdii import bdii_site_yaim                	# NOQA
 from umd.products.bdii import bdii_top_puppet               	# NOQA
-from umd.products.ca import ca, crl                         	# NOQA
+from umd.products.ca import ca, crl, ca_cam                         	# NOQA
 from umd.products.canl import canl                          	# NOQA
 from umd.products.cream import gridenginerized              	# NOQA
 from umd.products.cream import standalone                   	# NOQA

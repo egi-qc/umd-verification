@@ -12,8 +12,9 @@ class CADeploy(base.Deploy):
         # NOTE(orviz) workaround CA release with no Debian '.list' repofile
         if system.distname in ["debian", "ubuntu"]:
             # Just one repository is expected
-            repo = "deb %s egi-igtf core" % os.path.join(
-                config.CFG["repository_url"][0], "current")
+            #repo = "deb %s egi-igtf core" % os.path.join(
+            #    config.CFG["repository_url"][0], "current")
+            repo = "deb %s egi-igtf core" % config.CFG["repository_url"][0]
             utils.remove_repo(repo)
 
             utils.add_repo_key(config.CFG["igtf_repo_key"])
@@ -46,6 +47,15 @@ ca = CADeploy(
     metapkg=[
         "ca-policy-egi-core",
         "ca-policy-lcg",
+    ],
+    # qc_step="QC_DIST_1",
+    qc_specific_id="ca")
+
+ca_cam = CADeploy(
+    name="ca-cam",
+    doc="CA deployment.",
+    metapkg=[
+        "ca-policy-egi-cam",
     ],
     # qc_step="QC_DIST_1",
     qc_specific_id="ca")
