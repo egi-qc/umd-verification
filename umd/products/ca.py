@@ -16,25 +16,19 @@ class CADeploy(base.Deploy):
             utils.remove_repo(repo)
 
             utils.add_repo_key(config.CFG["igtf_repo_key"])
-
-            if system.distro_version == "debian6":
-                source = "/etc/apt/sources.list.d/egi-igtf.list"
-                utils.runcmd("echo '%s' > %s" % (repo, source))
-            else:
-                utils.enable_repo(repo)
+            print("asfasdfasd: %s" % repo)
+            utils.enable_repo(repo)
         elif system.distname in ["centos", "redhat"]:
             repo = ["EGI-trustanchors", "LCG-trustanchors"]
             utils.remove_repo(repo)
+            utils.enable_repo(config.CFG["repository_url"][0],
+                              name="UMD IGTF verification repo",
+                              priority=1)
 
     def _install(self, **kwargs):
-        # Part of the above workaround
+        self.pre_install()
         kwargs.update({"ignore_repos": True,
                        "ignore_verification_repos": True})
-        utils.enable_repo(config.CFG["repository_url"][0],
-                          name="UMD IGTF verification repo",
-                          priority=1)
-
-        self.pre_install()
         Install().run(**kwargs)
         self.post_install()
 

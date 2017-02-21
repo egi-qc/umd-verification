@@ -402,6 +402,7 @@ class Apt(object):
         """
         # Parse URL in not Debian-formatted or PPA
         if len(repo.split(' ')) == 1 and not re.search(":(?!//)", repo):
+            print ">>>>>>>>>>>>>> ", repo
             uri, rest = repo.split("dists")
             rest = rest.strip('/').split('/')
             rest.pop(0)  # distro
