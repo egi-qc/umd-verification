@@ -30,11 +30,11 @@ class CADeploy(base.Deploy):
 
     def _install(self, **kwargs):
         # Part of the above workaround
-        if system.distname in ["debian", "ubuntu"]:
-            kwargs.update({"ignore_repos": True,
-                           "ignore_verification_repos": True})
-        else:
-            kwargs.update({"ignore_repos": True})
+        kwargs.update({"ignore_repos": True,
+                       "ignore_verification_repos": True})
+        utils.enable_repo(config.CFG["repository_url"][0],
+                          name="UMD IGTF verification repo",
+                          priority=1)
 
         self.pre_install()
         Install().run(**kwargs)
