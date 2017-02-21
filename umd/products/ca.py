@@ -12,8 +12,6 @@ class CADeploy(base.Deploy):
         # NOTE(orviz) workaround CA release with no Debian '.list' repofile
         if system.distname in ["debian", "ubuntu"]:
             # Just one repository is expected
-            #repo = "deb %s egi-igtf core" % os.path.join(
-            #    config.CFG["repository_url"][0], "current")
             repo = "deb %s egi-igtf core" % config.CFG["repository_url"][0]
             utils.remove_repo(repo)
 

@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 
 for repo in sys.argv[1:]:
-    url = '/'.join([repo, "current/meta/ca-policy-egi-core.release"])
+    url = '/'.join([repo, "meta/ca-policy-egi-core.release"])
     response = urllib2.urlopen(url)
     txt = response.read()
     root = ET.fromstring(txt)
