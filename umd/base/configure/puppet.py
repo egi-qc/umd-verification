@@ -3,7 +3,7 @@ import shutil
 
 from umd import api
 from umd.base.configure import BaseConfig
-from umd.base.configure import utils as cfg_utils
+from umd.base.configure import common
 from umd import config
 from umd import system
 from umd import utils
@@ -63,7 +63,7 @@ class PuppetConfig(BaseConfig):
     def _set_hiera_params(self):
         """Sets hiera parameter files (repository deploy and custom params)."""
         # umd file
-        cfg_utils.set_umd_params(
+        common.set_umd_params(
             "umd_puppet.yaml", os.path.join(self.hiera_data_dir, "umd.yaml"))
         self._add_hiera_param_file("umd.yaml")
         # custom (static) files
@@ -143,13 +143,22 @@ class PuppetConfig(BaseConfig):
 
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
 
-        # Set hiera
-        self._set_hiera_params()
-        self._set_hiera()
-
         # Deploy modules
         self._install_modules()
 
+        # Hiera data files
+        ## umd & static vars
+        self._set_hiera_params()
+        ## extra vars
+        _extra_vars_fname = os.path.join(self.hiera_data_dir,
+                                         "extra_vars.yaml")
+        if self.extra_vars:
+            self._add_extra_vars(_extra_vars_fname)
+            self._add_hiera_param_file(os.path.basename(_extra_vars_fname))
+
+        # Hiera config files
+        self._set_hiera()
+        
         # Run Puppet
         r = self._run()
         self.has_run = True

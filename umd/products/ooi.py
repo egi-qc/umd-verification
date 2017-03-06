@@ -10,13 +10,7 @@ from umd import utils
 class OOIDeploy(base.Deploy):
     def pre_config(self):
         os_release = config.CFG["openstack_release"]
-        ooi_params = "ooi::openstack_version: %s" % os_release
-        ooi_conf = os.path.join(config.CFG["cfgtool"].hiera_data_dir,
-                                "ooi.yaml")
-        if utils.to_yaml(ooi_conf, ooi_params):
-            api.info("OOI hiera parameters set: %s" % ooi_conf)
-        # Add it to hiera.yaml
-        config.CFG["cfgtool"]._add_hiera_param_file("ooi.yaml")
+        self.cfgtool.extra_vars = "ooi::openstack_version: %s" % os_release
 
 
 ooi = OOIDeploy(

@@ -1,12 +1,11 @@
 import os.path
 
 from umd.base.configure import BaseConfig
-from umd.base.configure import utils as cfg_utils
+from umd.base.configure import common
 from umd import utils
 
 
 UMD_VARS_FILE = "/tmp/umd.yaml"
-EXTRA_VARS_FILE = "/tmp/ansible_extra_vars.yaml"
 
 
 class AnsibleConfig(BaseConfig):
@@ -49,15 +48,12 @@ class AnsibleConfig(BaseConfig):
                          stop_on_error=False)
         return r
 
-    def _add_extra_vars(self):
-        utils.to_yaml(EXTRA_VARS_FILE, self.extra_vars)
-
     def config(self, logfile=None):
         # Install ansible if it does not exist
         if utils.runcmd("ansible --help", stop_on_error=False).failed:
             utils.install("ansible")
 
-        cfg_utils.set_umd_params(
+        common.set_umd_params(
             "umd_ansible.yaml", UMD_VARS_FILE)
 
         # Run ansible

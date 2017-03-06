@@ -1,4 +1,8 @@
 from umd import api
+from umd import utils
+
+
+EXTRA_VARS_FILE = "/tmp/extra_vars.yaml"
 
 
 class BaseConfig(object):
@@ -6,6 +10,15 @@ class BaseConfig(object):
     def __init__(self, *args, **kwargs):
         self.has_run = False
         self.logfile = None
+        self.extra_vars = None
+
+    def _add_extra_vars(self, fname=None):
+        """Method to add extra variables needed by the automation tool."""
+        _fname = EXTRA_VARS_FILE
+        if fname:
+            _fname = fname
+        if utils.to_yaml(_fname, self.extra_vars):
+            api.info("Extra vars file added: %s" % _fname)
 
     def _deploy(self):
         """Method where the client tool is deployed."""
