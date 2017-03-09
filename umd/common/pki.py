@@ -51,14 +51,16 @@ def certify():
     utils.runcmd("chown root:root /etc/grid-security")
     utils.runcmd("chmod 0755 /etc/grid-security")
     if os.path.isfile(cert_path) and os.path.isfile(key_path):
-        r = fabric_ops.prompt(("Certificate already exists under "
-                               "'/etc/grid-security'. Do you want to "
-                               "overwrite them? (y/N)"))
-        if r.lower() == "y":
-            api.info("Overwriting already existant certificate")
-        else:
-            do_cert = False
-            api.info("Using already existant certificate")
+        if not config.CFG.get("ask_cert_renewal", False):
+            print config.CFG.keys()
+            r = fabric_ops.prompt(("Certificate already exists under "
+                                   "'/etc/grid-security'. Do you want to "
+                                   "overwrite them? (y/N)"))
+            if r.lower() == "y":
+                api.info("Overwriting already existant certificate")
+            else:
+                do_cert = False
+                api.info("Using already existant certificate")
 
     cert_for_subject = None
     if do_cert:

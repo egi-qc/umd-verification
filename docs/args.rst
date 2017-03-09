@@ -97,6 +97,9 @@ runtime arguments are:
 
 :hostkey: Private key server certificate.
 
+:ask_cert_renewal: Whether prompt or not for certificate renewal (when certificates
+                   already exist)
+
 
 .. _static-args-ref:
 
