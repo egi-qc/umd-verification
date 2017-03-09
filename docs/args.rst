@@ -97,8 +97,8 @@ runtime arguments are:
 
 :hostkey: Private key server certificate.
 
-:ask_cert_renewal: Whether prompt or not for certificate renewal (when certificates
-                   already exist)
+:dont_ask_cert_renewal: Do not prompt for certificate renewal (when certificates
+                        already exist)
 
 
 .. _static-args-ref:
