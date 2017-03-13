@@ -9,7 +9,7 @@ else
 fi
 
 Verification_repository=$(./bin/jenkins/parse_repos.sh ${Verification_repository})
-[ -n "$Verification_repository ] && fabcmd=${fabcmd},${Verification_repository}
+[ -n "$Verification_repository" ] && fabcmd=${fabcmd},${Verification_repository}
 
 set +e
 $fabcmd
