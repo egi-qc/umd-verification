@@ -1,4 +1,6 @@
-[[ $1 == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
+OS=$1
+
+[[ $OS == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
 
 $sudocmd pip install -r requirements.txt
 
@@ -14,4 +16,4 @@ set +e
 $fabcmd
 # very*20 dirty hack
 [[ $OS == centos* ]] && repeat=1 || repeat=0
-[[ $repeat -eq 1 ]] && $fabcmd,dont_ask_cert_renewal=True
+[[ $repeat -eq 1 ]] && $fabcmd,dont_ask_cert_renewal=True || exit 0
