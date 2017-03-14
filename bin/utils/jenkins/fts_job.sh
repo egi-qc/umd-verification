@@ -1,4 +1,4 @@
-[[ $OS == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
+[[ $1 == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
 
 $sudocmd pip install -r requirements.txt
 
