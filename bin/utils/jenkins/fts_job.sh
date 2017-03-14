@@ -2,14 +2,13 @@
 
 $sudocmd pip install -r requirements.txt
 
-if [ "${Deployment_type}" == "installation-only" ]; then
-    fabcmd="$sudocmd fab fts:umd_release=${UMD_release},log_path=logs,qc_step=QC_DIST_1"
-else
-    fabcmd="$sudocmd fab fts:umd_release=${UMD_release},log_path=logs"
-fi
+[ -z "$UMD_release" ] && UMD_release=4
+fabcmd="$sudocmd fab fts:umd_release=${UMD_release},log_path=logs"
 
 Verification_repository=$(./bin/jenkins/parse_repos.sh ${Verification_repository})
 [ -n "$Verification_repository" ] && fabcmd=${fabcmd},${Verification_repository}
+
+[ "${Deployment_type}" == "installation-only" ] && fabcmd="${fabcmd},qc_step=QC_DIST_1"
 
 set +e
 $fabcmd
