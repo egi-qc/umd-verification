@@ -236,13 +236,16 @@ class RCDeploy(base.Deploy):
                           "/etc/yum/pluginconf.d/priorities.conf"))
 
     def _install(self, **kwargs):
+	self.pre_install()
+        if (config.CFG["rc_release"].startswith("UMD") and
+            system.distro_version in ["redhat5", "redhat6", "centos7"]):
+            if not utils.is_pkg_installed("epel-release"):
+                utils.install_remote(config.CFG["epel_release"])
         kwargs.update({
             "ignore_repos": True,
             "ignore_verification_repos": True})
-
-        self.pre_install()
         base.installation.Install().run(**kwargs)
-        self.post_install()
+	self.post_install()
 
 
 rc = RCDeploy(
