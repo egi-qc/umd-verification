@@ -147,9 +147,9 @@ class PuppetConfig(BaseConfig):
         self._install_modules()
 
         # Hiera data files
-        ## umd & static vars
+        # - umd & static vars -
         self._set_hiera_params()
-        ## extra vars
+        # - extra vars -
         _extra_vars_fname = os.path.join(self.hiera_data_dir,
                                          "extra_vars.yaml")
         if self.extra_vars:
@@ -158,7 +158,7 @@ class PuppetConfig(BaseConfig):
 
         # Hiera config files
         self._set_hiera()
-        
+
         # Run Puppet
         r = self._run()
         self.has_run = True
