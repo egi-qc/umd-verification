@@ -1,4 +1,5 @@
 import collections
+import os.path
 
 import yaml
 
@@ -93,6 +94,9 @@ class ConfigDict(dict):
                 elif k.startswith("func_id"):
                     item = "qc_specific_id"
                     append_arg = True
+                elif k.startswith("log_path"):
+                    if not os.path.isabs(v):
+                        v = os.path.join(os.getcwd(), v)
 
                 # Parameters that accept lists
                 if append_arg:
