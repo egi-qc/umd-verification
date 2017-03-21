@@ -1,10 +1,6 @@
-import os.path
-
-from umd import api
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
 from umd import config
-from umd import utils
 
 
 class OOIDeploy(base.Deploy):
