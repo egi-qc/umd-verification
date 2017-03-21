@@ -37,8 +37,8 @@ class AnsibleConfig(BaseConfig):
             # extra vars
             cmd += " --extra-vars '@%s'" % UMD_VARS_FILE
             if self.extra_vars:
-                self._add_extra_vars()
-                cmd += " --extra-vars '@%s'" % EXTRA_VARS_FILE
+                _extra_vars_file = self._add_extra_vars()
+                cmd += " --extra-vars '@%s'" % _extra_vars_file
             # tags
             if self.tags:
                 cmd += " --tags '%s'" % ','.join(self.tags)

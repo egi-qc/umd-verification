@@ -20,6 +20,8 @@ class BaseConfig(object):
         if utils.to_yaml(_fname, self.extra_vars):
             api.info("Extra vars file added: %s" % _fname)
 
+        return EXTRA_VARS_FILE
+
     def _deploy(self):
         """Method where the client tool is deployed."""
         pass
