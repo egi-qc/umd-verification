@@ -28,7 +28,7 @@ from umd.products.fts import fts                            	# NOQA
 from umd.products.keystone_voms import keystone_voms             # NOQA
 from umd.products.myproxy import myproxy                    	# NOQA
 from umd.products.ooi import ooi                    	         # NOQA
-# from umd.products.rc import rc                              	# NOQA
+from umd.products.rc import rc                              	# NOQA
 # from umd.products.storm import storm                        	# NOQA
 # from umd.products.ui import ui, ui_myproxy, ui_gfal         	# NOQA
 # from umd.products.ui import ui_gfal, gfal_solo              	# NOQA
