@@ -118,7 +118,7 @@ class Deploy(tasks.Task):
         utils.show_exec_banner_ascii()
 
         # Workspace
-        utils.remove_logs()
+        utils.create_workspace()
 
         # Configuration tool
         if config.CFG["cfgtool"]:
