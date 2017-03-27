@@ -100,6 +100,9 @@ runtime arguments are:
 :dont_ask_cert_renewal: Do not prompt for certificate renewal (when certificates
                         already exist)
 
+:ca_version: Special runtime argument for CA verifications. This value refers to 
+             the CA release version with '<major>.<minor>.<patch>' format.
+
 
 .. _static-args-ref:
 

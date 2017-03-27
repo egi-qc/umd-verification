@@ -73,9 +73,11 @@ class Validate(object):
         for check in self._get_checklist(cfg):
             description, user, f, args = check
             api.info("Probe '%s'" % description)
-
-            if isinstance(args, list):
-                args = ' '.join(args)
+            if args:
+                if isinstance(args, list):
+                    args = ' '.join(args)
+            else:
+                args = ''
             cmd = "./%s" % " ".join([f, args])
             sudo_user = os.environ.get("SUDO_USER", None)
             _user = None

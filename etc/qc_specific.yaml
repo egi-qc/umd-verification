@@ -36,13 +36,14 @@ bdii-top:
 
 ca:
     qc_func_1:
-        #- test: "bin/ca/fetch_crl.run"
-        #  description: "Run fetch_crl script with verbosity."
         - test: "bin/ca/check-release.py"
           description: "Check release date."
-          user: "umd"
           args: *REPO_URL
 
+crl:
+    qc_func_1:
+        - test: "bin/ca/fetch_crl.run"
+          description: "Run fetch_crl script with verbosity."
 cream:
     qc_func_1:
         - test: "bin/cream/"
