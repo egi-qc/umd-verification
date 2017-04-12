@@ -402,7 +402,6 @@ class Apt(object):
         """
         # Parse URL in not Debian-formatted or PPA
         if len(repo.split(' ')) == 1 and not re.search(":(?!//)", repo):
-            print ">>>>>>>>>>>>>> ", repo
             uri, rest = repo.split("dists")
             rest = rest.strip('/').split('/')
             rest.pop(0)  # distro
@@ -443,7 +442,11 @@ class Apt(object):
         r = runcmd("%s -W %s" % (cmd, debfile),
                    stop_on_error=False)
         if not r.failed:
-            name, version = r.split()
+            try:
+                name, version = r.split()
+            except ValueError:
+                name = r
+                version = "-"
             d[name] = version
         return d
 
