@@ -66,6 +66,11 @@ glexec-wn:
           description: "Testing transfer of a specific proxy file."
           user: "umd"
 
+im:
+    qc_func_1:
+        - test: "bin/im/im-client.sh"
+          description: "Infrastructure manager client tasks."
+
 storm:
     qc_func_1:
         - test: "bin/myproxy/client-test.sh"
