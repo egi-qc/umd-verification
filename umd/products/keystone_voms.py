@@ -37,16 +37,31 @@ class KeystoneVOMSDeploy(base.Deploy):
     #     product_utils.add_fake_lsc()
 
 
+
 keystone_voms = KeystoneVOMSDeploy(
-    name="keystone-voms",
-    doc="Keystone VOMS module.",
+    name="keystone-voms-full",
+    doc="Keystone service & Keystone VOMS module deployment.",
     need_cert=True,
     cfgtool=PuppetConfig(
         manifest="keystone_voms.pp",
         hiera_data=["voms.yaml"],
         # NOTE(orviz) either we use a generic 'umd' branch
         # or if it is per OS release, it has to be set in pre_config() above
-        module=["lcgdm-voms"],
+        #module=[("git://github.com/egi-qc/puppet-keystone.git", "umd_stable_mitaka"), "lcgdm-voms"],
+        module=["puppetlabs-inifile", "lcgdm-voms"],
+    ),
+    qc_specific_id="keystone-voms",
+)
+
+keystone_voms_devstack = KeystoneVOMSDeploy(
+    name="keystone-voms",
+    doc="Keystone VOMS module deployment leveraging Devstack.",
+    cfgtool=PuppetConfig(
+        manifest="keystone_voms_devstack.pp",
+        hiera_data=["voms.yaml"],
+        module=["puppetlabs-inifile",
+                "puppetlabs-apache",
+                "lcgdm-voms"],
     ),
     qc_specific_id="keystone-voms",
 )

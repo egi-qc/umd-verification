@@ -13,7 +13,8 @@ class PuppetConfig(BaseConfig):
     def __init__(self,
                  manifest,
                  module=[],
-                 hiera_data=[]):
+                 hiera_data=[],
+                 extra_vars=None):
         """Runs Puppet configurations.
 
         :manifest: Main ".pp" with the configuration to be applied.
@@ -32,6 +33,7 @@ class PuppetConfig(BaseConfig):
         self.puppetfile = "etc/puppet/Puppetfile"
         self.params_files = []
         self.use_rvmsudo = False
+        self.extra_vars = extra_vars
 
     def _deploy(self):
         # Install release package
@@ -150,9 +152,9 @@ class PuppetConfig(BaseConfig):
         # - umd & static vars -
         self._set_hiera_params()
         # - extra vars -
-        _extra_vars_fname = os.path.join(self.hiera_data_dir,
-                                         "extra_vars.yaml")
         if self.extra_vars:
+            _extra_vars_fname = os.path.join(self.hiera_data_dir,
+                                             "extra_vars.yaml")
             self._add_extra_vars(_extra_vars_fname)
             self._add_hiera_param_file(os.path.basename(_extra_vars_fname))
 
