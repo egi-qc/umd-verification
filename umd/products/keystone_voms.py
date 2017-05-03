@@ -16,7 +16,8 @@ class KeystoneVOMSDeploy(base.Deploy):
             "umd_stable_%s" % os_release))
         keystone_voms_params = [
             "keystone_voms::openstack_version: %s" % os_release,
-            "cacert: %s" % config.CFG["ca"].location]
+            "cacert: %s" % config.CFG["ca"].location
+        ]
         keystone_voms_conf = os.path.join(
             config.CFG["cfgtool"].hiera_data_dir,
             "keystone_voms.yaml")
@@ -53,7 +54,7 @@ keystone_voms = KeystoneVOMSDeploy(
     qc_specific_id="keystone-voms",
 )
 
-keystone_voms_devstack = KeystoneVOMSDeploy(
+keystone_voms_devstack = base.Deploy(
     name="keystone-voms",
     doc="Keystone VOMS module deployment leveraging Devstack.",
     cfgtool=PuppetConfig(
