@@ -9,7 +9,7 @@ class {
 
 exec {
     "Enable ooi API":
-        command => "/bin/sed -e '/enabled_apis*/c\enabled_apis = osapi_compute,metadata,ooi' /etc/nova/nova.conf",
+        command => "/bin/sed -i '/enabled_apis*/c\enabled_apis = osapi_compute,metadata,ooi' /etc/nova/nova.conf",
         require => Class["ooi"]
 }
 
