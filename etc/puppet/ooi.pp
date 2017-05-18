@@ -14,8 +14,18 @@ exec {
 }
 
 exec {
-    "Restart nova-api in devstack":
-        command => "pkill -9 -f nova-api && nohup python nova-api &",
+    "kill nova-api":
+        command => "pkill -9 -f nova-api",
         path    => ["/usr/bin", "/usr/local/bin"],
+        onlyif  => "pgrep -fc nova-api",
         require => Exec["Enable ooi API"]
+}
+
+exec {
+    "Start nova-api":
+        command  => "/usr/local/bin/nova-api & echo $! >/opt/stack/status/stack/n-api.pid; fg || echo \"n-api failed to start\" | tee \"/opt/stack/status/stack/n-api.failure\"",
+        user     => "stack",
+        provider => shell,
+        path     => ["/usr/bin", "/usr/local/bin"],
+        require  => Exec["kill nova-api"]
 }
