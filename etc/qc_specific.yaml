@@ -71,6 +71,10 @@ im:
         - test: "bin/im/im-client.sh"
           description: "Infrastructure manager client tasks."
 
+ooi:
+    qc_func_1: 
+        - test: "bin/ooi/occi.sh"
+          description: "OCCI 1.1 testing."
 storm:
     qc_func_1:
         - test: "bin/myproxy/client-test.sh"
