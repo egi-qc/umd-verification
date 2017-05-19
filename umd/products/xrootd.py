@@ -32,4 +32,4 @@ xrootd = base.Deploy(
             "https://github.com/egi-qc/puppet-xrootd/archive/"
             "umd.tar.gz"), "xrootd"),
         module_from_puppetforge=[
-            "CERNOps-fetchcrl"]))
+            "puppet-fetchcrl"]))
