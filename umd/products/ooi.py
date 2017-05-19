@@ -16,5 +16,5 @@ ooi = OOIDeploy(
         manifest="ooi.pp",
         module=("git://github.com/egi-qc/puppet-ooi.git", "umd"),
     ),
-    # qc_specific_id="ooi",
+    qc_specific_id="ooi",
 )
