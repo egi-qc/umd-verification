@@ -1,8 +1,7 @@
-include umd
-
-class {
-    "ooi":
-        manage_repos      => false,
-        manage_service    => false,
-        require           => Class["umd"],
+# Class containtment
+class wrapper {
+    contain umd
+    contain ooi
+    Class["umd"] -> Class["ooi"]
 }
+include wrapper
