@@ -24,5 +24,10 @@ class ooi_start {
 }
 
 include umd
-class {"ooi": require => Class["umd"]}
+class {
+    "ooi":
+        manage_repos   => false,
+        manage_service => false,
+        require        => Class["umd"]
+}
 class {"ooi_start": require => Class["ooi"]}
