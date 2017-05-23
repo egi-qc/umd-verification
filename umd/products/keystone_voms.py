@@ -6,9 +6,21 @@ from umd.base.configure.puppet import PuppetConfig
 from umd.common import pki
 from umd import config
 from umd import utils
+from umd.products import utils as product_utils
+from umd.products import voms
 
 
-class KeystoneVOMSDeploy(base.Deploy):
+def fakeproxy():
+    # voms packages
+    voms.client_install()
+    utils.runcmd("pip install voms-auth-system-openstack")
+    # fake proxy
+    product_utils.create_fake_proxy()
+    # fake voms server - lsc
+    product_utils.add_fake_lsc()
+
+
+class KeystoneVOMSFullDeploy(base.Deploy):
     def pre_config(self):
         os_release = config.CFG["openstack_release"]
         self.cfgtool.module.append((
@@ -28,18 +40,16 @@ class KeystoneVOMSDeploy(base.Deploy):
         config.CFG["cfgtool"]._add_hiera_param_file("keystone_voms.yaml")
         pki.trust_ca(config.CFG["ca"].location)
 
-    # def pre_validate(self):
-    #     # voms packages
-    #     voms.client_install()
-    #     utils.runcmd("pip install voms-auth-system-openstack")
-    #     # fake proxy
-    #     product_utils.create_fake_proxy()
-    #     # fake voms server - lsc
-    #     product_utils.add_fake_lsc()
+    def pre_validate(self):
+        fakeproxy()
 
 
+class KeystoneVOMSDeploy(base.Deploy):
+    def pre_validate(self):
+        fakeproxy()
 
-keystone_voms = KeystoneVOMSDeploy(
+
+keystone_voms = KeystoneVOMSFullDeploy(
     name="keystone-voms-full",
     doc="Keystone service & Keystone VOMS module deployment.",
     need_cert=True,
@@ -54,9 +64,10 @@ keystone_voms = KeystoneVOMSDeploy(
     qc_specific_id="keystone-voms",
 )
 
-keystone_voms_devstack = base.Deploy(
+keystone_voms_devstack = KeystoneVOMSFullDeploy(
     name="keystone-voms",
     doc="Keystone VOMS module deployment leveraging Devstack.",
+    need_cert=True,
     cfgtool=PuppetConfig(
         manifest="keystone_voms_devstack.pp",
         hiera_data=["voms.yaml"],

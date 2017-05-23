@@ -8,9 +8,9 @@ def client_install():
         "myproxy"
     ])
 
-voms_server = base.Deploy(
-    name="voms-mysql",
-    doc="MySQL VOMS server deployment.",
-    metapkg="emi-voms-mysql",
-    need_cert=True,
-    has_infomodel=True)
+#voms_server = base.Deploy(
+#    name="voms-mysql",
+#    doc="MySQL VOMS server deployment.",
+#    metapkg="emi-voms-mysql",
+#    need_cert=True,
+#    has_infomodel=True)

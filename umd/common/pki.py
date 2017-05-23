@@ -1,4 +1,5 @@
 import os.path
+import socket
 
 import fabric
 from fabric import operations as fabric_ops
@@ -8,7 +9,7 @@ from umd import config
 from umd import system
 from umd import utils
 
-openssl_cnf = """
+openssl_cnf_old = """
 [ ca ]
 default_ca = myca
 
@@ -39,6 +40,37 @@ subjectAltName = @alt_names
 [alt_names]
 IP.1 = 127.0.0.1
 """
+openssl_cnf = """
+[ ca ]
+default_ca = myca
+
+[ myca ]
+dir = ./
+new_certs_dir = $dir
+unique_subject = no
+certificate = $dir/ca.pem
+database = $dir/index.txt
+private_key = $dir/ca.key
+crlnumber = $dir/crlnumber
+serial = $dir/certserial
+default_days = 730
+default_md = sha1
+default_crl_days = 730
+
+[req]
+distinguished_name = req_dn
+req_extensions = v3_req
+
+[req_dn]
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = %s
+""" % socket.getfqdn()
 
 
 def certify():

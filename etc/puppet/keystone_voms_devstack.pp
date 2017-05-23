@@ -82,7 +82,7 @@ elsif $::osfamily == "RedHat" {
 define create_tenant {
     exec {
         "Create project ${name}":
-            command => "/usr/local/bin/openstack project create --enabled True ${name}"
+            command => "/usr/local/bin/openstack project create --domain default --enable ${name}"
     }
 }
 create_tenant { ["VO:dteam", "VO:ops.vo.ibergrid.eu"]: }
@@ -99,8 +99,8 @@ file {
     "/etc/keystone/voms.json":
         ensure  => file,
         content => $voms_json_conf,
-        owner   => "stack",
-        group   => "stack",
+        owner   => "keystone",
+        group   => "keystone",
         mode    => "0640",
         notify  => Exec["reload"]
 }

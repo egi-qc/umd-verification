@@ -20,7 +20,7 @@ args = parser.parse_args()
 
 username = password = None
 tenant = args.tenant
-url = "https://%s:5000/v2.0/" % socket.getfqdn()
+url = "http://%s:5000/v3/" % socket.getfqdn()
 version = 2
 
 auth_system = "voms"
