@@ -1,27 +1,105 @@
-class { "umd": igtf_repo => "yes" }
+include umd
+
+## Base Keystone
+
+Exec { logoutput => 'on_failure' }
+
+if $::osfamily == 'Debian' {
+    $trust_dir = "/usr/share/ca-certificates/"
+    $trust_cmd = "update-ca-certificates"
+    $pkgname = 'mariadb-client'
+}
+else {
+    $trust_dir = "/etc/pki/ca-trust/source/anchors/"
+    $trust_cmd = "update-ca-trust"
+    $pkgname = 'mariadb'
+}
+
+$cacert = hiera("cacert")
+file {
+    "${trust_dir}/0d2a3bdd.crt":
+        ensure => present,
+        source => "file:///${cacert}",
+}
+
+exec {
+    "Add CA cert to configuration":
+        command => "/bin/grep -q \"0d2a3bdd.crt\" /etc/ca-certificates.conf || /bin/echo \"0d2a3bdd.crt\" >> /etc/ca-certificates.conf",
+        unless  => "/bin/grep \"0d2a3bdd.crt\" /etc/ca-certificates.conf",
+        notify  => Exec["Update CA trust"],
+        require => File["${trust_dir}/0d2a3bdd.crt"],
+}
+
+exec {
+    "Update CA trust":
+        command => $trust_cmd,
+        path    => ["/bin", "/usr/bin"],
+        refreshonly => true,
+        require => [File["${trust_dir}/0d2a3bdd.crt"], Exec["Add CA cert to configuration"]]
+}
+
+class { '::mysql::client':
+    package_name => $pkgname,
+}
+
+class { '::mysql::server':
+    package_name            => 'mariadb-server',
+    root_password           => 'TESTOWY',
+    remove_default_accounts => true,
+}
+class { 'keystone::db::mysql':
+    password      => 'super_secret_db_password',
+    allowed_hosts => '%',
+    #mysql_module  => '2.2',
+}
+class { 'keystone':
+    verbose             => true,
+    debug               => true,
+    database_connection => 'mysql://keystone:super_secret_db_password@localhost/keystone',
+    catalog_type        => 'sql',
+    admin_token         => 'random_uuid',
+    enabled             => false,
+    enable_ssl          => true,
+    #mysql_module        => '2.2',
+    public_endpoint     => "https://${::fqdn}:5000/",
+    admin_endpoint      => "https://${::fqdn}:35357/",
+    require             => File["${trust_dir}/0d2a3bdd.crt"],
+}
+
+class { 'keystone::endpoint':
+  public_url => "https://${::fqdn}:5000/",
+  admin_url  => "https://${::fqdn}:35357/",
+}
+
+
+class { 'keystone::roles::admin':
+    email    => 'test@puppetlabs.com',
+    password => 'ChangeMe',
+}
+
+## WSGI Keystone
+
+include apache
+class { 'keystone::wsgi::apache':
+    ssl               => true,
+    ssl_cert          => "/etc/grid-security/hostcert.pem",
+    ssl_key           => "/etc/grid-security/hostkey.pem",
+    ssl_certs_dir     => "/etc/grid-security/certificates",
+    ssl_crl_path      => "/etc/grid-security/certificates",
+    ssl_verify_client => "optional",
+    ssl_verify_depth  => "10",
+    ssl_options       => "+StdEnvVars +ExportCertData",
+}
+
+#keystone_config { 'ssl/enable': value => true }
 
 ## Keystone VOMS ##
 
-if $::osfamily == "Debian" {
-    $apache_srv = "apache2"
-}
-else {
-    $apache_srv = "httpd"
-}
-exec {
-    "reload":
-        command => "/usr/sbin/service ${apache_srv} reload",
-        refreshonly => true,
-}
-
 # keystone-paste.ini
-ini_setting {
+keystone_paste_ini {
     "VOMS_filter":
-        ensure  => present,
-        path    => "/etc/keystone/keystone-paste.ini",
-        section => "filter:voms",
-        setting => "paste.filter_factory",
-        value   => "keystone_voms.core:VomsAuthNMiddleware.factory",
+        name      => "filter:voms/paste.filter_factory",
+        value     => "keystone_voms.core:VomsAuthNMiddleware.factory",
 }
 
 ini_subsetting {
@@ -33,15 +111,15 @@ ini_subsetting {
         path              => "/etc/keystone/keystone-paste.ini",
         subsetting        => "ec2_extension",
         value             => " voms",
-        require           => Ini_setting["VOMS_filter"],
-        notify            => Exec["reload"]
+        require           => Keystone_paste_ini["VOMS_filter"],
+        notify            => Class['Apache::Service']
 }
 
 # keystone.conf
 $defaults = { "path" => "/etc/keystone/keystone.conf" }
 $voms_conf  = {
     "voms" => {
-        "vomsdir_path"     => "/etc/grid-security/vomsdir",
+        "vomsdir_path" => "/etc/grid-security/vomsdir",
         "ca_path"          => "/etc/grid-security/certificates",
         "voms_policy"      => "/etc/keystone/voms.json",
         "vomsapi_lib"      => "libvomsapi.so.1",
@@ -57,6 +135,7 @@ if $::osfamily == "Debian" {
     file {
         "/etc/apache2/envvars":
             ensure  => present,
+            require => Class["Keystone::Wsgi::Apache"]
     }
 
     file_line {
@@ -78,14 +157,17 @@ elsif $::osfamily == "RedHat" {
 
 }
 
-## Tenants/VOs
-define create_tenant {
-    exec {
-        "Create project ${name}":
-            command => "/usr/local/bin/openstack project create --domain default --enable ${name}"
-    }
+# Tenants/VOs
+keystone_tenant {
+    "VO:dteam":
+        ensure  => present,
+        enabled => True,
 }
-create_tenant { ["VO:dteam", "VO:ops.vo.ibergrid.eu"]: }
+keystone_tenant {
+    "VO:ops.vo.ibergrid.eu":
+        ensure  => present,
+        enabled => True,
+}
 
 $voms_json_conf = '{
     "dteam": {
@@ -102,7 +184,12 @@ file {
         owner   => "keystone",
         group   => "keystone",
         mode    => "0640",
-        notify  => Exec["reload"]
+        notify  => Class['Apache::Service']
+}
+
+package {
+    "ca-policy-egi-core":
+        ensure => installed
 }
 
 voms::client{
@@ -120,7 +207,7 @@ voms::client{
             ca_dn  => "/C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2016"
 
         }],
-        require => Class["Umd"]
+        require => Package["ca-policy-egi-core"]
 }
 
 voms::client{

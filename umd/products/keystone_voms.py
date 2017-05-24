@@ -10,17 +10,7 @@ from umd.products import utils as product_utils
 from umd.products import voms
 
 
-def fakeproxy():
-    # voms packages
-    voms.client_install()
-    utils.runcmd("pip install voms-auth-system-openstack")
-    # fake proxy
-    product_utils.create_fake_proxy()
-    # fake voms server - lsc
-    product_utils.add_fake_lsc()
-
-
-class KeystoneVOMSFullDeploy(base.Deploy):
+class KeystoneVOMSDeploy(base.Deploy):
     def pre_config(self):
         os_release = config.CFG["openstack_release"]
         self.cfgtool.module.append((
@@ -41,39 +31,40 @@ class KeystoneVOMSFullDeploy(base.Deploy):
         pki.trust_ca(config.CFG["ca"].location)
 
     def pre_validate(self):
-        fakeproxy()
+        # voms packages
+        voms.client_install()
+        utils.runcmd("pip install voms-auth-system-openstack")
+        # fake proxy
+        product_utils.create_fake_proxy()
+        # fake voms server - lsc
+        product_utils.add_fake_lsc()
 
 
-class KeystoneVOMSDeploy(base.Deploy):
-    def pre_validate(self):
-        fakeproxy()
+keystone_voms = KeystoneVOMSDeploy(
+    name="keystone-voms",
+    doc="Keystone VOMS module deployment leveraging Devstack.",
+    need_cert=True,
+    cfgtool=PuppetConfig(
+        manifest="keystone_voms.pp",
+        hiera_data=["voms.yaml"],
+        module=["puppetlabs-inifile",
+                "puppetlabs-apache",
+                "lcgdm-voms"],
+    ),
+    qc_specific_id="keystone-voms",
+)
 
-
-keystone_voms = KeystoneVOMSFullDeploy(
+keystone_voms_full = KeystoneVOMSDeploy(
     name="keystone-voms-full",
     doc="Keystone service & Keystone VOMS module deployment.",
     need_cert=True,
     cfgtool=PuppetConfig(
-        manifest="keystone_voms.pp",
+        manifest="keystone_voms_full.pp",
         hiera_data=["voms.yaml"],
         # NOTE(orviz) either we use a generic 'umd' branch
         # or if it is per OS release, it has to be set in pre_config() above
         #module=[("git://github.com/egi-qc/puppet-keystone.git", "umd_stable_mitaka"), "lcgdm-voms"],
         module=["puppetlabs-inifile", "lcgdm-voms"],
-    ),
-    qc_specific_id="keystone-voms",
-)
-
-keystone_voms_devstack = KeystoneVOMSFullDeploy(
-    name="keystone-voms",
-    doc="Keystone VOMS module deployment leveraging Devstack.",
-    need_cert=True,
-    cfgtool=PuppetConfig(
-        manifest="keystone_voms_devstack.pp",
-        hiera_data=["voms.yaml"],
-        module=["puppetlabs-inifile",
-                "puppetlabs-apache",
-                "lcgdm-voms"],
     ),
     qc_specific_id="keystone-voms",
 )

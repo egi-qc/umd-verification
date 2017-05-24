@@ -20,7 +20,7 @@ args = parser.parse_args()
 
 username = password = None
 tenant = args.tenant
-url = "http://%s:5000/v3/" % socket.getfqdn()
+url = "https://%s:5000/v2.0/" % socket.getfqdn()
 version = 2
 
 auth_system = "voms"
@@ -33,6 +33,7 @@ else:
 
 client = novaclient.client.Client(version, username, password,
                                   tenant, url,
+                                  cacert=os.environ["OS_CACERT"],
                                   auth_plugin=auth_plugin,
                                   auth_system=auth_system)
 try:
