@@ -6,6 +6,7 @@ from umd.base.configure.puppet import PuppetConfig
 from umd.common import pki
 from umd import config
 from umd import utils
+from umd import system
 from umd.products import utils as product_utils
 from umd.products import voms
 
@@ -30,9 +31,24 @@ class KeystoneVOMSDeploy(base.Deploy):
         config.CFG["cfgtool"]._add_hiera_param_file("keystone_voms.yaml")
         pki.trust_ca(config.CFG["ca"].location)
 
+        # FIXME Create tenant VO:dteam
+        utils.runcmd("systemctl restart httpd")
+        utils.runcmd(("/bin/bash -c 'source /root/.nova/admin-novarc ; "
+                      "openstack --os-password $OS_PASSWORD "
+                      "--os-username $OS_USERNAME "
+                      "--os-project-name $OS_PROJECT_NAME "
+                      "--os-auth-url $OS_AUTH_URL "
+                      "--os-cacert $OS_CACERT "
+                      "project create --enable VO:dteam --or-show'"))
+
     def pre_validate(self):
         # voms packages
-        voms.client_install()
+        if system.distro_version == "ubuntu16":
+            utils.install(["http://mirrors.kernel.org/ubuntu/pool/universe/v/voms/voms-clients_2.0.12-4build1_amd64.deb",
+                           "http://launchpadlibrarian.net/229641205/myproxy_6.1.16-1_amd64.deb"])
+        elif system.distro_version == "centos7":
+        else:
+            voms.client_install()
         utils.runcmd("pip install voms-auth-system-openstack")
         # fake proxy
         product_utils.create_fake_proxy()

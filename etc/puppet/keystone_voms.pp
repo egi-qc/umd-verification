@@ -83,16 +83,23 @@ elsif $::osfamily == "RedHat" {
 }
 
 # Tenants/VOs
-define create_tenant {
-    # FIXME(orviz) Nova credentials hardcoded to /root/.nova/admin-novarc!
-    exec {
-        "Create project ${name}":
-            command => "/bin/bash -c 'source /root/.nova/admin-novarc && openstack project create --domain default --enable ${name} --or-show'",
-            path    => ["/usr/local/bin", "/usr/bin"],
-            logoutput => true
-    }
-}
-create_tenant { ["VO:dteam", "VO:ops.vo.ibergrid.eu"]: }
+#define create_tenant {
+#    # FIXME(orviz) Nova credentials hardcoded to /root/.nova/admin-novarc!
+#    exec {
+#        "Create project ${name}":
+#            #command => "/bin/bash -c 'source /root/.nova/admin-novarc && openstack project create --domain default --enable ${name} --or-show'",
+#            #command => "/bin/bash -c 'source /root/.nova/admin-novarc ; openstack --os-project-name \$OS_PROJECT_NAME --os-password \$OS_PASSWORD --os-username \$OS_USERNAME --os-auth-url \$OS_AUTH_URL --os-cacert \$OS_CACERT endpoint list'",
+#            command => "openstack --os-password soplao10000 --os-username admin --os-project-name admin --os-auth-url https://${::fqdn}:5000/v2.0 --os-cacert /etc/grid-security/certificates/0d2a3bdd.0 endpoint list",
+#            provider => shell,
+#            path    => ["/usr/local/bin", "/usr/bin"],
+#            logoutput => true
+#    }
+#}
+#create_tenant { ["VO:dteam", "VO:ops.vo.ibergrid.eu"]: }
+#keystone_tenant { ["VO:dteam", "VO:ops.vo.ibergrid.eu"]:
+#  ensure  => present,
+#  enabled => true,
+#}
 
 $voms_json_conf = '{
     "dteam": {

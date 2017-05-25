@@ -67,6 +67,7 @@ def filelog(f):
         logfile = kwargs.pop("log_to_file", None)
         stop_on_error = kwargs.pop("stop_on_error", True)
         r = f(*args, **kwargs)
+        api.info("%s, %s" % (logfile, r))
         if logfile:
             r.logfile = to_file(r, logfile)
         if r.failed:
