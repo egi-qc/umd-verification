@@ -34,6 +34,7 @@ else:
 client = novaclient.client.Client(version, username, password,
                                   tenant, url,
                                   cacert=os.environ["OS_CACERT"],
+                                  #insecure=True,
                                   auth_plugin=auth_plugin,
                                   auth_system=auth_system)
 try:
