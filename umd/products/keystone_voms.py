@@ -47,8 +47,10 @@ class KeystoneVOMSDeploy(base.Deploy):
             utils.install(["http://mirrors.kernel.org/ubuntu/pool/universe/v/voms/voms-clients_2.0.12-4build1_amd64.deb",
                            "http://launchpadlibrarian.net/229641205/myproxy_6.1.16-1_amd64.deb"])
         elif system.distro_version == "centos7":
-        else:
-            voms.client_install()
+            # FIXME Enable epel to install voms clients (remove this when epel clients in CentOS7)
+            api.info("Temporary enable epel-release to install voms clients")
+            utils.install("epel-release")
+        voms.client_install()
         utils.runcmd("pip install voms-auth-system-openstack")
         # fake proxy
         product_utils.create_fake_proxy()
