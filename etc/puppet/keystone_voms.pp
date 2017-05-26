@@ -172,7 +172,7 @@ package {
 
 exec {
     "Execute fetch-crl":
-        command => "/usr/sbin/fetch-crl -q",
+        command => "/usr/sbin/fetch-crl -q && exit 0",
         require => Package["fetch-crl"]
 }
 
