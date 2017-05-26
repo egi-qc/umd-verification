@@ -41,7 +41,7 @@ class KeystoneVOMSDeploy(base.Deploy):
                           "/etc/httpd/conf/httpd.conf") % system.fqdn)
             utils.runcmd("systemctl restart httpd")
 
-        # mysql
+        # mysql - set current hostname
         utils.runcmd("mysql -e 'UPDATE keystone.endpoint SET url=\"https://%s:5000/v2.0\" WHERE url like \"%%5000%%v2.0%%\";'" % system.fqdn) 
         utils.runcmd("mysql -e 'UPDATE keystone.endpoint SET url=\"https://%s:35357/v2.0\" WHERE url like \"%%35357%%v2.0%%\";'" % system.fqdn) 
 
@@ -59,10 +59,10 @@ class KeystoneVOMSDeploy(base.Deploy):
         if system.distro_version == "ubuntu16":
             utils.install(["http://mirrors.kernel.org/ubuntu/pool/universe/v/voms/voms-clients_2.0.12-4build1_amd64.deb",
                            "http://launchpadlibrarian.net/229641205/myproxy_6.1.16-1_amd64.deb"])
-        elif system.distro_version == "centos7":
-            # FIXME Enable epel to install voms clients (remove this when epel clients in CentOS7)
-            api.info("Temporary enable epel-release to install voms clients")
-            utils.install("epel-release")
+        #elif system.distro_version == "centos7":
+        #    # FIXME Enable epel to install voms clients (remove this when epel clients in CentOS7)
+        #    api.info("Temporary enable epel-release to install voms clients")
+        #    utils.install("epel-release")
         voms.client_install()
         utils.runcmd("pip install voms-auth-system-openstack")
         # fake proxy

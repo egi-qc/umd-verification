@@ -33,7 +33,7 @@ else:
 
 client = novaclient.client.Client(version, username, password,
                                   tenant, url,
-                                  cacert=os.environ["OS_CACERT"],
+                                  cacert="/etc/grid-security/certificates/0d2a3bdd.0",
                                   #insecure=True,
                                   auth_plugin=auth_plugin,
                                   auth_system=auth_system)

@@ -9,6 +9,8 @@ if $::osfamily == "Debian" {
 else {
     $apache_srv = "httpd"
     $pkg = "python-keystone_voms"
+    # FIXME - Remove this whenever 'fetch-crl' is available in UMD
+    $extra_pkgs = "epel-release"
 }
 exec {
     "reload":
@@ -158,9 +160,14 @@ voms::client{
 ## Misc
 
 package {
+    $extra_pkgs:
+        ensure => installed
+}
+
+package {
     "fetch-crl":
         ensure => latest,
-#        require => Package["ca-policy-egi-core"]
+        require => Package[$extra_pkgs]
 }
 
 exec {
