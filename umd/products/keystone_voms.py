@@ -31,11 +31,17 @@ class KeystoneVOMSDeploy(base.Deploy):
         config.CFG["cfgtool"]._add_hiera_param_file("keystone_voms.yaml")
         pki.trust_ca(config.CFG["ca"].location)
 
-        # FIXME Create tenant VO:dteam
+        # Apache2
         if system.distro_version == "ubuntu16":
+            utils.runcmd(("sed -e '/ServerName*/c\ServerName %s' "
+                          "/etc/apache2/apache2.conf") % system.fqdn)
             utils.runcmd("/etc/init.d/apache2 restart")
         elif system.distro_version == "centos7":
+            utils.runcmd(("sed -e '/ServerName*/c\ServerName %s' "
+                          "/etc/httpd/conf/httpd.conf") % system.fqdn)
             utils.runcmd("systemctl restart httpd")
+
+        # FIXME Create tenant VO:dteam
         utils.runcmd(("/bin/bash -c 'source /root/.nova/admin-novarc ; "
                       "openstack --os-password $OS_PASSWORD "
                       "--os-username $OS_USERNAME "
