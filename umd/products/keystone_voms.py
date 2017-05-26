@@ -32,7 +32,10 @@ class KeystoneVOMSDeploy(base.Deploy):
         pki.trust_ca(config.CFG["ca"].location)
 
         # FIXME Create tenant VO:dteam
-        utils.runcmd("systemctl restart httpd")
+        if system.distro_version == "ubuntu16":
+            utils.runcmd("/etc/init.d/apache2 restart")
+        elif system.distro_version == "centos7":
+            utils.runcmd("systemctl restart httpd")
         utils.runcmd(("/bin/bash -c 'source /root/.nova/admin-novarc ; "
                       "openstack --os-password $OS_PASSWORD "
                       "--os-username $OS_USERNAME "
