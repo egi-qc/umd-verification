@@ -157,12 +157,18 @@ voms::client{
 
 ## Misc
 
-#package {
-#    "fetch-crl":
-#        ensure => latest,
+package {
+    "fetch-crl":
+        ensure => latest,
 #        require => Package["ca-policy-egi-core"]
-#}
-#
+}
+
+exec {
+    "Execute fetch-crl":
+        command => "/usr/sbin/fetch-crl -q",
+        require => Package["fetch-crl"]
+}
+
 #cron {
 #    "fetch-crl":
 #        command => "/usr/sbin/fetch-crl",
