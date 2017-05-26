@@ -42,8 +42,8 @@ class KeystoneVOMSDeploy(base.Deploy):
             utils.runcmd("systemctl restart httpd")
 
         # mysql - set current hostname
-        utils.runcmd("mysql -e 'UPDATE keystone.endpoint SET url=\"https://%s:5000/v2.0\" WHERE url like \"%%5000%%v2.0%%\";'" % system.fqdn) 
-        utils.runcmd("mysql -e 'UPDATE keystone.endpoint SET url=\"https://%s:35357/v2.0\" WHERE url like \"%%35357%%v2.0%%\";'" % system.fqdn) 
+        utils.runcmd("mysql -e 'UPDATE keystone.endpoint SET url=\"https://%s:5000/v2.0\" WHERE url like \"%%5000%%\";'" % system.fqdn) 
+        utils.runcmd("mysql -e 'UPDATE keystone.endpoint SET url=\"https://%s:35357/v2.0\" WHERE url like \"%%35357%%\";'" % system.fqdn) 
 
         # FIXME Create tenant VO:dteam
         utils.runcmd(("/bin/bash -c 'source /root/.nova/admin-novarc ; "
