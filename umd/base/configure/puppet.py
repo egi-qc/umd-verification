@@ -116,7 +116,7 @@ class PuppetConfig(BaseConfig):
             nosudo=True)
 
     def _run(self):
-        logfile = os.path.join(config.CFG["log_path"], "puppet.log")
+        logfile = os.path.join(config.CFG["log_path"], "qc_conf.stderr")
         module_path = utils.runcmd("puppet config print modulepath",
                                    nosudo=self.use_rvmsudo)
 
@@ -133,7 +133,7 @@ class PuppetConfig(BaseConfig):
                       "though, check logs)"))
             r.failed = False
         else:
-            api.fail("Puppet execution failed. More information in logs: %s"
+            api.fail("Puppet execution failed. More infromation on %s log"
                      % logfile,
                      stop_on_error=True)
             r.failed = True
