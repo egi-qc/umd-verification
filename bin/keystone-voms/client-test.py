@@ -42,4 +42,4 @@ try:
 except novaclient.exceptions.EndpointNotFound:
     pass
 
-print(client.client.auth_token)
+print("Token retrieved from proxy: %s" % client.client.auth_token)
