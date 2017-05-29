@@ -175,10 +175,11 @@ frontier-squid:
 
 keystone-voms:
     qc_func_1: 
-        - test: "sudo bin/keystone-voms/client-test.py"
+        - test: "bin/keystone-voms/client-test.py"
           description: "Requesting a token using a valid VOMS proxy."
           source: "https://github.com/IFCA/voms-auth-system-openstack"
           args: "VO:dteam --proxy-path /tmp/umd_proxy"
+          sudo: True 
         #- test: "bin/keystone-voms/client-test.sh"
         #  description: "Requesting a token using a valid VOMS proxy."
         #  source: "https://github.com/IFCA/voms-auth-system-openstack"

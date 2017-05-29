@@ -160,7 +160,7 @@ voms::client{
 
 ## Misc
 
-if defined("$extra_pkgs") {
+if $extra_pkgs != undef {
     package {
         $extra_pkgs:
             ensure => installed
