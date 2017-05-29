@@ -61,6 +61,10 @@ class KeystoneVOMSDeploy(base.Deploy):
         product_utils.create_fake_proxy()
         # fake voms server - lsc
         product_utils.add_fake_lsc()
+        
+        # If Ubuntu, token must be retrieved using curl calls
+        if system.distro_version == "ubuntu16":
+            config.CFG["qc_specific_id"] = "keystone-voms-ubuntu"     
 
 
 keystone_voms = KeystoneVOMSDeploy(
