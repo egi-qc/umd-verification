@@ -5,6 +5,7 @@ class { "umd": igtf_repo => "yes" }
 if $::osfamily == "Debian" {
     $apache_srv = "apache2"
     $pkg = "python-keystone-voms"
+    $extra_pkgs = []
 }
 else {
     $apache_srv = "httpd"
@@ -159,15 +160,18 @@ voms::client{
 
 ## Misc
 
-package {
-    $extra_pkgs:
-        ensure => installed
+if defined("$extra_pkgs") {
+    package {
+        $extra_pkgs:
+            ensure => installed
+    }
+    $require_extra = Package[$extra_pkgs]
 }
 
 package {
     "fetch-crl":
         ensure => latest,
-        require => Package[$extra_pkgs]
+        require => $require_extra
 }
 
 exec {
