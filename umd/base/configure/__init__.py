@@ -17,7 +17,7 @@ class BaseConfig(object):
         _fname = EXTRA_VARS_FILE
         if fname:
             _fname = fname
-        if utils.to_yaml(_fname, self.extra_vars):
+        if utils.to_yaml(_fname, self.extra_vars, destroy=True):
             api.info("Extra vars file added: %s" % _fname)
 
         return EXTRA_VARS_FILE

@@ -843,10 +843,13 @@ def create_workspace():
     api.info("Log directory '%s' has been created." % config.CFG["log_path"])
 
 
-def to_yaml(fname, lines):
+def to_yaml(fname, lines, destroy=False):
     """Creates a YAML file with the content given (string)."""
     lines = to_list(lines)
-    with open(fname, 'a') as f:
+    write_type = 'a'
+    if destroy:
+        write_type = 'w'
+    with open(fname, write_type) as f:
         for line in lines:
             f.write(yaml.dump(yaml.safe_load(line), default_flow_style=False))
     return fname
