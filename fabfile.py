@@ -37,6 +37,7 @@ from umd.products.rc import rc                              	# NOQA
 # from umd.products.ui import ui_gfal, gfal_solo              	# NOQA
 # from umd.products.voms import voms_server                   	# NOQA
 # from umd.products.wms import wms_utils                      	# NOQA
+from umd.products.wn import wn                      		# NOQA
 # from umd.products.xrootd import xrootd                      	# NOQA
 
 
