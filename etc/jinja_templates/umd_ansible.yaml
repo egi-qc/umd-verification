@@ -1,7 +1,10 @@
 ---
 distribution: {{ distribution }}
 release: {{ release }}
-openstack_release: {{ openstack_release }}
+{% if enable_testing_repo %}
+enable_testing_repo: {{ enable_testing_repo }}
+{% endif %}
+{% if distribution == "cmd" %}openstack_release: {{ openstack_release }}{% endif %}
 igtf_repo: {{ igtf_repo }}
 {% if repository_file %}
 verification_repofile:
