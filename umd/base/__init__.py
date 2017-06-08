@@ -105,6 +105,7 @@ class Deploy(tasks.Task):
         :package: Custom individual package/s to install.
         :func_id: Functional test/s to be performed ('id' from
             etc/qc_specific.yaml)
+        :enable_testing_repo: Enable the UMD or CMD testing repository.
         """
         # Get configuration parameters
         config.CFG.set_defaults()

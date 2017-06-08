@@ -103,6 +103,8 @@ runtime arguments are:
 :ca_version: Special runtime argument for CA verifications. This value refers to 
              the CA release version with '<major>.<minor>.<patch>' format.
 
+:enable_testing_repo: Enable UMD or CMD testing repository.
+
 
 .. _static-args-ref:
 

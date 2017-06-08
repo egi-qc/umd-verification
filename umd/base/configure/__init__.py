@@ -1,4 +1,5 @@
 from umd import api
+from umd import config
 from umd import utils
 
 
@@ -22,6 +23,13 @@ class BaseConfig(object):
 
         return EXTRA_VARS_FILE
 
+    def _extra_repo(self):
+        """Method where testing/preview/.. repos are enabled."""
+        if "enable_testing_repo" in config.CFG.keys():
+            utils.enable_repo("UMD-testing",
+                              local_repo=True,
+                              name="UMD-*-testing")
+
     def _deploy(self):
         """Method where the client tool is deployed."""
         pass
@@ -36,6 +44,7 @@ class BaseConfig(object):
         pass
 
     def run(self):
+        self._extra_repo()
         self._deploy()
 
         self.pre_config()

@@ -282,24 +282,26 @@ class Yum(object):
     def add_repo(self, repo, **kwargs):
         if "name" in kwargs.keys():
             name = kwargs["name"]
-            priority = kwargs["priority"]
-            lrepo = ["[%s]" % name.replace(' ', '_'),
-                     "name=%s" % name,
-                     "baseurl=%s" % repo,
-                     "priority=%s" % priority,
-                     "protect=1",
-                     "enabled=1",
-                     "gpgcheck=0"]
-            if "priority" in kwargs.keys():
-                lrepo.append("priority=%s" % kwargs["priority"])
-            fname = os.path.join(self.path,
-                                 name.replace(' ', '') + self.extension)
-            with open(fname, 'w') as f:
-                for line in lrepo:
-                    f.write(line + '\n')
-            r = mock.MagicMock()
-            r.failed = False
-
+            if "local_repo" in kwargs.keys():
+                r = runcmd("yum-config-manager --enable %s" % name)
+            else:
+                priority = kwargs["priority"]
+                lrepo = ["[%s]" % name.replace(' ', '_'),
+                         "name=%s" % name,
+                         "baseurl=%s" % repo,
+                         "priority=%s" % priority,
+                         "protect=1",
+                         "enabled=1",
+                         "gpgcheck=0"]
+                if "priority" in kwargs.keys():
+                    lrepo.append("priority=%s" % kwargs["priority"])
+                fname = os.path.join(self.path,
+                                     name.replace(' ', '') + self.extension)
+                with open(fname, 'w') as f:
+                    for line in lrepo:
+                        f.write(line + '\n')
+                r = mock.MagicMock()
+                r.failed = False
         else:
             r = runcmd("wget %s -O %s" % (repo,
                                           os.path.join(
