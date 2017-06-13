@@ -1,7 +1,7 @@
 from fabric import state
 
 # from umd.products.arc import arc_ce                         	# NOQA
-# from umd.products.argus import argus        	                # NOQA
+from umd.products.argus import argus        	                # NOQA
 # from umd.products.argus import argus_puppet       	            # NOQA
 # from umd.products.argus import argus_puppet_no_metapkg          # NOQA
 # from umd.products.argus import argus_yaim                   	# NOQA
