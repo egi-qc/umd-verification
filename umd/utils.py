@@ -31,15 +31,11 @@ def to_list(obj):
 def to_file(r, logfile):
     """Writes Fabric capture result to the given file."""
     def _write(fname, msg):
-        dirname = os.path.dirname(fname)
-        if not os.path.exists(dirname):
-            try:
-                os.makedirs(dirname)
-            except Exception:
-                create_workspace()
-                dirname = config.CFG["log_path"]
-        fname = os.path.join(dirname, fname)
-        with open(fname, 'a') as f:
+        fname = os.path.join(config.CFG["log_path"], fname)
+        _write_type = 'w'
+        if os.path.isfile(fname):
+           _write_type = 'a'
+        with open(fname, _write_type) as f:
             f.write(msg)
             f.flush()
 
@@ -59,6 +55,14 @@ def to_file(r, logfile):
             _write(_fname, r)
             l.append(_fname)
     return l
+
+
+def create_workspace():
+    """Create workspace (logs, ..) removing any previous existence."""
+    if os.path.exists(config.CFG["log_path"]):
+        shutil.rmtree(config.CFG["log_path"])
+    os.makedirs(config.CFG["log_path"])
+    api.info("Log directory '%s' has been created." % config.CFG["log_path"])
 
 
 def filelog(f):
@@ -835,14 +839,6 @@ def find_extension_files(path, extension):
             if f.endswith(extension):
                 l.append(os.path.join(root, f))
     return l
-
-
-def create_workspace():
-    """Create workspace (logs, ..) removing any previous existence."""
-    if os.path.exists(config.CFG["log_path"]):
-        shutil.rmtree(config.CFG["log_path"])
-    os.makedirs(config.CFG["log_path"])
-    api.info("Log directory '%s' has been created." % config.CFG["log_path"])
 
 
 def to_yaml(fname, lines, destroy=False):
