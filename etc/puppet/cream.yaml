@@ -3,8 +3,7 @@ creamce::mysql::root_password :      mysqlp@ssw0rd
 creamce::creamdb::password :         creamp@ssw0rd
 creamce::creamdb::minpriv_password : minp@ssw0rd
 apel::db::pass :                     apelp@ssw0rd
-#creamce::batch_system :              pbs
-creamce::batch_system :              
+creamce::batch_system :              pbs
 creamce::use_argus :                 false
 creamce::default_pool_size :         10
 creamce::info::capability :          [ "CloudSupport=false", "Multinode=true" ]
