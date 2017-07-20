@@ -106,6 +106,7 @@ class Deploy(tasks.Task):
         :func_id: Functional test/s to be performed ('id' from
             etc/qc_specific.yaml)
         :enable_testing_repo: Enable the UMD or CMD testing repository.
+        :enable_untested_repo: Enable the UMD or CMD untested repository.
         """
         # Get configuration parameters
         config.CFG.set_defaults()
