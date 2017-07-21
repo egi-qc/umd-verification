@@ -3,11 +3,13 @@
 # Args:
 #   $1: distribution and release (umd3, umd4, cmd1)
 #   $2: configuration management tool (ansible, puppet)
-#   $3: Role/module URL 
+#   $3: Role/module URL
+#   $4: verification repository/s 
 
 distro=$1
 config_tool=$2
 module_name="`basename $3`"
+verification_repos=$4
 
 ## sudo OR rvmsudo
 [[ $OS == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
@@ -35,5 +37,9 @@ case $distro in
 esac
 
 # fab execution
-Verification_repository=$(./bin/jenkins/parse_multiline.sh ${Verification_repository})
-$sudocmd fab argus:umd_release=${release_str},${Verification_repository},log_path=logs
+if [ -n "${verification_repos}" ] ; then
+    verification_repos=$(./bin/jenkins/parse_multiline.sh ${verification_repos})
+    $sudocmd fab argus:${release_str},${Verification_repository},log_path=logs
+else
+    $sudocmd fab argus:${release_str},log_path=logs
+fi
