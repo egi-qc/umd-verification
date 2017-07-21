@@ -19,3 +19,7 @@ case $1 in
         echo "Configuration management tool '$1' not supported" && exit -1
         ;;
 esac
+
+# fab execution
+Verification_repository=$(./bin/jenkins/parse_multiline.sh ${Verification_repository})
+$sudocmd fab argus:umd_release=${UMD_release},${Verification_repository},log_path=logs
