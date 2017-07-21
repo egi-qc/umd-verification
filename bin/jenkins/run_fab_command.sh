@@ -4,6 +4,8 @@
 #   $1: configuration management tool (ansible, puppet)
 #   $2: Role/module URL 
 
+module_name="`basename $2`"
+
 ## sudo OR rvmsudo
 [[ $OS == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
 
@@ -11,7 +13,7 @@
 case $1 in
     *ansible*)
         $sudocmd pip install ansible==2.2
-        git clone $2 /tmp && sudo ansible-galaxy install -r `basename ${2}`/requirements.yml
+        git clone $2 /tmp/$module_name && sudo ansible-galaxy install -r ${module_name}/requirements.yml
         ;;
     #*puppet*)
     #    ;;
