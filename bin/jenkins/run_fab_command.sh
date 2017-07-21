@@ -13,7 +13,8 @@ module_name="`basename $2`"
 case $1 in
     *ansible*)
         $sudocmd pip install ansible==2.2
-        git clone $2 /tmp/$module_name && sudo ansible-galaxy install -r ${module_name}/requirements.yml
+        module_path=/tmp/$module_name
+        git clone $2 $module_path && sudo ansible-galaxy install -r ${module_path}/requirements.yml
         ;;
     #*puppet*)
     #    ;;
