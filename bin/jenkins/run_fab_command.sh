@@ -8,6 +8,7 @@
 
 distro=$1
 config_tool=$2
+module_url=$3
 module_name="`basename $3`"
 verification_repos=$4
 
@@ -19,7 +20,9 @@ case $config_tool in
     *ansible*)
         $sudocmd pip install ansible==2.2
         module_path=/tmp/$module_name
-        git clone $2 $module_path && sudo ansible-galaxy install -r ${module_path}/requirements.yml
+        $sudocmd rm -rf $module_path
+        git clone $module_url $module_path
+        $sudocmd ansible-galaxy install -r ${module_path}/requirements.yml
         ;;
     #*puppet*)
     #    ;;
