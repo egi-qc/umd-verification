@@ -5,7 +5,7 @@ set -x
 export X509_USER_PROXY=$1
 
 subject=`sudo voms-proxy-info -acsubject -file $1`
-the_user=$SUDO_USER
+the_user=${SUDO_USER:-root}
 
 sudo chown ${the_user}:${the_user} $1
 sudo bash -c "echo \"$subject $the_user\" >> /etc/grid-security/grid-mapfile"
