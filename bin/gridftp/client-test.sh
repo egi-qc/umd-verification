@@ -5,10 +5,12 @@ set -x
 export X509_USER_PROXY=$1
 
 subject=`sudo voms-proxy-info -acsubject -file $1`
-the_user=${SUDO_USER:-umd}
-[ -z "`getent passwd ${the_user}`" ] && sudo useradd -m umd
+#the_user=${SUDO_USER:$USER}
+the_user=$USER
+
+#[ -z "`getent passwd ${the_user}`" ] && sudo useradd -m $the_user
 sudo chown ${the_user}:${the_user} $1
 sudo bash -c "echo \"$subject $the_user\" >> /etc/grid-security/grid-mapfile"
 
-su $the_user -c "globus-url-copy file:///etc/issue gsiftp://localhost:2811/tmp/issue"
+globus-url-copy file:///etc/issue gsiftp://localhost:2811/tmp/issue
 diff /etc/issue /tmp/issue
