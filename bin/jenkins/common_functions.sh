@@ -44,7 +44,10 @@ function get_repos {
 function deploy_config_management {
     # $1 - config management tool: ansible, puppet
     # $2 - sudo type
+    # $3 - module URL
 
+    module_url=$3
+    module_name="`basename $3`"
     ## ansible OR puppet
     case $1 in
         *ansible*)
