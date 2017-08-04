@@ -33,7 +33,6 @@ function get_repos {
     c=0
     repostr=''
     for i in "$@"; do
-        echo ojete
         c=$((c+1))
         [ -n "$repostr" ] && repostr=$repostr','
         repostr=$repostr"${prefix}_$c=$i"
