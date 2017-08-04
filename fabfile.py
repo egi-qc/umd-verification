@@ -1,7 +1,7 @@
 from fabric import state
 
 # from umd.products.arc import arc_ce                         	# NOQA
-# from umd.products.argus import argus        	                # NOQA
+from umd.products.argus import argus        	                # NOQA
 # from umd.products.argus import argus_puppet       	            # NOQA
 # from umd.products.argus import argus_puppet_no_metapkg          # NOQA
 # from umd.products.argus import argus_yaim                   	# NOQA
@@ -16,6 +16,7 @@ from umd.products.clients_solo import clients_solo                # NOQA
 from umd.products.cloud_info_provider import cloud_info_provider  # NOQA
 # from umd.products.cream import gridenginerized              	# NOQA
 # from umd.products.cream import standalone                   	# NOQA
+from umd.products.cream import cream                   		# NOQA
 # from umd.products.dcache import dcache                      	# NOQA
 # from umd.products.dpm import dpm_1_8_10                     	# NOQA
 from umd.products.frontier_squid import frontier_squid      	# NOQA

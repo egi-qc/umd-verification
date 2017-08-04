@@ -104,6 +104,7 @@ runtime arguments are:
              the CA release version with '<major>.<minor>.<patch>' format.
 
 :enable_testing_repo: Enable UMD or CMD testing repository.
+:enable_untested_repo: Enable UMD or CMD untested repository.
 
 
 .. _static-args-ref:
