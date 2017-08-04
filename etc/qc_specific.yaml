@@ -66,6 +66,12 @@ glexec-wn:
           description: "Testing transfer of a specific proxy file."
           user: "umd"
 
+wn:
+    qc_func_1:
+        - test: "bin/srm/client-test.sh"
+          description: "SRM testing tools."
+          args: "storm gfal2-util"
+
 im:
     qc_func_1:
         - test: "bin/im/im-client.sh"
