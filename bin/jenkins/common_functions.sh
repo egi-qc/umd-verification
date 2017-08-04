@@ -26,12 +26,14 @@ function get_repos {
     # $1 - Comma-separated string with the repository URLs
     # $2 - Argument name (prefix)
     
-    prefix=$1
-    shift
+    #prefix=$1
+    #shift
+    prefix=repository_file
     
     c=0
     repostr=''
     for i in "$@"; do
+        echo ojete
         c=$((c+1))
         [ -n "$repostr" ] && repostr=$repostr','
         repostr=$repostr"${prefix}_$c=$i"
@@ -64,3 +66,5 @@ function deploy_config_management {
             ;;
     esac
 }
+
+get_repos repository_file http://admin-repo.egi.eu/sw/unverified/umd-4.infn.argus.centos7.x86_64/1/7/3/repofiles/INFN.argus.centos7.x86_64.repo
