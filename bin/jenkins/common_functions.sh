@@ -3,9 +3,9 @@ function get_umd_release {
 
     # UMD or CMD
     case $1 in
-        umd3) release_str="umd_release=3" ;;
-        umd4) release_str="umd_release=4" ;;
-        cmd1) release_str="cmd_release=1" ;;
+        UMD3) release_str="umd_release=3" ;;
+        UMD4) release_str="umd_release=4" ;;
+        CMD1) release_str="cmd_release=1,openstack_release=mitaka" ;;
         *) echo "UMD distribution '$distro' not known" && exit -1
     esac
 
@@ -26,8 +26,9 @@ function get_repos {
     # $1 - Comma-separated string with the repository URLs
     # $2 - Argument name (prefix)
     
-    prefix=$1
-    shift
+    #prefix=$1
+    #shift
+    prefix=repository_file
     
     c=0
     repostr=''
@@ -44,7 +45,10 @@ function get_repos {
 function deploy_config_management {
     # $1 - config management tool: ansible, puppet
     # $2 - sudo type
+    # $3 - module URL
 
+    module_url=$3
+    module_name="`basename $3`"
     ## ansible OR puppet
     case $1 in
         *ansible*)
@@ -60,4 +64,10 @@ function deploy_config_management {
             echo "Configuration management tool '$1' not supported" && exit -1
             ;;
     esac
+}
+
+function add_hostname_as_localhost {
+    # $1 - sudo type
+
+    $1 sed -i "/^127\.0\.0\.1/ s/$/ `hostname`/" /etc/hosts
 }
