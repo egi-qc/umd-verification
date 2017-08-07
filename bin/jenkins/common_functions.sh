@@ -47,19 +47,24 @@ function deploy_config_management {
     # $2 - sudo type
     # $3 - module URL
 
+    sudocmd=$2
     module_url=$3
     module_name="`basename $3`"
     ## ansible OR puppet
     case $1 in
         *ansible*)
-            $2 pip install ansible==2.2
+            $sudocmd pip install ansible==2.2
             module_path=/tmp/$module_name
-            $2 rm -rf $module_path
+            $sudocmd rm -rf $module_path
             git clone $module_url $module_path
-            $2 ansible-galaxy install -r ${module_path}/requirements.yml
+            $sudocmd ansible-galaxy install -r ${module_path}/requirements.yml
             ;;
-        #*puppet*)
-        #    ;;
+        *puppet*)
+            if [[ $OS == sl6* ]] ; then 
+                $sudocmd /usr/local/rvm/rubies/ruby-1.9.3-p551/bin/gem install librarian-puppet
+                $sudocmd sed -i '/secure_path =/ s/$/:\/usr\/local\/rvm\/gems\/ruby-1.9.3-p551\/bin/' /etc/sudoers
+            fi
+            ;;
         *)
             echo "Configuration management tool '$1' not supported" && exit -1
             ;;
