@@ -3,9 +3,9 @@ function get_umd_release {
 
     # UMD or CMD
     case $1 in
-        umd3) release_str="umd_release=3" ;;
-        umd4) release_str="umd_release=4" ;;
-        cmd1) release_str="cmd_release=1" ;;
+        UMD3) release_str="umd_release=3" ;;
+        UMD4) release_str="umd_release=4" ;;
+        CMD1) release_str="cmd_release=1,openstack_release=mitaka" ;;
         *) echo "UMD distribution '$distro' not known" && exit -1
     esac
 
@@ -66,4 +66,8 @@ function deploy_config_management {
     esac
 }
 
-get_repos repository_file http://admin-repo.egi.eu/sw/unverified/umd-4.infn.argus.centos7.x86_64/1/7/3/repofiles/INFN.argus.centos7.x86_64.repo
+function add_hostname_as_localhost {
+    # $1 - sudo type
+
+    $1 sed -i "/^127\.0\.0\.1/ s/$/ `hostname`/" /etc/hosts
+}
