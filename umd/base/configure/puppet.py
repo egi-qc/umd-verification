@@ -61,6 +61,8 @@ class PuppetConfig(BaseConfig):
             },
             output_file=os.path.join("/etc/hiera.yaml"))
         shutil.copy("/etc/hiera.yaml", "/etc/puppet/hiera.yaml")
+        if os.path.exists("/etc/puppetlabs/code/hiera.yaml"):
+            shutil.copy("/etc/hiera.yaml", "/etc/puppetlabs/code/hiera.yaml")
 
     def _set_hiera_params(self):
         """Sets hiera parameter files (repository deploy and custom params)."""
