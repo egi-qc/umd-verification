@@ -12,11 +12,11 @@ def set_umd_params(template_file, output_file):
     _data = {
         "release": config.CFG[_release],
         "distribution": _distribution,
-        "repository_file": config.CFG.get("repository_file", ""),
-        "openstack_release": config.CFG.get("openstack_release", ""),
-        "igtf_repo": "undef",
-        "enable_testing_repo": config.CFG.get("enable_testing_repo", ""),
-        "enable_untested_repo": config.CFG.get("enable_untested_repo", ""),
+        "repository_file": config.CFG.get("repository_file", "False"),
+        "openstack_release": config.CFG.get("openstack_release", "False"),
+        "igtf_repo": "False",
+        "enable_testing_repo": config.CFG.get("enable_testing_repo", "False"),
+        "enable_untested_repo": config.CFG.get("enable_untested_repo", "Flase"),
     }
     if config.CFG.get("need_cert", ""):
         _data["igtf_repo"] = "yes",
