@@ -1,9 +1,10 @@
 from umd import base
 from umd.base.configure.ansible import AnsibleConfig
-from umd import system
+from umd import utils
 
 class CasoDeploy(base.Deploy):
     def pre_config(self):
+        ip = utils.runcmd("hostname -I | cut -d' ' -f1")
         # extra vars
         extra_vars = [
             "site_name: UMD",
@@ -11,7 +12,7 @@ class CasoDeploy(base.Deploy):
             "mapping_file: /etc/caso/voms.json",
             "extractor: nova",
             "auth_type: password",
-            "auth_url: http://%s/identity" % system.ip,
+            "auth_url: http://%s/identity" % ip,
             "username: admin",
             "user_domain_name: default",
             "password: secret",

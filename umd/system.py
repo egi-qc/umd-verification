@@ -3,9 +3,6 @@ import socket
 
 from umd import api
 
-# IP
-ip = socket.gethostbyname(socket.gethostname())
-
 # hostname
 fqdn = socket.getfqdn()
 
