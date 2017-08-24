@@ -1,4 +1,4 @@
-function get_umd_release {
+get_umd_release () {
     # $1 - UMD/CMD distribution: umd3,umd4,cmd1 
 
     # UMD or CMD
@@ -13,7 +13,7 @@ function get_umd_release {
 }
 
 
-function get_sudo_type {
+get_sudo_type () {
     # $1 - Operating system: sl6, (others)
 
     [[ $OS == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
@@ -22,7 +22,7 @@ function get_sudo_type {
 }
 
 
-function get_repos {
+get_repos () {
     # $1 - Comma-separated string with the repository URLs
     # $2 - Argument name (prefix)
     
@@ -42,7 +42,7 @@ function get_repos {
 }
 
 
-function deploy_config_management {
+deploy_config_management () {
     # $1 - config management tool: ansible, puppet
     # $2 - sudo type
     # $3 - module URL
@@ -71,7 +71,7 @@ function deploy_config_management {
     esac
 }
 
-function add_hostname_as_localhost {
+add_hostname_as_localhost () {
     # $1 - sudo type
 
     $1 sed -i "/^127\.0\.0\.1/ s/$/ `hostname`/" /etc/hosts
