@@ -849,7 +849,7 @@ def to_yaml(fname, lines, destroy=False):
         write_type = 'w'
     with open(fname, write_type) as f:
         for line in lines:
-            f.write(yaml.dump(yaml.safe_load(line), default_flow_style=False))
+            f.write(yaml.safe_dump(yaml.safe_load(line), default_flow_style=False))
     return fname
 
 

@@ -40,6 +40,11 @@ ca:
           description: "Check release date."
           args: *REPO_URL
 
+caso:
+    qc_func_1: 
+        - test: "bin/caso/extract.sh"
+          description: "CASO extract test."
+
 crl:
     qc_func_1:
         - test: "bin/ca/fetch_crl.run"
@@ -81,6 +86,7 @@ ooi:
     qc_func_1: 
         - test: "bin/ooi/occi.sh"
           description: "OCCI 1.1 testing."
+
 storm:
     qc_func_1:
         - test: "bin/myproxy/client-test.sh"
