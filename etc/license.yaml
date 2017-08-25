@@ -1,5 +1,7 @@
 argus:
     - Apache 2.0
+caso:
+    - Apache 2.0
 edg-mkgridmap:
     - Apache 2.0
 frontier-squid:
