@@ -9,7 +9,6 @@ class CasoDeploy(base.Deploy):
         extra_vars = [
             "site_name: UMD",
             "projects: demo",
-            "mapping_file: /etc/caso/voms.json",
             "extractor: nova",
             "auth_type: password",
             "auth_url: http://%s/identity" % ip,
