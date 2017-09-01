@@ -1,4 +1,4 @@
-include umd
+class {"umd": before => [Class["gridftp::install"], Class["creamce::install"]]}
 
 ## Uncomment for torque deployment
 #$torque_pkgs = [
@@ -17,6 +17,5 @@ class {
     "creamce":
         require => [
             Class["umd"],
-            #Package[$torque_pkgs]
         ]
 }
