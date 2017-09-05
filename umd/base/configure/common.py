@@ -12,7 +12,7 @@ def set_umd_params(template_file, output_file):
     _data = {
         "release": config.CFG[_release],
         "distribution": _distribution,
-        "repository_file": config.CFG.get("repository_file", "False"),
+        "repository_file": config.CFG.get("repository_file", ""),
         "openstack_release": config.CFG.get("openstack_release", "False"),
         "igtf_repo": "False",
         "enable_testing_repo": config.CFG.get("enable_testing_repo", "False"),
