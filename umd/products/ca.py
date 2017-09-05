@@ -14,9 +14,14 @@ class CADeploy(base.Deploy):
         return _version
 
     def pre_config(self):
-        extra_vars = [
-            "ca_verification: true",
-            "ca_version: %s" % self.format_version(config.CFG["ca_version"])]
+        ca_version = config.CFG["ca_version"]
+        extra_vars = []
+        if ca_version:
+            extra_vars = [
+                "ca_verification: true",
+                "ca_version: %s" % self.format_version(ca_version)]
+        else:
+            api.info("Installing last available production version")
         if config.CFG["distribution"] == "umd":
             extra_vars.append("crl_deploy: true")
             config.CFG["qc_specific_id"].append("crl")
