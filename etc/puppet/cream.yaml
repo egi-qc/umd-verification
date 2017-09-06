@@ -3,7 +3,7 @@ creamce::mysql::root_password :      mysqlp@ssw0rd
 creamce::creamdb::password :         creamp@ssw0rd
 creamce::creamdb::minpriv_password : minp@ssw0rd
 apel::db::pass :                     apelp@ssw0rd
-creamce::batch_system :              pbs
+creamce::batch_system :              slurm
 creamce::use_argus :                 false
 creamce::default_pool_size :         10
 creamce::info::capability :          [ "CloudSupport=false", "Multinode=true" ]
@@ -106,4 +106,6 @@ creamce::se_table :
 #    cloud.pd.infn.it : { mount_dir : "/data/mount", export_dir : "/storage/export",  type : Dcache }
 
 munge::key_path: /etc/munge.key
+slurm_munge_key_b64: "cGxhY2Vob2xkZXI=cGxhY2Vob2xkZXI=cGxhY2Vob2xkZXI="
 torque::config::client: false
+

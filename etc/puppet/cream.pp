@@ -19,3 +19,5 @@ class {
             Class["umd"],
         ]
 }
+
+include slurm
