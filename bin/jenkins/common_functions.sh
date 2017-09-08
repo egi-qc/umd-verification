@@ -76,3 +76,32 @@ add_hostname_as_localhost () {
 
     $1 sed -i "/^127\.0\.0\.1/ s/$/ `hostname`/" /etc/hosts
 }
+
+deploy_devstack () {
+    devstack_home=${HOME}/devstack
+    lastpath=`pwd`
+    git clone https://github.com/openstack-dev/devstack $devstack_home
+    cd $devstack_home
+    cat <<EOF > ${devstack_home}/local.conf
+[[local|localrc]]
+ADMIN_PASSWORD=secret
+DATABASE_PASSWORD=secret
+RABBIT_PASSWORD=secret
+SERVICE_PASSWORD=secret
+disable_service n-net
+enable_service q-svc
+enable_service q-agt
+enable_service q-dhcp
+enable_service q-l3
+enable_service q-meta
+IP_VERSION=4
+NEUTRON_CREATE_INITIAL_NETWORKS=False
+#FLOATING_RANGE=192.168.1.224/27
+#FIXED_RANGE=10.11.12.0/24
+#FIXED_NETWORK_SIZE=256
+#FLAT_INTERFACE=eth0
+EOF
+    ./stack.sh
+     cd $lastpath
+     echo $devstack_home
+}
