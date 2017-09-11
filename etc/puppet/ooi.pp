@@ -34,6 +34,28 @@ processes = 2
 wsgi-file = /usr/bin/nova-api-wsgi
     "
 
+    $wsgi_app_str = "
+from nova.api.openstack import wsgi_app
+
+NAME = \"ooi\"
+
+
+def init_application():
+    return wsgi_app.init_application(NAME)
+    "
+
+    $wgsi_nova_str = "
+#!/usr/bin/python
+
+from nova.api.openstack.compute.wsgi_occi import init_application
+application = None
+app_lock = threading.Lock()
+
+with app_lock:
+    if application is None:
+        application = init_application()
+    "
+
     exec {
         "Enable ooi API":
             command => "/bin/sed -i '/enabled_apis*/c\enabled_apis = osapi_compute,metadata,ooi' /etc/nova/nova.conf",
@@ -42,11 +64,31 @@ wsgi-file = /usr/bin/nova-api-wsgi
  
     file {
         "/etc/nova/nova-api-occi-uwsgi.ini":
-            content => $uwsgi_init_str
+            content => $uwsgi_init_str,
+            owner   => "stack",
+            group   => "stack"
+    }
+
+    file {
+        "/opt/stack/nova/nova/api/openstack/compute/wsgi_occi.py":
+            content => $wsgi_app_str,
+            owner   => "stack",
+            group   => "stack",
+            mode    => "0644",
+            require => File["/etc/nova/nova-api-occi-uwsgi.ini"]
+    }
+
+    file {
+        "/usr/bin/nova-api-occi-wsgi":
+            content => $wgsi_nova_str,
+            owner   => "root",
+            group   => "root",
+            mode    => "0755",
+            require => File["/opt/stack/nova/nova/api/openstack/compute/wsgi_occi.py"]
     }
  
     file {
-        "/etc/systemd/system/devstack\@n-api-occi.service":
+        "/etc/systemd/system/devstack@n-api-occi.service":
             content => $systemd_occi_str,
             require => File["/etc/nova/nova-api-occi-uwsgi.ini"],
             notify  => Exec["reload systemctl"]
@@ -55,12 +97,12 @@ wsgi-file = /usr/bin/nova-api-wsgi
     exec {
         "reload systemctl":
             command   => "/bin/systemctl daemon-reload",
-            subscribe => File["/etc/systemd/system/devstack\@n-api-occi.service"]
+            subscribe => File["/etc/systemd/system/devstack@n-api-occi.service"]
     }
 
     exec {
-        "start devstack\@n-api-occi.service":
-            command => "/bin/systemctl restart "devstack@n-api-occi*",
+        "start devstack@n-api-occi.service":
+            command => "/bin/systemctl restart devstack@n-api-occi",
             require => Exec["reload systemctl"]
     }
 }
