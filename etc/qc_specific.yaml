@@ -86,6 +86,7 @@ ooi:
     qc_func_1: 
         - test: "bin/ooi/occi.sh"
           description: "OCCI 1.1 testing."
+          args: "/home/stack/devstack"
 
 storm:
     qc_func_1:
