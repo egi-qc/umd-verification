@@ -101,7 +101,7 @@ NEUTRON_CREATE_INITIAL_NETWORKS=False
 #FIXED_NETWORK_SIZE=256
 #FLAT_INTERFACE=eth0
 EOF
-    ./stack.sh
+    ./stack.sh || sudo systemctl restart "devstack@*" # FIXME(orviz) remove this part whenever devstack stops failing in Ubuntu 16.04
      cd $lastpath
      echo $devstack_home
 }
