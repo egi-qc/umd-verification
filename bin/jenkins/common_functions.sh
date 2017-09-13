@@ -102,6 +102,7 @@ NEUTRON_CREATE_INITIAL_NETWORKS=False
 #FLAT_INTERFACE=eth0
 EOF
     ./stack.sh || sudo systemctl restart "devstack@*" # FIXME(orviz) remove this part whenever devstack stops failing in Ubuntu 16.04
+    if sudo ls /etc/apt/sources.list.d/*ocata*.list 1> /dev/null 2>&1 ; then sudo rm -f /etc/apt/sources.list.d/*ocata*.list ; fi # FIXME(orviz) devstack add this repository file
      cd $lastpath
      echo $devstack_home
 }
