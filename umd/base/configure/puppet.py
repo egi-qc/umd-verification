@@ -77,6 +77,9 @@ class PuppetConfig(BaseConfig):
                 target = os.path.join(self.hiera_data_dir, f)
                 utils.runcmd("cp etc/puppet/%s %s" % (f, target))
                 self._add_hiera_param_file(f)
+        # runtime file
+        if config.CFG.get("params_file", None):
+                self._add_hiera_param_file(config.CFG["params_file"])
 
     def _set_puppetfile(self):
         """Processes the list of modules given."""
