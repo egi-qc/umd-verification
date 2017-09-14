@@ -1,4 +1,10 @@
 class ooi_start {
+    if $::osfamily == "RedHat" {
+        $bin_path = "/usr/bin"
+    }
+    else {
+        $bin_path = "/usr/local/bin"
+    }
     $systemd_occi_str = "
 
 [Unit]
@@ -10,7 +16,7 @@ NotifyAccess = all
 Restart = always
 KillSignal = SIGQUIT
 Type = notify
-ExecStart = /usr/bin/uwsgi --procname-prefix nova-api-occi --ini /etc/nova/nova-api-occi-uwsgi.ini
+ExecStart = ${bin_path}/uwsgi --procname-prefix nova-api-occi --ini /etc/nova/nova-api-occi-uwsgi.ini
 User = stack
 SyslogIdentifier = devstack@n-api-occi.service
 
@@ -31,7 +37,7 @@ exit-on-reload = true
 die-on-term = true
 master = true
 processes = 2
-wsgi-file = /usr/bin/nova-api-wsgi
+wsgi-file = /usr/bin/nova-api-occi-wsgi
     "
 
     $wsgi_app_str = "
@@ -46,7 +52,7 @@ def init_application():
 
     $wgsi_nova_str = "
 #!/usr/bin/python
-
+import threading
 from nova.api.openstack.compute.wsgi_occi import init_application
 application = None
 app_lock = threading.Lock()
