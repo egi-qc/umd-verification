@@ -43,8 +43,11 @@ class ConfigDict(dict):
         v_repo = self.get("repository_url", None)
         v_repo_file = self.get("repository_file", None)
         if not v_umd_release and not v_cmd_release:
-            api.fail(("No UMD or CMD release was selected: cannot start "
-                      "deployment"), stop_on_error=True)
+            if self.get("cmd_one_release", None):
+                v_cmd_release = self.get("cmd_one_release")
+            else:
+                api.fail(("No UMD or CMD release was selected: cannot start "
+                          "deployment"), stop_on_error=True)
         else:
             api.info("Using UMD %s release repository" % v_umd_release)
 
