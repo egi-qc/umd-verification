@@ -85,6 +85,9 @@ class ConfigDict(dict):
                         d_tmp["umd_release_pkg"] = pkg
                     # set 'distribution'
                     d_tmp["distribution"] = "umd"
+                elif k.startswith("cmd_one_release"):
+                    # set 'distribution'
+                    d_tmp["distribution"] = "cmd-one"
                 elif k.startswith("cmd_release"):
                     # set 'distribution'
                     d_tmp["distribution"] = "cmd"

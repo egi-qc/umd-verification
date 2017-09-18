@@ -6,7 +6,7 @@ def set_umd_params(template_file, output_file):
     _distribution = config.CFG["distribution"]
     if _distribution == "umd":
         _release = "umd_release"
-    elif _distribution == "cmd":
+    elif _distribution.startswith("cmd"):
         _release = "cmd_release"
 
     _data = {

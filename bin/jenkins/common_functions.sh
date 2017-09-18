@@ -6,7 +6,7 @@ get_umd_release () {
         UMD3) release_str="umd_release=3" ;;
         UMD4) release_str="umd_release=4" ;;
         CMD1|CMD-OS-1) release_str="cmd_release=1,openstack_release=mitaka" ;;
-        CMD-ONE-1) release_str="cmd_release=1" ;;
+        CMD-ONE-1) release_str="cmd_one_release=1" ;;
         *) echo "UMD distribution '$distro' not known" && exit -1
     esac
 
