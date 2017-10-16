@@ -29,7 +29,7 @@ get_repos () {
     
     #prefix=$1
     #shift
-    prefix=repository_file
+    prefix=${2:-repository_file}
     
     c=0
     repostr=''
