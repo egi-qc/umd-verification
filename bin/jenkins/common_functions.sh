@@ -23,14 +23,12 @@ get_sudo_type () {
 }
 
 
-get_repos () {
-    # $1 - Comma-separated string with the repository URLs
-    # $2 - Argument name (prefix)
-    
-    #prefix=$1
-    #shift
-    prefix=${2:-repository_file}
-    
+multiple_arg () {
+    # $1 - Prefix
+    # $2 - Arguments
+    prefix=$1
+    shift
+
     c=0
     repostr=''
     for i in "$@"; do
@@ -40,6 +38,22 @@ get_repos () {
     done
     
     echo $repostr
+}
+
+
+get_repos () {
+    # $1 - Comma-separated string with the repository URLs
+    
+    prefix=repository_file
+    multiple_arg $prefix $@
+}
+
+
+get_packages () {
+    # $1 - Comma-separated string with the package/s
+    
+    prefix=package
+    multiple_arg $prefix $@
 }
 
 
