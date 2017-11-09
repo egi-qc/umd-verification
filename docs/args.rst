@@ -105,6 +105,8 @@ runtime arguments are:
 
 :enable_testing_repo: Enable UMD or CMD testing repository.
 :enable_untested_repo: Enable UMD or CMD untested repository.
+:params_file: YAML file with extra parameters to be passed to the configuration 
+              management tool (Ansible, Puppet)
 
 
 .. _static-args-ref:

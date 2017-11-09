@@ -5,7 +5,8 @@ get_umd_release () {
     case $1 in
         UMD3) release_str="umd_release=3" ;;
         UMD4) release_str="umd_release=4" ;;
-        CMD1) release_str="cmd_release=1,openstack_release=mitaka" ;;
+        CMD1|CMD-OS-1) release_str="cmd_release=1,openstack_release=mitaka" ;;
+        CMD-ONE-1) release_str="cmd_one_release=1" ;;
         *) echo "UMD distribution '$distro' not known" && exit -1
     esac
 
@@ -22,14 +23,12 @@ get_sudo_type () {
 }
 
 
-get_repos () {
-    # $1 - Comma-separated string with the repository URLs
-    # $2 - Argument name (prefix)
-    
-    #prefix=$1
-    #shift
-    prefix=repository_file
-    
+multiple_arg () {
+    # $1 - Prefix
+    # $2 - Arguments
+    prefix=$1
+    shift
+
     c=0
     repostr=''
     for i in "$@"; do
@@ -39,6 +38,22 @@ get_repos () {
     done
     
     echo $repostr
+}
+
+
+get_repos () {
+    # $1 - Comma-separated string with the repository URLs
+    
+    prefix=repository_file
+    multiple_arg $prefix $@
+}
+
+
+get_packages () {
+    # $1 - Comma-separated string with the package/s
+    
+    prefix=package
+    multiple_arg $prefix $@
 }
 
 
@@ -75,4 +90,34 @@ add_hostname_as_localhost () {
     # $1 - sudo type
 
     $1 sed -i "/^127\.0\.0\.1/ s/$/ `hostname`/" /etc/hosts
+}
+
+deploy_devstack () {
+    devstack_home=${HOME}/devstack
+    lastpath=`pwd`
+    git clone https://github.com/openstack-dev/devstack $devstack_home
+    cd $devstack_home
+    cat <<EOF > ${devstack_home}/local.conf
+[[local|localrc]]
+ADMIN_PASSWORD=secret
+DATABASE_PASSWORD=secret
+RABBIT_PASSWORD=secret
+SERVICE_PASSWORD=secret
+disable_service n-net
+enable_service q-svc
+enable_service q-agt
+enable_service q-dhcp
+enable_service q-l3
+enable_service q-meta
+IP_VERSION=4
+NEUTRON_CREATE_INITIAL_NETWORKS=False
+#FLOATING_RANGE=192.168.1.224/27
+#FIXED_RANGE=10.11.12.0/24
+#FIXED_NETWORK_SIZE=256
+#FLAT_INTERFACE=eth0
+EOF
+    ./stack.sh || sudo systemctl restart "devstack@*" # FIXME(orviz) remove this part whenever devstack stops failing in Ubuntu 16.04
+    if sudo ls /etc/apt/sources.list.d/*ocata*.list 1> /dev/null 2>&1 ; then sudo rm -f /etc/apt/sources.list.d/*ocata*.list ; fi # FIXME(orviz) devstack add this repository file
+     cd $lastpath
+     echo $devstack_home
 }

@@ -2,6 +2,7 @@ import os.path
 
 from umd.base.configure import BaseConfig
 from umd.base.configure import common
+from umd import config
 from umd import utils
 
 
@@ -39,6 +40,9 @@ class AnsibleConfig(BaseConfig):
             if self.extra_vars:
                 _extra_vars_file = self._add_extra_vars()
                 cmd += " --extra-vars '@%s'" % _extra_vars_file
+            # extra vars runtime file
+            if config.CFG.get("params_file", None):
+                cmd += " --extra-vars '@%s'" % config.CFG["params_file"]
             # tags
             if self.tags:
                 cmd += " --tags '%s'" % ','.join(self.tags)

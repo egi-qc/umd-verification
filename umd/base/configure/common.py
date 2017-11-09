@@ -5,12 +5,14 @@ from umd import utils as base_utils
 def set_umd_params(template_file, output_file):
     _distribution = config.CFG["distribution"]
     if _distribution == "umd":
-        _release = "umd_release"
+        _release = config.CFG["umd_release"]
     elif _distribution == "cmd":
-        _release = "cmd_release"
+        _release = config.CFG["cmd_release"]
+    elif _distribution == "cmd-one":
+        _release = config.CFG["cmd_one_release"]
 
     _data = {
-        "release": config.CFG[_release],
+        "release": _release,
         "distribution": _distribution,
         "repository_file": config.CFG.get("repository_file", ""),
         "openstack_release": config.CFG.get("openstack_release", "False"),

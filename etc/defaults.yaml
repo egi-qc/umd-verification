@@ -9,6 +9,7 @@ umd_release:
     4:
         redhat6:  "http://repository.egi.eu/sw/production/umd/4/sl6/x86_64/updates/umd-release-4.0.0-1.el6.noarch.rpm"
         ubuntu14: ""
+        ubuntu16: ""
         centos7:  "http://repository.egi.eu/sw/production/umd/4/centos7/x86_64/base/umd-release-4.0.0-1.el7.noarch.rpm" 
 
 cmd_release:

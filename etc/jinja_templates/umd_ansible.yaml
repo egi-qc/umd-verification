@@ -1,5 +1,6 @@
 ---
 distribution: {{ distribution }}
+{% if distribution == "cmd" %}cmd_distribution: cmd-os{% elif distribution == "cmd-one" %}cmd_distribution: cmd-one{% endif %}
 release: {{ release }}
 {% if enable_testing_repo %}
 enable_testing_repo: {{ enable_testing_repo }}

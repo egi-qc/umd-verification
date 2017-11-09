@@ -155,8 +155,10 @@ def trust_ca(ca_location):
 
 class OwnCACert(object):
     """Host certificate class."""
-    def __init__(self, subject):
+    def __init__(self, subject, key_path, cert_path):
         self.subject = subject
+        self.key_path = key_path
+        self.cert_path = cert_path
 
 
 class OwnCA(object):
@@ -248,4 +250,4 @@ class OwnCA(object):
                 utils.runcmd("cp cert.crt %s" % key_pub)
                 api.info("Public key stored in '%s'." % key_pub)
 
-        return OwnCACert(subject)
+        return OwnCACert(subject, key_prv, key_pub)
