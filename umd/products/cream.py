@@ -9,6 +9,6 @@ cream = base.Deploy(
     cfgtool=PuppetConfig(
         manifest="cream.pp",
         hiera_data="cream.yaml",
-        module=["git://github.com/cernops/puppet-slurm.git",
+        module=["git://github.com/egi-qc/puppet-slurm.git",
                 "infnpd-creamce",
                 "puppetlabs-firewall"]))
