@@ -1,4 +1,5 @@
 ---
+creamce::host: $::fqdn
 creamce::mysql::root_password :      mysqlp@ssw0rd
 creamce::creamdb::password :         creamp@ssw0rd
 creamce::creamdb::minpriv_password : minp@ssw0rd
