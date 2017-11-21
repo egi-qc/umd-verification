@@ -105,6 +105,8 @@ def runcmd(cmd,
                            fabric_api.shell_env(**env_d)):
         if not nosudo:
             cmd = "sudo -E " + cmd
+        else:
+            cmd = "sudo su %s -c '%s'" % (nosudo, cmd)
 
         r = fabric_api.local(cmd, capture=True)
     return r
@@ -132,7 +134,6 @@ def runcmd_chdir(cmd,
                            fabric_api.shell_env(**env_d)):
         if not nosudo:
             cmd = "sudo -E " + cmd
-
         r = fabric_api.local(cmd, capture=True)
     return r
 
