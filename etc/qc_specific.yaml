@@ -1,4 +1,5 @@
 repo_url: &REPO_URL !!python/object/apply:umd.config.cfg_item [repository_url]
+x509_proxy: &X509_PROXY !!python/object/apply:umd.config.cfg_item [x509_user_proxy]
 
 argus:
     qc_func_1:
@@ -51,12 +52,12 @@ crl:
           description: "Run fetch_crl script with verbosity."
 cream:
     qc_func_1:
-        - test: "bin/cream/"
-          description: "CREAM rele"
         - test: "bin/certs/check-cert"
           description: "Check whether the certificate is up-to-date."
-          user: "umd"
           args: "/etc/grid-security/hostcert.pem"
+        - test: "bin/cream/client_test_local.sh"
+          description: "Job submission"
+          args: *X509_PROXY
 
 glexec-wn:
     qc_func_1:

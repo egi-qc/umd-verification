@@ -58,7 +58,7 @@ class KeystoneVOMSDeploy(base.Deploy):
         voms.client_install()
         utils.runcmd("pip install voms-auth-system-openstack")
         # fake proxy
-        product_utils.create_fake_proxy()
+        config.CFG["x509_user_proxy"] = product_utils.create_fake_proxy()
         # fake voms server - lsc
         product_utils.add_fake_lsc()
         
