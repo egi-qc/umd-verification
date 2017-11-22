@@ -7,4 +7,7 @@ class {
         ]
 }
 
-include slurm
+class {
+    "slurm":
+        require => Class["creamce"]
+}
