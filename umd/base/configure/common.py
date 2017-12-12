@@ -18,7 +18,7 @@ def set_umd_params(template_file, output_file):
         "openstack_release": config.CFG.get("openstack_release", "False"),
         "igtf_repo": "False",
         "enable_testing_repo": config.CFG.get("enable_testing_repo", "False"),
-        "enable_untested_repo": config.CFG.get("enable_untested_repo", "Flase"),
+        "enable_untested_repo": config.CFG.get("enable_untested_repo", "False"),
     }
     if config.CFG.get("need_cert", ""):
         _data["igtf_repo"] = "yes",
