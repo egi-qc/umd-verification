@@ -81,7 +81,7 @@ class Validate(object):
                 args = ''
             cmd = "./%s" % " ".join([f, args])
             if user:
-                cmd = "su %s -c \"%s\"" % (_user, cmd)
+                cmd = "su %s -c \"%s\"" % (user, cmd)
 
             if not self._is_executable(f):
                 api.info("Could not run check '%s': file is not executable"
