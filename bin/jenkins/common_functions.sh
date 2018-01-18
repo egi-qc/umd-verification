@@ -17,8 +17,10 @@ get_umd_release () {
 get_sudo_type () {
     # $1 - Operating system: sl6, (others)
 
-    [[ $OS == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
-    
+    # Latest image is CentOS6
+    #[[ $OS == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
+    sudocmd=sudo
+
     echo $sudocmd
 }
 
