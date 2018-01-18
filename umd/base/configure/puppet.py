@@ -135,11 +135,11 @@ class PuppetConfig(BaseConfig):
         if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
         elif r.return_code == 2:
-            api.info(("Puppet execution ended successfully (some warnings "
-                      "though, check logs)"))
+            api.info(("Puppet execution ended successfully (changes were "
+                      "applied)"))
             r.failed = False
         else:
-            api.fail("Puppet execution failed. More infromation on %s log"
+            api.fail("Puppet execution failed. More information on %s log"
                      % logfile,
                      stop_on_error=True)
             r.failed = True
