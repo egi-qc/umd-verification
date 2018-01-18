@@ -77,10 +77,10 @@ deploy_config_management () {
             $sudocmd ansible-galaxy install -r ${module_path}/requirements.yml
             ;;
         *puppet*)
-            if [[ $OS == sl6* ]] ; then 
-                $sudocmd /usr/local/rvm/rubies/ruby-1.9.3-p551/bin/gem install librarian-puppet
-                $sudocmd sed -i '/secure_path =/ s/$/:\/usr\/local\/rvm\/gems\/ruby-1.9.3-p551\/bin/' /etc/sudoers
-            fi
+            #if [[ $OS == sl6* ]] ; then 
+            #    $sudocmd /usr/local/rvm/rubies/ruby-1.9.3-p551/bin/gem install librarian-puppet
+            #    $sudocmd sed -i '/secure_path =/ s/$/:\/usr\/local\/rvm\/gems\/ruby-1.9.3-p551\/bin/' /etc/sudoers
+            #fi
             ;;
         *)
             echo "Configuration management tool '$1' not supported" && exit -1
