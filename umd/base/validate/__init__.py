@@ -47,14 +47,15 @@ class Validate(object):
             d = collections.defaultdict(str)
             for k, v in checkdata.items():
                 d[k] = v
-            l.append((d["description"],
-                      d["user"],
-                      d["test"],
-                      d["args"]))
+            l.append((d.get("description", None),
+                      d.get("user", None),
+                      d.get("test", None),
+                      d.get("args", None),
+                      d.get("sudo", None)))
 
         checklist = []
         for check in l:
-            description, user, path, args = check
+            description, user, path, args, sudo = check
             if os.path.exists(path):
                 if os.path.isdir(path):
                     for f in self._get_files_from_dir(path):
@@ -71,11 +72,13 @@ class Validate(object):
         """Runs the checks received."""
         failed_checks = []
         for check in self._get_checklist(cfg):
-            description, user, f, args = check
+            description, user, f, args, sudo = check
             api.info("Probe '%s'" % description)
-
-            if isinstance(args, list):
-                args = ' '.join(args)
+            if args:
+                if isinstance(args, list):
+                    args = ' '.join(args)
+            else:
+                args = ''
             cmd = "./%s" % " ".join([f, args])
             sudo_user = os.environ.get("SUDO_USER", None)
             _user = None
@@ -91,11 +94,12 @@ class Validate(object):
                 api.info("Could not run check '%s': file is not executable"
                          % f)
             else:
-                self._handle_user(_user, logfile)
+                # self._handle_user(_user, logfile)
+                sudo_user = sudo or os.environ.get("SUDO_USER", None)
                 r = utils.runcmd(cmd,
                                  stderr_to_stdout=True,
                                  log_to_file=logfile,
-                                 nosudo=_user)
+                                 nosudo=sudo_user)
                 if r.failed:
                     failed_checks.append(cmd)
                 else:

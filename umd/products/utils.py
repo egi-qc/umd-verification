@@ -30,6 +30,7 @@ def create_fake_proxy(vo="dteam", out="/tmp/umd_proxy"):
                   "-uri %s:15000 -out %s")
                  % (certpath, keypath, vo, vo, fqdn, out))
     api.info("Fake proxy created under '%s'" % out)
+    return out
 
 
 def add_fake_lsc(vo="dteam", root_dir="/etc/grid-security/vomsdir"):

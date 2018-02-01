@@ -1,12 +1,15 @@
 import os.path
+import socket
 
 import fabric
+from fabric import operations as fabric_ops
 
 from umd import api
+from umd import config
 from umd import system
 from umd import utils
 
-openssl_cnf = """
+openssl_cnf_old = """
 [ ca ]
 default_ca = myca
 
@@ -37,6 +40,87 @@ subjectAltName = @alt_names
 [alt_names]
 IP.1 = 127.0.0.1
 """
+openssl_cnf = """
+[ ca ]
+default_ca = myca
+
+[ myca ]
+dir = ./
+new_certs_dir = $dir
+unique_subject = no
+certificate = $dir/ca.pem
+database = $dir/index.txt
+private_key = $dir/ca.key
+crlnumber = $dir/crlnumber
+serial = $dir/certserial
+default_days = 730
+default_md = sha1
+default_crl_days = 730
+
+[req]
+distinguished_name = req_dn
+req_extensions = v3_req
+
+[req_dn]
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = %s
+""" % socket.getfqdn()
+
+
+def certify():
+    """Create host certificate and private key."""
+    cert_path = "/etc/grid-security/hostcert.pem"
+    key_path = "/etc/grid-security/hostkey.pem"
+    do_cert = True
+
+    utils.runcmd("mkdir -p /etc/grid-security/certificates")
+    utils.runcmd("chown root:root /etc/grid-security")
+    utils.runcmd("chmod 0755 /etc/grid-security")
+    if os.path.isfile(cert_path) and os.path.isfile(key_path):
+        if not config.CFG.get("dont_ask_cert_renewal", False):
+            r = fabric_ops.prompt(("Certificate already exists under "
+                                   "'/etc/grid-security'. Do you want to "
+                                   "overwrite them? (y/N)"))
+            if r.lower() == "y":
+                api.info("Overwriting already existant certificate")
+            else:
+                do_cert = False
+                api.info("Using already existant certificate")
+
+    cert_for_subject = None
+    if do_cert:
+        hostcert = config.CFG.get("hostcert", None)
+        hostkey = config.CFG.get("hostkey", None)
+        if hostkey and hostcert:
+            api.info("Using provided host certificates")
+            utils.runcmd("cp %s %s" % (hostkey, key_path))
+            utils.runcmd("chmod 600 %s" % key_path)
+            utils.runcmd("cp %s %s" % (hostcert, cert_path))
+            cert_for_subject = hostcert
+        else:
+            api.info("Generating own certificates")
+            config.CFG["ca"] = OwnCA(
+                domain_comp_country="es",
+                domain_comp="UMDverification",
+                common_name="UMDVerificationOwnCA")
+            config.CFG["ca"].create(
+                trusted_ca_dir="/etc/grid-security/certificates")
+            config.CFG["cert"] = config.CFG["ca"].issue_cert(
+                hash="2048",
+                key_prv=key_path,
+                key_pub=cert_path)
+    else:
+        cert_for_subject = cert_path
+
+    if cert_for_subject:
+        subject = get_subject(cert_for_subject)
+        config.CFG["cert"] = OwnCACert(subject)
 
 
 def get_subject(hostcert):
@@ -71,8 +155,10 @@ def trust_ca(ca_location):
 
 class OwnCACert(object):
     """Host certificate class."""
-    def __init__(self, subject):
+    def __init__(self, subject, key_path, cert_path):
         self.subject = subject
+        self.key_path = key_path
+        self.cert_path = cert_path
 
 
 class OwnCA(object):
@@ -164,4 +250,4 @@ class OwnCA(object):
                 utils.runcmd("cp cert.crt %s" % key_pub)
                 api.info("Public key stored in '%s'." % key_pub)
 
-        return OwnCACert(subject)
+        return OwnCACert(subject, key_prv, key_pub)

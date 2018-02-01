@@ -1,6 +1,7 @@
-#!/bin/bash -eu
+##!/bin/bash -eu
 
-set -x
+#set -x
+#!/bin/bash
 
 max_iterations=10
 iterations=0
@@ -30,7 +31,7 @@ case $1 in
         for i in `seq 1 5` ; do 
             set +e
             $cmd 2>&1 > /dev/null
-            [ $? -eq 0 ] && break
+            [ $? -eq 0 ] && exit 0
             echo "ldap not started..waiting for 2 seconds.." && sleep 2
         done
         ;;
@@ -49,7 +50,11 @@ case $1 in
 		ldapsearch -x -h localhost -p 2170 -b o=grid
 	    fi
         done
-        
+        ;;
+    ldapsearch-site-bdii-cloud)
+        cmd="ldapsearch -x -H ldap://localhost:2170 -b o=glue"
+        $cmd 2>&1 > /dev/null
+        [ $? -eq 0 ] && exit 0 || exit -1
         ;;
     *)
         echo "No options or option not known"

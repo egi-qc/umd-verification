@@ -56,3 +56,5 @@ venv
 
 # docs
 docs/_build
+
+.librarian

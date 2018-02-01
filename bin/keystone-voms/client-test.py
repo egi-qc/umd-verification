@@ -33,6 +33,8 @@ else:
 
 client = novaclient.client.Client(version, username, password,
                                   tenant, url,
+                                  cacert="/etc/grid-security/certificates/0d2a3bdd.0",
+                                  #insecure=True,
                                   auth_plugin=auth_plugin,
                                   auth_system=auth_system)
 try:
@@ -40,4 +42,4 @@ try:
 except novaclient.exceptions.EndpointNotFound:
     pass
 
-print(client.client.auth_token)
+print("Token retrieved from proxy: %s" % client.client.auth_token)

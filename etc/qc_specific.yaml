@@ -1,4 +1,5 @@
 repo_url: &REPO_URL !!python/object/apply:umd.config.cfg_item [repository_url]
+x509_proxy: &X509_PROXY !!python/object/apply:umd.config.cfg_item [x509_user_proxy]
 
 argus:
     qc_func_1:
@@ -36,21 +37,27 @@ bdii-top:
 
 ca:
     qc_func_1:
-        #- test: "bin/ca/fetch_crl.run"
-        #  description: "Run fetch_crl script with verbosity."
         - test: "bin/ca/check-release.py"
           description: "Check release date."
-          user: "umd"
           args: *REPO_URL
 
+caso:
+    qc_func_1: 
+        - test: "bin/caso/extract.sh"
+          description: "CASO extract test."
+
+crl:
+    qc_func_1:
+        - test: "bin/ca/fetch_crl.run"
+          description: "Run fetch_crl script with verbosity."
 cream:
     qc_func_1:
-        - test: "bin/cream/"
-          description: "CREAM rele"
         - test: "bin/certs/check-cert"
           description: "Check whether the certificate is up-to-date."
-          user: "umd"
           args: "/etc/grid-security/hostcert.pem"
+        - test: "bin/cream/client_test_local.sh"
+          description: "Job submission"
+          args: *X509_PROXY
 
 glexec-wn:
     qc_func_1:
@@ -64,6 +71,29 @@ glexec-wn:
         - test: "bin/glexec/test-transfer.sh"
           description: "Testing transfer of a specific proxy file."
           user: "umd"
+
+gridftp:
+    qc_func_1: 
+        - test: "bin/gridftp/client-test.sh"
+          description: "GridFTP transfer check using globus-url-copy."
+          args: *X509_PROXY
+
+wn:
+    qc_func_1:
+        - test: "bin/srm/client-test.sh"
+          description: "SRM testing tools."
+          args: "storm gfal2-util"
+
+im:
+    qc_func_1:
+        - test: "bin/im/im-client.sh"
+          description: "Infrastructure manager client tasks."
+
+ooi:
+    qc_func_1: 
+        - test: "bin/ooi/occi.sh"
+          description: "OCCI 1.1 testing."
+          args: "/home/stack/devstack"
 
 storm:
     qc_func_1:
@@ -111,6 +141,16 @@ myproxy-client:
           description: "myproxy client commands testing."
           user: "umd"
 
+arc:
+    qc_func_1:
+        - test: "bin/myproxy/client-test.sh"
+          description: "Retrieve myproxy for ops.vo.ibergrid.eu VO."
+          user: "umd"
+          args: "retrieve"
+        - test: "bin/arc/client-test.sh"
+          description: "Check job submission."
+          user: "umd"
+
 dpm:
     qc_func_1:
         - test: "bin/myproxy/client-test.sh"
@@ -142,7 +182,6 @@ frontier-squid:
         - test: "bin/frontier-squid/fnget.sh"
           description: "Frontier squid cache test."
           source: "https://twiki.cern.ch/twiki/bin/view/Frontier/InstallSquid#Testing_the_installation"
-          user: "umd"
 
 gridftp:
     qc_func_1: 
@@ -162,6 +201,13 @@ keystone-voms:
           description: "Requesting a token using a valid VOMS proxy."
           source: "https://github.com/IFCA/voms-auth-system-openstack"
           args: "VO:dteam --proxy-path /tmp/umd_proxy"
+          sudo: True 
+keystone-voms-ubuntu:
+    qc_func_1: 
+        - test: "bin/keystone-voms/client-test.sh"
+          description: "Requesting a token using a valid VOMS proxy."
+          source: "https://github.com/IFCA/voms-auth-system-openstack"
+          args: "/tmp/umd_proxy"
 
 mkgridmap:
     qc_func_1:
@@ -172,3 +218,9 @@ gridsite:
     qc_func_1: 
         - test: "bin/gridsite/test_read_gacl.sh"
           description: "Test reading a file using gacl."
+
+cloud-info-provider:
+    qc_func_1: 
+        - test: "bin/bdii/client-test.sh"
+          description: "GLUE2 ldapsearch check."
+          args: "ldapsearch-site-bdii-cloud"

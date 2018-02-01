@@ -1,4 +1,5 @@
 import collections
+import os.path
 
 import yaml
 
@@ -25,25 +26,15 @@ class ConfigDict(dict):
             return yaml.safe_load(f)
 
     def set_defaults(self):
+        self.__setitem__("log_path", self.defaults["base"]["log_path"])
+        self.__setitem__("jinja_template_dir",
+                         self.defaults["base"]["jinja_template_dir"])
         self.__setitem__("yaim_path", self.defaults["yaim"]["path"])
         self.__setitem__("puppet_path", self.defaults["puppet"]["path"])
-        self.__setitem__("log_path", self.defaults["base"]["log_path"])
         self.__setitem__("umdnsu_url", self.defaults["nagios"]["umdnsu_url"])
-        self.__setitem__(
-            "igtf_repo",
-            self.defaults["igtf_repo"][system.distname])
-        self.__setitem__(
-            "igtf_repo_key",
-            self.defaults["igtf_repo_key"][system.distname])
-        self.__setitem__(
-            "repo_keys",
-            self.defaults["repo_keys"][system.distname])
         self.__setitem__(
             "puppet_release",
             self.defaults["puppet_release"][system.distro_version])
-        self.__setitem__(
-            "epel_release",
-            self.defaults["epel_release"][system.distro_version])
 
     def validate(self):
         # Strong validations first: (umd_release, repository_url)
@@ -52,8 +43,11 @@ class ConfigDict(dict):
         v_repo = self.get("repository_url", None)
         v_repo_file = self.get("repository_file", None)
         if not v_umd_release and not v_cmd_release:
-            api.fail(("No UMD or CMD release was selected: cannot start "
-                      "deployment"), stop_on_error=True)
+            if self.get("cmd_one_release", None):
+                v_cmd_release = self.get("cmd_one_release")
+            else:
+                api.fail(("No UMD or CMD release was selected: cannot start "
+                          "deployment"), stop_on_error=True)
         else:
             api.info("Using UMD %s release repository" % v_umd_release)
 
@@ -71,27 +65,6 @@ class ConfigDict(dict):
                 api.fail(("No Puppet release package defined for '%s' "
                           "distribution" % system.distname),
                          stop_on_error=True)
-        # EPEL release
-        if system.distname in ["centos", "redhat"]:
-            if not self.__getitem__("epel_release"):
-                api.fail(("EPEL release package not provided for '%s' "
-                          "distribution" % system.distname),
-                         stop_on_error=True)
-        # Type of installation
-        if not self.__getitem__("installation_type"):
-            api.warn("No installation type provided: performing installation.")
-            self.__setitem__("installation_type", "install")
-        # Metapackage
-        v = self.__getitem__("metapkg")
-        for pkg in v:                       # check if version is added
-            if isinstance(pkg, tuple):
-                t = v.pop(v.index(pkg))
-                from umd import utils
-                v.extend(utils.join_pkg_version(t))
-        if v:
-            msg = "Metapackage/s selected: %s" % ''.join([
-                "\n\t+ %s" % mpkg for mpkg in v])
-            api.info(msg)
 
     def update(self, d):
         d_tmp = {}
@@ -113,12 +86,23 @@ class ConfigDict(dict):
                         pkg = self.defaults[(
                             "umd_release")][int(v)][system.distro_version]
                         d_tmp["umd_release_pkg"] = pkg
+                    # set 'distribution'
+                    d_tmp["distribution"] = "umd"
+                elif k.startswith("cmd_one_release"):
+                    # set 'distribution'
+                    d_tmp["distribution"] = "cmd-one"
+                elif k.startswith("cmd_release"):
+                    # set 'distribution'
+                    d_tmp["distribution"] = "cmd"
                 elif k.startswith("package"):
                     item = "metapkg"
                     append_arg = True
                 elif k.startswith("func_id"):
                     item = "qc_specific_id"
                     append_arg = True
+                elif k.startswith("log_path"):
+                    if not os.path.isabs(v):
+                        v = os.path.join(os.getcwd(), v)
 
                 # Parameters that accept lists
                 if append_arg:

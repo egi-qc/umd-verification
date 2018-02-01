@@ -36,19 +36,19 @@ case $1 in
 	    EXTRA_OPTS="-b"
         ;;
     storm) 
-        : ${SRM_HOST:=srm01.ncg.ingrid.pt}
+        : ${SRM_HOST:=srm01.ifca.es}
         VO_PATH=$(get_vo_path $SRM_HOST $VO)
         : ${SRM_ENDPOINT:="srm://${SRM_HOST}:8444/srm/managerv2?SFN=${VO_PATH}"}
         ;;
     dpm)
-        : ${SRM_HOST:=lcg-srm.ecm.ub.es}
+        : ${SRM_HOST:=dc2-grid-64.brunel.ac.uk}
         VO_PATH=$(get_vo_path $SRM_HOST $VO)
         : ${SRM_ENDPOINT:="srm://${SRM_HOST}/${VO_PATH}"}
         ;;
     dcache) 
-        : ${SRM_HOST:=srm.ciemat.es}
+        : ${SRM_HOST:=srm.pic.es}
         VO_PATH=$(get_vo_path $SRM_HOST $VO)
-        : ${SRM_ENDPOINT:="srm://${SRM_HOST}:8443/srm/managerv2?SFN=/${VO_PATH}"}
+        : ${SRM_ENDPOINT:="srm://${SRM_HOST}:8443${VO_PATH}"}
         ;;
     *)
         echo "Not a valid tag for an SRM endpoint: $1" && exit 1
@@ -77,15 +77,16 @@ set -e
 
 case $2 in
     lcg-util)
-        lcg-ls $EXTRA_OPTS -D srmv2 -vl $SRM_ENDPOINT
-        lcg-cp $EXTRA_OPTS -D srmv2 -v file:$FILE $SRM_ENDPOINT/$REMOTE_FILE
-        lcg-gt $EXTRA_OPTS -T srmv2 -v $SRM_ENDPOINT/$REMOTE_FILE gsiftp 
-        lcg-gt $EXTRA_OPTS -T srmv2 -v $SRM_ENDPOINT/$REMOTE_FILE https
-        lcg-gt $EXTRA_OPTS -T srmv2 -v $SRM_ENDPOINT/$REMOTE_FILE file
-        lcg-ls $EXTRA_OPTS -D srmv2 -vl $SRM_ENDPOINT | grep $REMOTE_FILE 
-        lcg-cp $EXTRA_OPTS -T srmv2 -v $SRM_ENDPOINT/$REMOTE_FILE file:$FILE2
+        gfal-ls $SRM_ENDPOINT
+        gfal-copy file:$FILE $SRM_ENDPOINT/$REMOTE_FILE
+        gfal-ls $SRM_ENDPOINT/$REMOTE_FILE
+        gfal-cat $SRM_ENDPOINT/$REMOTE_FILE
+        rm -f $FILE2
+        gfal-copy $SRM_ENDPOINT/$REMOTE_FILE file:$FILE2
         diff $FILE $FILE2
-        lcg-del $EXTRA_OPTS -T srmv2 -vl $SRM_ENDPOINT/$REMOTE_FILE
+        gfal-rm $SRM_ENDPOINT/$REMOTE_FILE
+        diff $FILE $FILE2
+        gfal-rm $SRM_ENDPOINT/$REMOTE_FILE
         ;;
     dcache-client)
         srmping -retry_num=2 -retry_timeout=10 -2 $SRM_ENDPOINT
@@ -98,11 +99,11 @@ case $2 in
         ;;
     gfal2-util)
         gfal-ls $SRM_ENDPOINT
-        gfal-copy file:$FILE $SRM_ENDPOINT/$REMOTE_FILE
+        gfal-copy file:///$FILE $SRM_ENDPOINT/$REMOTE_FILE
         gfal-ls $SRM_ENDPOINT/$REMOTE_FILE
         gfal-cat $SRM_ENDPOINT/$REMOTE_FILE
         rm -f $FILE2
-        gfal-copy $SRM_ENDPOINT/$REMOTE_FILE file:$FILE2
+        gfal-copy $SRM_ENDPOINT/$REMOTE_FILE file:///$FILE2
         diff $FILE $FILE2
         gfal-rm $SRM_ENDPOINT/$REMOTE_FILE
         ;;

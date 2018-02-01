@@ -53,17 +53,6 @@ runtime arguments are:
 
                 - Arguments passed with equal names will overwrite the value.
 
-:installation_type: Type of installation.
-
-                - Available options:
-
-                    :install: from scratch installation, launches
-                        `QC_DIST_1 <http://egi-qc.github.io/#INSTALLATION>`_.
-                    :update: update from last production version, launches
-                        `QC_UPGRADE_1 <http://egi-qc.github.io/#INSTALLATION>`_.
-
-                - Default value: ``install``
-
 :igtf_repo: Repository for the IGTF release.
 
                 - Value must contain a URL pointing to a valid repository file.
@@ -97,23 +86,27 @@ runtime arguments are:
 
                   .. code:: bash
 
-                     fab qc_step=QC_FUNC_1,qc_step_2=QC_DIST_1,..
+                     fab qc_step_1=QC_SEC,qc_step_2=QC_INFO,..
 
                 - Arguments passed with equal names will overwrite the value.
 
 :umdnsu_url: URL (hostname:port) to interface with `umdnsu` service running
              in the SAM-Nagios instance.
 
-:epel_release: Package URL with the EPEL release (RPM file).
-
-                - Distro-specific: only available for RedHat-based
-                  distributions.
-                - Value must contain an URL pointing to a valid EPEL release
-                  package.
-
 :hostcert: Public key server certificate.
 
 :hostkey: Private key server certificate.
+
+:dont_ask_cert_renewal: Do not prompt for certificate renewal (when certificates
+                        already exist)
+
+:ca_version: Special runtime argument for CA verifications. This value refers to 
+             the CA release version with '<major>.<minor>.<patch>' format.
+
+:enable_testing_repo: Enable UMD or CMD testing repository.
+:enable_untested_repo: Enable UMD or CMD untested repository.
+:params_file: YAML file with extra parameters to be passed to the configuration 
+              management tool (Ansible, Puppet)
 
 
 .. _static-args-ref:
@@ -136,7 +129,6 @@ equivalent) are:
 :igtf_repo\:<distname (e.g. redhat)>: ``igtf_repo``.
 :yaim\:path: ``yaim_path``.
 :nagios\:umdnsu_url: ``umdnsu_url``.
-:epel_release\:<distro_version (e.g. redhat5)>: ``epel_release`` argument.
 
 .. _instantiation-args-ref:
 
@@ -157,11 +149,6 @@ instantiation arguments are:
 
        - Type: ``str``.
        - Default value: empty string.
-
-:metapkg: UMD metapackages to install.
-
-       - Type: ``list``.
-       - Default value: empty list.
 
 :need_cert: Whether installation type requires a signed cert.
 

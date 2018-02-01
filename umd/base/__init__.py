@@ -1,11 +1,7 @@
-import os.path
-
-from fabric import operations as fabric_ops
 from fabric import tasks
 
 from umd import api
 from umd.base.infomodel import InfoModel
-from umd.base.installation import Install
 from umd.base.operations import Operations
 from umd.base.security import Security
 from umd.base.validate import Validate
@@ -19,7 +15,6 @@ class Deploy(tasks.Task):
     def __init__(self,
                  name,
                  doc=None,
-                 metapkg=[],
                  need_cert=False,
                  has_infomodel=False,
                  cfgtool=None,
@@ -33,7 +28,6 @@ class Deploy(tasks.Task):
 
                 name: Fabric command name.
                 doc: docstring that will appear when typing `fab -l`.
-                metapkg: list of UMD metapackages to install.
                 need_cert: whether installation type requires a signed cert.
                 has_infomodel: whether the product publishes information
                                about itself.
@@ -48,25 +42,16 @@ class Deploy(tasks.Task):
         self.name = name
         if doc:
             self.__doc__ = doc
-        self.metapkg = utils.to_list(metapkg)
         self.need_cert = need_cert
         self.has_infomodel = has_infomodel
         self.qc_specific_id = qc_specific_id
         self.exceptions = exceptions
         self.cfgtool = cfgtool
-        self.ca = None
-        self.installation_type = None  # FIXME default value?
         self.qc_mon_capable = qc_mon_capable
         self.qc_envvars = {}
         self.qc_step = qc_step
         self.dryrun = dryrun
         self.info_port = info_port
-
-    def pre_install(self):
-        pass
-
-    def post_install(self):
-        pass
 
     def pre_config(self):
         pass
@@ -79,11 +64,6 @@ class Deploy(tasks.Task):
 
     def post_validate(self):
         pass
-
-    def _install(self, **kwargs):
-        self.pre_install()
-        Install().run(**kwargs)
-        self.post_install()
 
     def _config(self, **kwargs):
         if config.CFG["cfgtool"]:
@@ -108,12 +88,10 @@ class Deploy(tasks.Task):
     def run(self, **kwargs):
         """Takes over base deployment.
 
-        :installation_type: Type of installation ('install', 'update').
         :repository_url: Repository path with the verification content. Could
             pass multiple values by prefixing with 'repository_url'.
         :repository_file: URL pointing to a repository file. Could
             pass multiple values by prefixing with 'repository_file'.
-        :epel_release: Package URL with the EPEL release.
         :umd_release: Package URL with the UMD release.
         :igtf_repo: Repository for the IGTF release.
         :yaim_path: Path pointing to YAIM configuration files.
@@ -127,6 +105,8 @@ class Deploy(tasks.Task):
         :package: Custom individual package/s to install.
         :func_id: Functional test/s to be performed ('id' from
             etc/qc_specific.yaml)
+        :enable_testing_repo: Enable the UMD or CMD testing repository.
+        :enable_untested_repo: Enable the UMD or CMD untested repository.
         """
         # Get configuration parameters
         config.CFG.set_defaults()
@@ -139,72 +119,26 @@ class Deploy(tasks.Task):
         # Show configuration summary
         utils.show_exec_banner_ascii()
 
+        # Workspace
+        utils.create_workspace()
+
         # Configuration tool
         if config.CFG["cfgtool"]:
             config.CFG["cfgtool"].pre_config = self.pre_config
             config.CFG["cfgtool"].post_config = self.post_config
 
-        # Certificate management
+        # Create private & public key
         if self.need_cert:
-            r = utils.install("ca-policy-egi-core",
-                              enable_repo=config.CFG["igtf_repo"],
-                              key_repo=config.CFG["igtf_repo_key"])
-            if r.failed:
-                api.fail("Could not install 'ca-policy-egi-core' package.",
-                         stop_on_error=True)
+            pki.certify()
 
-            cert_path = "/etc/grid-security/hostcert.pem"
-            key_path = "/etc/grid-security/hostkey.pem"
-            do_cert = True
-            if os.path.isfile(cert_path) and os.path.isfile(key_path):
-                r = fabric_ops.prompt(("Certificate already exists under "
-                                       "'/etc/grid-security'. Do you want to "
-                                       "overwrite them? (y/N)"))
-                if r.lower() == "y":
-                    api.info("Overwriting already existant certificate")
-                else:
-                    do_cert = False
-                    api.info("Using already existant certificate")
-
-            cert_for_subject = None
-            if do_cert:
-                hostcert = config.CFG.get("hostcert", None)
-                hostkey = config.CFG.get("hostkey", None)
-                if hostkey and hostcert:
-                    api.info("Using provided host certificates")
-                    utils.runcmd("cp %s %s" % (hostkey, key_path))
-                    utils.runcmd("chmod 600 %s" % key_path)
-                    utils.runcmd("cp %s %s" % (hostcert, cert_path))
-                    cert_for_subject = hostcert
-                else:
-                    api.info("Generating own certificates")
-                    config.CFG["ca"] = pki.OwnCA(
-                        domain_comp_country="es",
-                        domain_comp="UMDverification",
-                        common_name="UMDVerificationOwnCA")
-                    config.CFG["ca"].create(
-                        trusted_ca_dir="/etc/grid-security/certificates")
-                    config.CFG["cert"] = config.CFG["ca"].issue_cert(
-                        hash="2048",
-                        key_prv=key_path,
-                        key_pub=cert_path)
-            else:
-                cert_for_subject = cert_path
-
-            if cert_for_subject:
-                subject = pki.get_subject(cert_for_subject)
-                config.CFG["cert"] = pki.OwnCACert(subject)
-
-        # Workflow
-        utils.remove_logs()
+        # Run deployment
+        self._config()
 
         if config.CFG["qc_step"]:
             for step in config.CFG["qc_step"]:
                 k, v = (step.rsplit('_', 1)[0], step)
                 try:
                     step_mappings = {
-                        "QC_DIST": self._install,
-                        "QC_UPGRADE": self._install,
                         "QC_SEC": self._security,
                         "QC_INFO": self._infomodel,
                         "QC_FUNC": self._validate}
@@ -214,11 +148,6 @@ class Deploy(tasks.Task):
 
                 step_mappings[k](**{"qc_step": v})
         else:
-            # QC_INST, QC_UPGRADE
-            self._install()
-
-            self._config()
-
             # QC_SEC
             self._security()
 

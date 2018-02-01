@@ -1,5 +1,7 @@
 argus:
     - Apache 2.0
+caso:
+    - Apache 2.0
 edg-mkgridmap:
     - Apache 2.0
 frontier-squid:
@@ -13,6 +15,8 @@ gridftp:
 gridsite:
     - Apache 2.0
 keystone-voms:
+    - Apache 2.0
+myproxy:
     - Apache 2.0
 ooi:
     - Apache 2.0

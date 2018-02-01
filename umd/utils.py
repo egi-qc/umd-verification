@@ -1,3 +1,4 @@
+import contextlib
 import inspect
 import os
 import os.path
@@ -5,8 +6,10 @@ import re
 import shutil
 import tempfile
 
+import fabric
 from fabric import api as fabric_api
 from fabric import colors
+import jinja2
 import mock
 import yaml
 
@@ -28,14 +31,11 @@ def to_list(obj):
 def to_file(r, logfile):
     """Writes Fabric capture result to the given file."""
     def _write(fname, msg):
-        dirname = os.path.dirname(fname)
-        if not dirname:
-            dirname = config.CFG["log_path"]
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-            api.info("Log directory '%s' has been created." % dirname)
-        fname = os.path.join(dirname, fname)
-        with open(fname, 'a') as f:
+        fname = os.path.join(config.CFG["log_path"], fname)
+        _write_type = 'w'
+        if os.path.isfile(fname):
+           _write_type = 'a'
+        with open(fname, _write_type) as f:
             f.write(msg)
             f.flush()
 
@@ -55,6 +55,14 @@ def to_file(r, logfile):
             _write(_fname, r)
             l.append(_fname)
     return l
+
+
+def create_workspace():
+    """Create workspace (logs, ..) removing any previous existence."""
+    if os.path.exists(config.CFG["log_path"]):
+        shutil.rmtree(config.CFG["log_path"])
+    os.makedirs(config.CFG["log_path"])
+    api.info("Log directory '%s' has been created." % config.CFG["log_path"])
 
 
 def filelog(f):
@@ -78,7 +86,10 @@ def filelog(f):
 
 
 @filelog
-def runcmd(cmd, stderr_to_stdout=False, nosudo=False):
+def runcmd(cmd,
+           stderr_to_stdout=False,
+           nosudo=False,
+           envvars=[]):
     """Runs a generic command.
 
     :cmd: command to execute
@@ -87,13 +98,43 @@ def runcmd(cmd, stderr_to_stdout=False, nosudo=False):
         cmd = ' '.join([cmd, "2>&1"])
     qc_envvars = config.CFG.get("qc_envvars", {})
     env_d = dict(qc_envvars.items()
-                 + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")])
-    with fabric_api.settings(warn_only=True):
-        with fabric_api.shell_env(**env_d):
-            # FIXME(orviz) use sudo fabric function
-            if not nosudo:
-                cmd = "sudo -E " + cmd
-            r = fabric_api.local(cmd, capture=True)
+                 + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
+                 + envvars)
+
+    with contextlib.nested(fabric_api.settings(warn_only=True),
+                           fabric_api.shell_env(**env_d)):
+        if not nosudo:
+            cmd = "sudo -E " + cmd
+        else:
+            cmd = "sudo su %s -c '%s'" % (nosudo, cmd)
+
+        r = fabric_api.local(cmd, capture=True)
+    return r
+
+
+@filelog
+def runcmd_chdir(cmd,
+                 chdir,
+                 stderr_to_stdout=False,
+                 nosudo=False,
+                 envvars=[]):
+    """Runs a generic command based on a given directory
+
+    :cmd: command to execute
+    :chdir: directory to execute the command from
+    """
+    if stderr_to_stdout:
+        cmd = ' '.join([cmd, "2>&1"])
+    qc_envvars = config.CFG.get("qc_envvars", {})
+    env_d = dict(qc_envvars.items()
+                 + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
+                 + envvars)
+    with contextlib.nested(fabric.context_managers.lcd(chdir),
+                           fabric_api.settings(warn_only=True),
+                           fabric_api.shell_env(**env_d)):
+        if not nosudo:
+            cmd = "sudo -E " + cmd
+        r = fabric_api.local(cmd, capture=True)
     return r
 
 
@@ -246,24 +287,26 @@ class Yum(object):
     def add_repo(self, repo, **kwargs):
         if "name" in kwargs.keys():
             name = kwargs["name"]
-            priority = kwargs["priority"]
-            lrepo = ["[%s]" % name.replace(' ', '_'),
-                     "name=%s" % name,
-                     "baseurl=%s" % repo,
-                     "priority=%s" % priority,
-                     "protect=1",
-                     "enabled=1",
-                     "gpgcheck=0"]
-            if "priority" in kwargs.keys():
-                lrepo.append("priority=%s" % kwargs["priority"])
-            fname = os.path.join(self.path,
-                                 name.replace(' ', '') + self.extension)
-            with open(fname, 'w') as f:
-                for line in lrepo:
-                    f.write(line + '\n')
-            r = mock.MagicMock()
-            r.failed = False
-
+            if "local_repo" in kwargs.keys():
+                r = runcmd("yum-config-manager --enable %s" % name)
+            else:
+                priority = kwargs["priority"]
+                lrepo = ["[%s]" % name.replace(' ', '_'),
+                         "name=%s" % name,
+                         "baseurl=%s" % repo,
+                         "priority=%s" % priority,
+                         "protect=1",
+                         "enabled=1",
+                         "gpgcheck=0"]
+                if "priority" in kwargs.keys():
+                    lrepo.append("priority=%s" % kwargs["priority"])
+                fname = os.path.join(self.path,
+                                     name.replace(' ', '') + self.extension)
+                with open(fname, 'w') as f:
+                    for line in lrepo:
+                        f.write(line + '\n')
+                r = mock.MagicMock()
+                r.failed = False
         else:
             r = runcmd("wget %s -O %s" % (repo,
                                           os.path.join(
@@ -354,6 +397,7 @@ class Apt(object):
             cmd = "apt-get -y %s %s" % (opts, action)
 
         return runcmd(cmd,
+                      envvars=[("DEBIAN_FRONTEND", "noninteractive")],
                       stop_on_error=False)
 
     def get_repos(self):
@@ -579,8 +623,6 @@ def show_exec_banner_ascii():
     cfg = config.CFG.copy()
 
     basic_repo = ["umd_release_pkg", "igtf_repo"]
-    if system.distname in ["redhat", "centos"]:
-        basic_repo.append("epel_release")
 
     print(u'\n')
     print(colors.green(u'UMD verification tool').center(120))
@@ -657,8 +699,6 @@ def show_exec_banner():
     print(u'\u2502')
     print(u'\u2502 Repository basic configuration:')
     basic_repo = ["umd_release", "igtf_repo"]
-    if system.distname in ["redhat", "centos"]:
-        basic_repo.append("epel_release")
     for k in basic_repo:
         v = cfg.pop(k)
         leftjust = len(max(basic_repo, key=len)) + 5
@@ -806,7 +846,34 @@ def find_extension_files(path, extension):
     return l
 
 
-def remove_logs():
-    """Creates a new execution log directory."""
-    if os.path.exists(config.CFG["log_path"]):
-        shutil.rmtree(config.CFG["log_path"])
+def to_yaml(fname, lines, destroy=False):
+    """Creates a YAML file with the content given (string)."""
+    lines = to_list(lines)
+    write_type = 'a'
+    if destroy:
+        write_type = 'w'
+    with open(fname, write_type) as f:
+        for line in lines:
+            f.write(yaml.safe_dump(yaml.safe_load(line), default_flow_style=False))
+    return fname
+
+
+def render_jinja(template, data, output_file=None):
+    """Stores in a file the output of rendering a Jinja2 template.
+
+    :template: template file name (neither absolute nor relative path)
+    :data: data to be rendered in the template
+    :output_file: absolute path to the file to put the rendered result
+    """
+    template_file = os.path.join(
+        os.getcwd(),
+        os.path.join(config.CFG["jinja_template_dir"],
+                     template))
+    templateLoader = jinja2.FileSystemLoader('/')
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    template = templateEnv.get_template(template_file)
+    out = template.render(data)
+    with open(output_file, 'w') as f:
+        f.write(out)
+        f.flush()
+    return output_file
