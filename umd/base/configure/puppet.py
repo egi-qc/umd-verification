@@ -106,12 +106,12 @@ class PuppetConfig(BaseConfig):
 
     def _install_modules(self):
         """Installs required Puppet modules through librarian-puppet."""
-        if utils.runcmd("librarian-puppet",
-                        envvars=[("PATH", "$PATH:/usr/local/bin")],
-                        nosudo=self.use_rvmsudo,
-                        stop_on_error=False).failed:
-            utils.runcmd("gem install librarian-puppet",
-                         nosudo=self.use_rvmsudo)
+        #if utils.runcmd("librarian-puppet",
+        #                envvars=[("PATH", "$PATH:/usr/local/bin")],
+        #                nosudo=self.use_rvmsudo,
+        #                stop_on_error=False).failed:
+        #    utils.runcmd("gem install librarian-puppet",
+        #                 nosudo=self.use_rvmsudo)
         puppetfile = self._set_puppetfile()
         utils.runcmd_chdir(
             "librarian-puppet install --clean --path=%s --verbose"
@@ -123,15 +123,20 @@ class PuppetConfig(BaseConfig):
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "qc_conf.stderr")
-        module_path = utils.runcmd("puppet config print modulepath",
-                                   nosudo=self.use_rvmsudo)
+        #module_path = utils.runcmd("puppet config print basemodulepath",
+        #                           nosudo=self.use_rvmsudo)
+        module_path= "/etc/puppetlabs/code/modules:/opt/puppetlabs/puppet/modules:/etc/puppet/modules/"
 
         cmd = ("puppet apply --verbose --debug --modulepath %s %s "
                "--detail-exitcodes") % (module_path, self.manifest)
-        r = utils.runcmd(cmd,
+        #r = utils.runcmd(cmd,
+        r = utils.runcmd_chdir(cmd,
+                         os.getcwd(),
                          log_to_file="qc_conf",
                          stop_on_error=False,
-                         nosudo=self.use_rvmsudo)
+                         #nosudo=self.use_rvmsudo,
+                         nosudo=True
+	)
         if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
         elif r.return_code == 2:

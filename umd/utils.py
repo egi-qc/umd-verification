@@ -106,7 +106,10 @@ def runcmd(cmd,
         if not nosudo:
             cmd = "sudo -E " + cmd
         else:
-            cmd = "sudo su %s -c '%s'" % (nosudo, cmd)
+            if system.distro_version == "redhat6":
+                cmd = "/usr/local/rvm/bin/rvmsudo " + cmd
+            else:
+                cmd = "sudo su %s -c '%s'" % (nosudo, cmd)
 
         r = fabric_api.local(cmd, capture=True)
     return r
