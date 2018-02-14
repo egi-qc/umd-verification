@@ -18,7 +18,7 @@ from umd.products.cloud_info_provider import cloud_info_provider  # NOQA
 # from umd.products.cream import standalone                   	# NOQA
 from umd.products.cream import cream                   		# NOQA
 # from umd.products.dcache import dcache                      	# NOQA
-# from umd.products.dpm import dpm_1_8_10                     	# NOQA
+from umd.products.dpm import dpm                     	        # NOQA
 from umd.products.frontier_squid import frontier_squid      	# NOQA
 from umd.products.fts import fts                            	# NOQA
 # from umd.products.glexec import glexec_wn                   	# NOQA

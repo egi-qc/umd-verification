@@ -1,29 +1,14 @@
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
 
-dpm_1_8_10 = base.Deploy(
-    name="dpm-1_8_10",
-    doc="DPM 1.8.10 deployment with Puppet.",
-    metapkg=["dpm-server-mysql",
-             "dpm",
-             "dpm-devel",
-             "dpm-dsi",
-             "dpm-libs"],
-    has_infomodel=True,
+dpm = base.Deploy(
+    name="dpm",
+    doc="DPM deployment using Puppet.",
     need_cert=True,
     cfgtool=PuppetConfig(
         manifest="dpm.pp",
-        module_from_puppetforge=[
-            "lcgdm-dmlite --version 0.3.10",
-            "puppetlabs-firewall",
-            "lcgdm-lcgdm --version 0.2.10",
-            "lcgdm-gridftp --version 0.1.2",
-            "lcgdm-xrootd --version 0.1.2",
-            "lcgdm-voms --version 0.2.0",
-            "puppetlabs-mysql",
-            "saz-memcached",
-            "CERNOps-bdii",
-            "CERNOps-fetchcrl",
-            "erwbgy-limits "]),
-    qc_specific_id="dpm"
+        module=[
+            "puppetlabs-stdlib",
+            "git://github.com/egi-qc/puppet-dpm.git",
+            ]),
 )
