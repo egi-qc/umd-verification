@@ -87,41 +87,17 @@ def filelog(f):
 
 @filelog
 def runcmd(cmd,
+           chdir=os.getcwd(),
            stderr_to_stdout=False,
            nosudo=False,
            envvars=[]):
     """Runs a generic command.
 
     :cmd: command to execute
-    """
-    if stderr_to_stdout:
-        cmd = ' '.join([cmd, "2>&1"])
-    qc_envvars = config.CFG.get("qc_envvars", {})
-    env_d = dict(qc_envvars.items()
-                 + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
-                 + envvars)
-
-    with contextlib.nested(fabric_api.settings(warn_only=True),
-                           fabric_api.shell_env(**env_d)):
-        if not nosudo:
-            cmd = "sudo -E " + cmd
-        else:
-            cmd = "sudo su %s -c '%s'" % (nosudo, cmd)
-
-        r = fabric_api.local(cmd, capture=True)
-    return r
-
-
-@filelog
-def runcmd_chdir(cmd,
-                 chdir,
-                 stderr_to_stdout=False,
-                 nosudo=False,
-                 envvars=[]):
-    """Runs a generic command based on a given directory
-
-    :cmd: command to execute
     :chdir: directory to execute the command from
+    :stderr_to_stdout: redirect standard error to standard output
+    :nosudo: running command as sudo
+    :envvars: list of OS environment variables
     """
     if stderr_to_stdout:
         cmd = ' '.join([cmd, "2>&1"])
