@@ -18,7 +18,12 @@ get_sudo_type () {
     # $1 - Operating system: sl6, (others)
 
     # Latest image is CentOS6
-    [[ $1 == *sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
+    if [[ $1 == *sl6* ]]; then
+        sudocmd=rvmsudo
+        . ~/.rvm/environments/default
+    else
+        sudocmd=sudo
+    fi
 
     echo $sudocmd
 }
