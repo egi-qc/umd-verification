@@ -32,7 +32,6 @@ class PuppetConfig(BaseConfig):
         self.module_path = "/etc/puppet/modules"
         self.puppetfile = "etc/puppet/Puppetfile"
         self.params_files = []
-        self.use_rvmsudo = False
         self.extra_vars = extra_vars
 
     def _deploy(self):
@@ -106,14 +105,14 @@ class PuppetConfig(BaseConfig):
 
     def _install_modules(self):
         """Installs required Puppet modules through librarian-puppet."""
-        #if utils.runcmd("librarian-puppet",
-        #                envvars=[("PATH", "$PATH:/usr/local/bin")],
-        #                nosudo=self.use_rvmsudo,
-        #                stop_on_error=False).failed:
-        #    utils.runcmd("gem install librarian-puppet",
-        #                 nosudo=self.use_rvmsudo)
+        if utils.runcmd("librarian-puppet",
+                         os.getcwd(),
+                        envvars=[("PATH", "$PATH:/usr/local/bin")],
+                        nosudo=True,
+                        stop_on_error=False).failed:
+            utils.runcmd("gem install librarian-puppet")
         puppetfile = self._set_puppetfile()
-        utils.runcmd_chdir(
+        utils.runcmd(
             "librarian-puppet install --clean --path=%s --verbose"
             % self.module_path,
             os.path.dirname(puppetfile),
@@ -129,12 +128,10 @@ class PuppetConfig(BaseConfig):
 
         cmd = ("puppet apply --verbose --debug --modulepath %s %s "
                "--detail-exitcodes") % (module_path, self.manifest)
-        #r = utils.runcmd(cmd,
-        r = utils.runcmd_chdir(cmd,
+        r = utils.runcmd(cmd,
                          os.getcwd(),
                          log_to_file="qc_conf",
                          stop_on_error=False,
-                         #nosudo=self.use_rvmsudo,
                          nosudo=True
 	)
         if r.return_code == 0:
@@ -151,9 +148,6 @@ class PuppetConfig(BaseConfig):
         return r
 
     def config(self):
-        if system.distro_version == "redhat6":
-            self.use_rvmsudo = True
-
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
 
         # Deploy modules
