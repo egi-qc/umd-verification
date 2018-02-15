@@ -18,8 +18,11 @@ get_sudo_type () {
     # $1 - Operating system: sl6, (others)
 
     # Latest image is CentOS6
-    #[[ $OS == sl6* ]] && sudocmd=rvmsudo || sudocmd=sudo
-    sudocmd=sudo
+    if [[ $1 == *sl6* ]]; then
+        sudocmd=rvmsudo
+    else
+        sudocmd=sudo
+    fi
 
     echo $sudocmd
 }
@@ -91,7 +94,12 @@ deploy_config_management () {
 add_hostname_as_localhost () {
     # $1 - sudo type
 
-    $1 sed -i "/^127\.0\.0\.1/ s/$/ `hostname`/" /etc/hosts
+    # Set a system's FQDN hostname
+    MY_DOMAIN=egi.ifca.es
+    [[ "`hostname -f`" != *"$MY_DOMAIN" ]] && $1 hostname "`hostname`.${MY_DOMAIN}"
+    # Append it to /etc/hosts
+    #$1 sed -i "/^127\.0\.0\.1/ s/$/ `hostname`/" /etc/hosts
+    $1 sed -i "/^127\.0\.0\.1/ s/ localhost/ `hostname`/" /etc/hosts
 }
 
 deploy_devstack () {
