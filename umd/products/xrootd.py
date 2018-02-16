@@ -1,5 +1,6 @@
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
+from umd import utils
 
 
 class XRootdDeploy(base.Deploy):
