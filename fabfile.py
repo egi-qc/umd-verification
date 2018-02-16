@@ -6,8 +6,7 @@ from umd.products.argus import argus        	                # NOQA
 # from umd.products.argus import argus_puppet_no_metapkg          # NOQA
 # from umd.products.argus import argus_yaim                   	# NOQA
 # from umd.products.argus import ees                          	# NOQA
-# from umd.products.bdii import bdii_site_puppet              	# NOQA
-# from umd.products.bdii import bdii_site_yaim                	# NOQA
+from umd.products.bdii import bdii_site              	        # NOQA
 # from umd.products.bdii import bdii_top_puppet               	# NOQA
 from umd.products.ca import ca                         	        # NOQA
 # from umd.products.canl import canl                          	# NOQA

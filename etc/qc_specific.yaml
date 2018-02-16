@@ -21,11 +21,9 @@ bdii-site:
     qc_func_1:
         - test: "bin/bdii/client-test.sh"
           description: "glue-validator check."
-          user: "umd"
           args: "glue-validator"
         - test: "bin/bdii/client-test.sh"
           description: "ldapsearch site BDII check."
-          user: "umd"
           args: "ldapsearch-site-bdii"
 
 bdii-top:

@@ -24,33 +24,24 @@ class BDIIDeploy(base.Deploy):
                       "/etc/bdii/bdii.conf && /etc/init.d/bdii restart"))
 
 
-bdii_site_yaim = BDIIDeploy(
-    name="bdii-site-yaim",
-    doc="Site BDII deployment with YAIM.",
-    metapkg="emi-bdii-site",
-    has_infomodel=True,
-    cfgtool=YaimConfig(
-        nodetype="BDII_site",
-        siteinfo=["site-info-BDII_site.def"]))
-
-bdii_site_puppet = BDIIDeploy(
-    name="bdii-site-puppet",
+bdii_site = BDIIDeploy(
+    name="bdii-site",
     doc="Site BDII deployment with Puppet.",
-    metapkg="emi-bdii-site",
     has_infomodel=True,
     cfgtool=PuppetConfig(
         manifest="site_bdii.pp",
         hiera_data="bdii.yaml",
-        module_from_puppetforge="CERNOps-bdii"),
+        module="CERNOps-bdii",
+    ),
     qc_specific_id="bdii-site")
 
-bdii_top_puppet = BDIIDeploy(
-    name="bdii-top-puppet",
-    doc="Top BDII deployment with Puppet.",
-    metapkg="emi-bdii-top",
-    has_infomodel=True,
-    cfgtool=PuppetConfig(
-        manifest="top_bdii.pp",
-        hiera_data="bdii.yaml",
-        module_from_puppetforge="CERNOps-bdii"),
-    qc_specific_id="bdii-top")
+#bdii_top_puppet = BDIIDeploy(
+#    name="bdii-top-puppet",
+#    doc="Top BDII deployment with Puppet.",
+#    metapkg="emi-bdii-top",
+#    has_infomodel=True,
+#    cfgtool=PuppetConfig(
+#        manifest="top_bdii.pp",
+#        hiera_data="bdii.yaml",
+#        module_from_puppetforge="CERNOps-bdii"),
+#    qc_specific_id="bdii-top")
