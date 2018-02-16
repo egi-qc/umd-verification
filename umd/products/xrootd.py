@@ -2,7 +2,12 @@ from umd import base
 from umd.base.configure.puppet import PuppetConfig
 
 
-xrootd = base.Deploy(
+class XRootdDeploy(base.Deploy):
+    def pre_validate(self):
+        utils.install("xrootd-client")
+
+
+xrootd = XRootdDeploy(
     name="xrootd",
     doc="xrootd deployment using Puppet.",
     cfgtool=PuppetConfig(
