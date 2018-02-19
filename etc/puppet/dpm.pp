@@ -11,5 +11,6 @@ class{'dpm::head_disknode':
    xrootd_sharedkey             => 'A32TO64CHARACTERKEYTESTTESTTESTTEST',
    site_name                    => 'CNR_DPM_TEST',
    volist                       => [dteam],
+   xrootd_use_voms              => false,
    require                      => Class["umd"],
 }
