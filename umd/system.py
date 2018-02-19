@@ -18,3 +18,6 @@ if not version_major.isdigit():
     distro_version = '_'.join(version)
 else:
     distro_version = ''.join([distname, version_major]).lower()
+
+if distro_version in [ "centos6" ]:
+    distro_version = "redhat6"

@@ -32,7 +32,6 @@ class PuppetConfig(BaseConfig):
         self.module_path = "/etc/puppet/modules"
         self.puppetfile = "etc/puppet/Puppetfile"
         self.params_files = []
-        self.use_rvmsudo = False
         self.extra_vars = extra_vars
 
     def _deploy(self):
@@ -107,13 +106,13 @@ class PuppetConfig(BaseConfig):
     def _install_modules(self):
         """Installs required Puppet modules through librarian-puppet."""
         if utils.runcmd("librarian-puppet",
+                         os.getcwd(),
                         envvars=[("PATH", "$PATH:/usr/local/bin")],
-                        nosudo=self.use_rvmsudo,
+                        nosudo=True,
                         stop_on_error=False).failed:
-            utils.runcmd("gem install librarian-puppet",
-                         nosudo=self.use_rvmsudo)
+            utils.runcmd("gem install librarian-puppet")
         puppetfile = self._set_puppetfile()
-        utils.runcmd_chdir(
+        utils.runcmd(
             "librarian-puppet install --clean --path=%s --verbose"
             % self.module_path,
             os.path.dirname(puppetfile),
@@ -124,14 +123,19 @@ class PuppetConfig(BaseConfig):
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "qc_conf.stderr")
         module_path = utils.runcmd("puppet config print modulepath",
-                                   nosudo=self.use_rvmsudo)
+                                   nosudo=True,
+                                   stop_on_error=False)
+        if module_path:
+            self.module_path = ':'.join([self.module_path, module_path])
 
         cmd = ("puppet apply --verbose --debug --modulepath %s %s "
-               "--detail-exitcodes") % (module_path, self.manifest)
+               "--detail-exitcodes") % (self.module_path, self.manifest)
         r = utils.runcmd(cmd,
+                         os.getcwd(),
                          log_to_file="qc_conf",
                          stop_on_error=False,
-                         nosudo=self.use_rvmsudo)
+                         nosudo=True
+	)
         if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
         elif r.return_code == 2:
@@ -146,9 +150,6 @@ class PuppetConfig(BaseConfig):
         return r
 
     def config(self):
-        if system.distro_version == "redhat6":
-            self.use_rvmsudo = True
-
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
 
         # Deploy modules

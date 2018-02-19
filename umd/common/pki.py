@@ -142,9 +142,9 @@ def trust_ca(ca_location):
         ca_location_basename.split('.')[0], "crt"])
     utils.runcmd("cp %s %s" % (
         ca_location,
-        os.path.join(trust_dir, ca_location_basename_crt)))
+        os.path.join(trust_dir, ca_location_basename_crt)), chdir=self.workspace)
     utils.runcmd("echo '%s' >> /etc/ca-certificates.conf"
-                 % ca_location_basename_crt)
+                 % ca_location_basename_crt, chdir=self.workspace)
     r = utils.runcmd(trust_cmd)
     if r.failed:
         api.fail("Could not add CA '%s' to the system's trust DB"
@@ -188,24 +188,24 @@ class OwnCA(object):
             subject = self.subject
             utils.runcmd(("openssl req -x509 -nodes -days 1 -newkey rsa:2048 "
                           "-out ca.pem -outform PEM -keyout ca.key -subj "
-                          "'%s'" % subject))
+                          "'%s'" % subject), chdir=self.workspace)
             if trusted_ca_dir:
-                hash = utils.runcmd("openssl x509 -noout -hash -in ca.pem")
+                hash = utils.runcmd("openssl x509 -noout -hash -in ca.pem", chdir=self.workspace)
                 # CA cert (.0)
                 ca_dest = os.path.join(trusted_ca_dir, '.'.join([hash, '0']))
-                utils.runcmd("cp ca.pem %s" % ca_dest)
+                utils.runcmd("cp ca.pem %s" % ca_dest, chdir=self.workspace)
                 self.location = ca_dest
                 # CRL cert (.r0)
                 # FIXME(orviz) check why absolute path is needed here
                 with open(os.path.join(self.workspace,
                                        "openssl.cnf"), 'w') as f:
                     f.write(openssl_cnf)
-                utils.runcmd("echo \"01\" > crlnumber")
-                utils.runcmd("touch index.txt")
+                utils.runcmd("echo \"01\" > crlnumber", chdir=self.workspace)
+                utils.runcmd("touch index.txt", chdir=self.workspace)
                 utils.runcmd(("openssl ca -config openssl.cnf -gencrl "
-                              "-keyfile ca.key -cert ca.pem -out crl.pem"))
+                              "-keyfile ca.key -cert ca.pem -out crl.pem"), chdir=self.workspace)
                 crl_dest = os.path.join(trusted_ca_dir, '.'.join([hash, 'r0']))
-                utils.runcmd("cp crl.pem %s" % crl_dest)
+                utils.runcmd("cp crl.pem %s" % crl_dest, chdir=self.workspace)
                 # signing_policy
                 signing_policy_dest = os.path.join(
                     trusted_ca_dir,
@@ -236,18 +236,18 @@ class OwnCA(object):
             utils.runcmd(("openssl req -newkey rsa:%s -nodes -sha1 -keyout "
                           "cert.key -keyform PEM -out cert.req -outform PEM "
                           "-subj '%s' -config openssl.cnf"
-                          % (hash, subject)))
+                          % (hash, subject)), chdir=self.workspace)
             utils.runcmd(("openssl x509 -req -in cert.req -CA ca.pem -CAkey "
                           "ca.key -CAcreateserial -extensions v3_req -extfile "
-                          "openssl.cnf -out cert.crt -days 1"))
+                          "openssl.cnf -out cert.crt -days 1"), chdir=self.workspace)
 
             if key_prv:
-                utils.runcmd("chmod 600 cert.key")
-                utils.runcmd("cp cert.key %s" % key_prv)
+                utils.runcmd("chmod 600 cert.key", chdir=self.workspace)
+                utils.runcmd("cp cert.key %s" % key_prv, chdir=self.workspace)
                 api.info("Private key stored in '%s' (with 600 perms)."
                          % key_prv)
             if key_pub:
-                utils.runcmd("cp cert.crt %s" % key_pub)
+                utils.runcmd("cp cert.crt %s" % key_pub, chdir=self.workspace)
                 api.info("Public key stored in '%s'." % key_pub)
 
         return OwnCACert(subject, key_prv, key_pub)

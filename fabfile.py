@@ -6,8 +6,7 @@ from umd.products.argus import argus        	                # NOQA
 # from umd.products.argus import argus_puppet_no_metapkg          # NOQA
 # from umd.products.argus import argus_yaim                   	# NOQA
 # from umd.products.argus import ees                          	# NOQA
-# from umd.products.bdii import bdii_site_puppet              	# NOQA
-# from umd.products.bdii import bdii_site_yaim                	# NOQA
+from umd.products.bdii import bdii_site              	        # NOQA
 # from umd.products.bdii import bdii_top_puppet               	# NOQA
 from umd.products.ca import ca                         	        # NOQA
 # from umd.products.canl import canl                          	# NOQA
@@ -39,7 +38,7 @@ from umd.products.ui import ui         				# NOQA
 # from umd.products.voms import voms_server                   	# NOQA
 # from umd.products.wms import wms_utils                      	# NOQA
 from umd.products.wn import wn                      		# NOQA
-# from umd.products.xrootd import xrootd                      	# NOQA
+from umd.products.xrootd import xrootd                      	# NOQA
 
 
 state.output.status = False
