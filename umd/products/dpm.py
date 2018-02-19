@@ -10,5 +10,6 @@ dpm = base.Deploy(
         module=[
             "puppetlabs-stdlib",
             "git://github.com/egi-qc/puppet-dpm.git",
+            #"git://github.com/cern-it-sdc-id/puppet-dpm",
             ]),
 )
