@@ -2,7 +2,8 @@ class {"umd": before => Class["Lcgdm::Dpm::Install",
                               "Gridftp::Install",
                               "Lcgdm::Mkgridmap::Install",
                               "Dmlite::Plugins::Mysql::Install",
-                              "Dmlite::Plugins::Memcache::Install"]}
+                              "Dmlite::Plugins::Memcache::Install",
+                              "Dmlite::Srm::Install"]}
 
 class{'dpm::head_disknode':
    configure_default_pool       => true,
