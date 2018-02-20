@@ -1,4 +1,6 @@
-class {"umd": before => Class["Lcgdm::Dpm::Install"]}
+class {"umd": before => Class["Lcgdm::Dpm::Install",
+                              "Gridftp::Install",
+                              "Lcgdm::Mkgridmap::Install"]}
 
 class{'dpm::head_disknode':
    configure_default_pool       => true,
