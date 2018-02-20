@@ -19,6 +19,12 @@ from umd import exception
 from umd import system
 
 
+def write_to_file(fname, msg, mode='a'):
+    with open(fname, mode) as f:
+        f.write(msg)
+        f.flush()
+
+
 def to_list(obj):
     if not isinstance(obj, (str, list, tuple)):
         raise exception.ConfigException("obj variable type '%s' not supported."
@@ -30,30 +36,25 @@ def to_list(obj):
 
 def to_file(r, logfile):
     """Writes Fabric capture result to the given file."""
-    def _write(fname, msg):
-        fname = os.path.join(config.CFG["log_path"], fname)
-        _write_type = 'w'
-        if os.path.isfile(fname):
-           _write_type = 'a'
-        with open(fname, _write_type) as f:
-            f.write(msg)
-            f.flush()
-
     l = []
+    _fname, _msg = (None, None)
     try:
         if r.stdout:
             _fname = '.'.join([logfile, "stdout"])
-            _write(_fname, r.stdout)
+            _msg = r.stdout
             l.append(_fname)
         if r.stderr:
             _fname = '.'.join([logfile, "stderr"])
-            _write(_fname, r.stderr)
+            _msg = r.stderr
             l.append(_fname)
     except AttributeError:
         if isinstance(r, str):
             _fname = '.'.join([logfile, "stdout"])
-            _write(_fname, r)
+            _msg = r
             l.append(_fname)
+    if _fname and _msg:
+    	write_to_file(os.path.join(config.CFG["log_path"], _fname),
+    	              _msg)
     return l
 
 
