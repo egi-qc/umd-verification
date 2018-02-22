@@ -1,6 +1,0 @@
-source site-info-common.def
-
-ARGUS_HOST=`hostname -f`
-
-PAP_ADMIN_DN="/DC=es/DC=irisgrid/O=ifca/CN=pablo-orviz"
-

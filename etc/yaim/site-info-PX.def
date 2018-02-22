@@ -1,3 +1,0 @@
-source site-info-common.def
-
-PX_HOST=`hostname -f`

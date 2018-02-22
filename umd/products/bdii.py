@@ -1,7 +1,6 @@
 from umd import api
 from umd import base
 from umd.base.configure.puppet import PuppetConfig
-from umd.base.configure.yaim import YaimConfig
 from umd import config
 from umd import system
 from umd import utils
