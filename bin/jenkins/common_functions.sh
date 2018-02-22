@@ -131,3 +131,22 @@ EOF
      cd $lastpath
      echo $devstack_home
 }
+
+archive_artifacts_in_workspace() {
+    # $1 - config management tool: ansible, puppet
+
+    artifacts=()
+    if [ $1 == "puppet" ]; then
+        artifacts+=(/tmp/Puppetfile) 
+        artifacts+=(/etc/puppet)
+    elif [ $1 == "ansible" ]; then
+        artifacts+=(/tmp/*.yaml)
+        artifacts+=(/tmp/*.yml)
+    fi
+
+    WORKSPACE_CONFIG_DIR="`pwd`/_files"
+    mkdir $WORKSPACE_CONFIG_DIR
+    for i in ${artifacts[@]}; do
+        cp -r $i $WORKSPACE_CONFIG_DIR/
+    done
+}
