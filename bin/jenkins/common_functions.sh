@@ -189,19 +189,43 @@ archive_artifacts_in_workspace() {
     # $2 - config management tool: ansible, puppet
     # $3 - operating system
 
-    artifacts=()
+    ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
+    
     if [ $2 == "puppet" ]; then
-        artifacts+=(/tmp/Puppetfile) 
-        artifacts+=(/etc/puppet)
+        MANIFEST=`python -c "from umd.products import $FAB_CMD ; print ${FAB_CMD}.${FAB_CMD}.cfgtool.manifest"`
+        cp /tmp/Puppetfile $WORKSPACE_CONFIG_DIR/
+        mkdir $WORKSPACE_CONFIG_DIR/puppet
+        cp -r /etc/puppet/hiera.yaml /etc/puppet/hieradata $WORKSPACE_CONFIG_DIR/puppet
+	mkdir $WORKSPACE_CONFIG_DIR/puppet/manifest 
+        cp etc/puppet/${MANIFEST} $WORKSPACE_CONFIG_DIR/puppet/manifest
     elif [ $2 == "ansible" ]; then
-        artifacts+=(/tmp/*.yaml)
-        artifacts+=(/tmp/*.yml)
+        cp /tmp/*.yaml $WORKSPACE_CONFIG_DIR/
+        cp /tmp/*.yml $WORKSPACE_CONFIG_DIR/
     fi
 
-    mkdir $WORKSPACE_CONFIG_DIR
-    for i in ${artifacts[@]}; do
-        cp -r $i $WORKSPACE_CONFIG_DIR/
-    done
-
     generate_readme $@
+}
+
+publish_howtos () {
+    # $1 - fab command, as it appears in `fab -l`
+    # $2 - operating system
+    # $3 - Jenkins build URL
+
+    FAB_CMD=$1
+    OS=$2
+    BUILD_URL=$3
+
+    git config --global user.name "Pablo Orviz"
+    git config --global user.email orviz@ifca.unican.es
+    echo "github.com,192.30.253.112 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==" >> ~/.ssh/known_hosts
+    ssh -T git@github.com
+
+    workspace=`pwd`
+    git clone https://github.com/egi-qc/deployment-howtos /tmp/deployment-howtos && cd /tmp/deployment-howtos
+    ! [ -d ${FAB_CMD}/${OS} ] && mkdir -p ${FAB_CMD}/${OS}
+    cp -r ${workspace}/${WORKSPACE_CONFIG_DIR}/* ${FAB_CMD}/${OS}/
+    git add ${FAB_CMD}/${OS}/
+    git commit -a -m "${FAB_CMD}/${OS}/ deployment how-to (build $BUILD_URL)"
+    git push
+    cd $workspace
 }
