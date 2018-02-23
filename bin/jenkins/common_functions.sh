@@ -1,3 +1,5 @@
+WORKSPACE_CONFIG_DIR="`pwd`/_files"
+
 get_umd_release () {
     # $1 - UMD/CMD distribution: umd3,umd4,cmd1 
 
@@ -91,6 +93,7 @@ deploy_config_management () {
     esac
 }
 
+
 add_hostname_as_localhost () {
     # $1 - sudo type
 
@@ -101,6 +104,7 @@ add_hostname_as_localhost () {
     #$1 sed -i "/^127\.0\.0\.1/ s/$/ `hostname`/" /etc/hosts
     $1 sed -i "/^127\.0\.0\.1/ s/ localhost/ `hostname`/" /etc/hosts
 }
+
 
 deploy_devstack () {
     devstack_home=${HOME}/devstack
@@ -132,21 +136,72 @@ EOF
      echo $devstack_home
 }
 
+
+generate_readme () {
+    # $1 - fab command, as it appears in `fab -l`
+    # $2 - config management tool: ansible, puppet
+    # $3 - operating system
+
+    FAB_CMD=$1
+    TOOL=$2
+    OS=$3
+
+    ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
+    README=${WORKSPACE_CONFIG_DIR}/README.md
+
+    if [ $2 == "puppet" ]; then
+        MANIFEST=`python -c "from umd.products import $FAB_CMD ; print ${FAB_CMD}.${FAB_CMD}.cfgtool.manifest"`
+cat > $README <<EOF
+## Directory structure
+
+    |-- Puppetfile
+    |-- puppet
+        |-- hiera.yaml
+        |-- hieradata
+            |-- umd.yaml
+            |-- extra_vars.yaml
+        |-- manifests
+            |-- $MANIFEST
+
+## Hiera variables
+
+Do not rely on the values set for the variables in the Hiera YAML files 
+within \`puppet/hieradata/\`; set here the right values that work for your
+environment.
+
+## Deployment with Puppet (use \`sudo\` with non-root accounts)
+
+    $ git clone https://github.com/egi-qc/jenkins-builds && cd jenkins-builds/${FAB_CMD}/${OS}
+    
+    $ librarian-puppet install --clean --path=/etc/puppet/modules --verbose
+    
+    $ cp puppet/hiera.yaml /etc/puppet/hiera.yaml
+    $ cp -r puppet/hieradata /etc/puppet/hieradata
+    
+    $ puppet apply --modulepath /etc/puppet/modules manifests/`basename $MANIFEST`
+EOF
+    fi
+}
+
+
 archive_artifacts_in_workspace() {
-    # $1 - config management tool: ansible, puppet
+    # $1 - fab command, as it appears in `fab -l`
+    # $2 - config management tool: ansible, puppet
+    # $3 - operating system
 
     artifacts=()
-    if [ $1 == "puppet" ]; then
+    if [ $2 == "puppet" ]; then
         artifacts+=(/tmp/Puppetfile) 
         artifacts+=(/etc/puppet)
-    elif [ $1 == "ansible" ]; then
+    elif [ $2 == "ansible" ]; then
         artifacts+=(/tmp/*.yaml)
         artifacts+=(/tmp/*.yml)
     fi
 
-    WORKSPACE_CONFIG_DIR="`pwd`/_files"
     mkdir $WORKSPACE_CONFIG_DIR
     for i in ${artifacts[@]}; do
         cp -r $i $WORKSPACE_CONFIG_DIR/
     done
+
+    generate_readme $@
 }
