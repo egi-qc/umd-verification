@@ -21,8 +21,7 @@ from umd.products.dpm import dpm                     	        # NOQA
 from umd.products.frontier_squid import frontier_squid      	# NOQA
 from umd.products.fts import fts                            	# NOQA
 # from umd.products.glexec import glexec_wn                   	# NOQA
-# from umd.products.globus import default_security            	# NOQA
-from umd.products.globus import gridftp                     	# NOQA
+from umd.products.gridftp import gridftp                     	# NOQA
 # from umd.products.gram5 import gram5                        	# NOQA
 # from umd.products.gridsite import gridsite                  	# NOQA
 from umd.products.im import im                  		# NOQA
