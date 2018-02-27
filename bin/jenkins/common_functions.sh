@@ -227,6 +227,6 @@ publish_howtos () {
     cp -r ${WORKSPACE_CONFIG_DIR}/* ${FAB_CMD}/${OS}/
     git add ${FAB_CMD}/${OS}/
     git commit -a -m "${FAB_CMD}/${OS}/ deployment how-to (build $BUILD_URL)"
-    git push
+    git push origin master
     cd $workspace
 }
