@@ -8,7 +8,7 @@ from umd import utils
 class GridFTPDeploy(base.Deploy):
     def pre_validate(self):
         # voms packages
-        #utils.install(["myproxy", "globus-gass-copy-progs", "voms-clients"])
+        utils.install("globus-gass-copy-progs")
         voms.client_install()
         # fake proxy
         product_utils.create_fake_proxy()
