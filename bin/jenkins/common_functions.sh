@@ -183,7 +183,7 @@ EOF
     elif [ $2 == "ansible" ]; then
         ROLE=`python -c "from umd.products import $FAB_CMD ; print ${FAB_CMD}.${FAB_CMD}.cfgtool.role"`
         ROLE_BASENAME=`basename $ROLE`
-        if [[ $ROLE ~= *https* ]]; then
+        if [[ $ROLE = *"https"* ]]; then
 cat >> $README <<EOF
     $ git clone $ROLE /tmp/$ROLE_BASENAME
 
