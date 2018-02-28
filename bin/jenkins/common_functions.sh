@@ -180,6 +180,22 @@ environment.
     
     $ puppet apply --modulepath /etc/puppet/modules manifests/`basename $MANIFEST`
 EOF
+    elif [ $2 == "ansible" ]; then
+        ROLE=`python -c "from umd.products import $FAB_CMD ; print ${FAB_CMD}.${FAB_CMD}.cfgtool.role"`
+        ROLE_BASENAME=`basename $ROLE`
+        if [[ $ROLE ~= *https* ]]; then
+cat >> $README <<EOF
+    $ git clone $ROLE /tmp/$ROLE_BASENAME
+
+    $ ansible-galaxy install -r /tmp/${ROLE_BASENAME}/requirements.yml
+
+    $ ansible-pull -vvv -C master -d /etc/ansible/roles/${ROLE_BASENAME} -i /etc/ansible/roles/${ROLE_BASENAME}/hosts -U $ROLE --extra-vars '@vars/umd.yaml' --extra-vars '@vars/extra_vars.yaml' --tags 'all'
+EOF
+        else
+cat >> $README <<EOF
+    GUIDELINES NOT AVAILABLE        
+EOF
+        fi
     fi
 }
 
@@ -199,8 +215,9 @@ archive_artifacts_in_workspace() {
 	mkdir $WORKSPACE_CONFIG_DIR/puppet/manifest 
         cp etc/puppet/${MANIFEST} $WORKSPACE_CONFIG_DIR/puppet/manifest
     elif [ $2 == "ansible" ]; then
-        cp /tmp/*.yaml $WORKSPACE_CONFIG_DIR/
-        cp /tmp/*.yml $WORKSPACE_CONFIG_DIR/
+        mkdir $WORKSPACE_CONFIG_DIR/vars
+        cp /tmp/*.yaml $WORKSPACE_CONFIG_DIR/vars/
+        cp /tmp/*.yml $WORKSPACE_CONFIG_DIR/vars/
     fi
 
     generate_readme $@
