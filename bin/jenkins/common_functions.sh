@@ -185,6 +185,19 @@ EOF
         ROLE_BASENAME=`basename $ROLE`
         if [[ $ROLE = *"https"* ]]; then
 cat >> $README <<EOF
+## Directory structure
+
+    |-- vars
+        |-- umd.yaml
+        |-- extra_vars.yaml
+
+## Variables
+
+Do not rely on the values set for the variables in the YAML files; set here 
+the right values that work for your environment.
+
+## Deployment with `ansible-pull` (use \`sudo\` with non-root accounts)
+
     $ git clone $ROLE /tmp/$ROLE_BASENAME
 
     $ ansible-galaxy install -r /tmp/${ROLE_BASENAME}/requirements.yml
