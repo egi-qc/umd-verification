@@ -217,7 +217,6 @@ archive_artifacts_in_workspace() {
     elif [ $2 == "ansible" ]; then
         mkdir $WORKSPACE_CONFIG_DIR/vars
         cp /tmp/*.yaml $WORKSPACE_CONFIG_DIR/vars/
-        cp /tmp/*.yml $WORKSPACE_CONFIG_DIR/vars/
     fi
 
     generate_readme $@
