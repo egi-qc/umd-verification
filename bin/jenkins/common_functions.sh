@@ -141,10 +141,12 @@ generate_readme () {
     # $1 - fab command, as it appears in `fab -l`
     # $2 - config management tool: ansible, puppet
     # $3 - operating system
+    # $4 - Jenkins build URL
 
     FAB_CMD=$1
     TOOL=$2
     OS=$3
+    BUILD_URL=$4
 
     ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
     README=${WORKSPACE_CONFIG_DIR}/README.md
@@ -169,7 +171,7 @@ Do not rely on the values set for the variables in the Hiera YAML files
 within \`puppet/hieradata/\`; set here the right values that work for your
 environment.
 
-## Deployment with Puppet (use \`sudo\` with non-root accounts)
+## Deployment with `puppet apply`
 
     $ git clone https://github.com/egi-qc/jenkins-builds && cd jenkins-builds/${FAB_CMD}/${OS}
     
@@ -179,6 +181,11 @@ environment.
     $ cp -r puppet/hieradata /etc/puppet/hieradata
     
     $ puppet apply --modulepath /etc/puppet/modules manifests/`basename $MANIFEST`
+
+Please note:
+  - _Use \`sudo\` with non-root accounts_
+
+Jenkins build URL: $BUILD_URL
 EOF
     elif [ $2 == "ansible" ]; then
         ROLE=`python -c "from umd.products import $FAB_CMD ; print ${FAB_CMD}.${FAB_CMD}.cfgtool.role"`
@@ -196,13 +203,18 @@ cat >> $README <<EOF
 Do not rely on the values set for the variables in the YAML files; set here 
 the right values that work for your environment.
 
-## Deployment with `ansible-pull` (use \`sudo\` with non-root accounts)
+## Deployment with `ansible-pull`
 
     $ git clone $ROLE /tmp/$ROLE_BASENAME
 
     $ ansible-galaxy install -r /tmp/${ROLE_BASENAME}/requirements.yml
 
     $ ansible-pull -vvv -C master -d /etc/ansible/roles/${ROLE_BASENAME} -i /etc/ansible/roles/${ROLE_BASENAME}/hosts -U $ROLE --extra-vars '@vars/umd.yaml' --extra-vars '@vars/extra_vars.yaml' --tags 'all'
+
+Please note:
+  - _Use \`sudo\` with non-root accounts_
+
+Jenkins build URL: $BUILD_URL
 EOF
         else
 cat >> $README <<EOF
@@ -217,6 +229,7 @@ archive_artifacts_in_workspace() {
     # $1 - fab command, as it appears in `fab -l`
     # $2 - config management tool: ansible, puppet
     # $3 - operating system
+    # $4 - Jenkins build URL
 
     ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
     
