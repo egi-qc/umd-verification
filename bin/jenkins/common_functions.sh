@@ -171,7 +171,7 @@ Do not rely on the values set for the variables in the Hiera YAML files
 within \`puppet/hieradata/\`; set here the right values that work for your
 environment.
 
-## Deployment with `puppet apply`
+## Deployment with \`puppet apply\`
 
     $ git clone https://github.com/egi-qc/jenkins-builds && cd jenkins-builds/${FAB_CMD}/${OS}
     
@@ -203,7 +203,7 @@ cat >> $README <<EOF
 Do not rely on the values set for the variables in the YAML files; set here 
 the right values that work for your environment.
 
-## Deployment with `ansible-pull`
+## Deployment with \`ansible-pull\`
 
     $ git clone $ROLE /tmp/$ROLE_BASENAME
 
