@@ -159,8 +159,18 @@ generate_readme () {
     ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
     README=${WORKSPACE_CONFIG_DIR}/README.md
 
+    case $FAB_CMD in
+        bdii*) PARENT_MODULE=bdii ;;
+        cloud-info-provider*) PARENT_MODULE=cloud_info_provider ;;
+        clients-solo*) PARENT_MODULE=clients_solo ;;
+        frontier-squid*) PARENT_MODULE=frontier_squid ;;
+        keystone-voms*) PARENT_MODULE=keystone_voms ;;
+        individual-packages*) PARENT_MODULE=individual_packages ;;
+        *) PARENT_MODULE=$FAB_CMD ;;
+    esac
+
     if [ $2 == "puppet" ]; then
-        MANIFEST=`python -c "from umd.products import $FAB_CMD ; print ${FAB_CMD}.${FAB_CMD}.cfgtool.manifest"`
+        MANIFEST=`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${FAB_CMD}.cfgtool.manifest"`
 cat > $README <<EOF
 ## Directory structure
 
@@ -199,7 +209,7 @@ Please note:
 Jenkins build URL: $BUILD_URL
 EOF
     elif [ $2 == "ansible" ]; then
-        ROLE=`python -c "from umd.products import $FAB_CMD ; print ${FAB_CMD}.${FAB_CMD}.cfgtool.role"`
+        ROLE=`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${FAB_CMD}.cfgtool.role"`
         ROLE_BASENAME=`basename $ROLE`
         if [[ $ROLE = *"https"* ]]; then
 cat >> $README <<EOF
