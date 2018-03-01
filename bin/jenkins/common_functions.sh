@@ -158,19 +158,19 @@ generate_readme () {
 
     ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
     README=${WORKSPACE_CONFIG_DIR}/README.md
-
+    PARENT_MODULE=
     case $FAB_CMD in
-        bdii*) PARENT_MODULE=bdii ;;
-        cloud-info-provider*) PARENT_MODULE=cloud_info_provider ;;
-        clients-solo*) PARENT_MODULE=clients_solo ;;
-        frontier-squid*) PARENT_MODULE=frontier_squid ;;
-        keystone-voms*) PARENT_MODULE=keystone_voms ;;
-        individual-packages*) PARENT_MODULE=individual_packages ;;
-        *) PARENT_MODULE=$FAB_CMD ;;
+        bdii*) PARENT_MODULE=bdii ; INSTANCE=bdii_site ;;
+        cloud-info-provider*) PARENT_MODULE=cloud_info_provider ; INSTANCE=cloud_info_provider;;
+        clients-solo*) PARENT_MODULE=clients_solo ; INSTANCE=clients_solo ;;
+        frontier-squid*) PARENT_MODULE=frontier_squid; INSTANCE=frontier_squid ;;
+        keystone-voms*) PARENT_MODULE=keystone_voms; INSTANCE=keystone_voms ;;
+        individual-packages*) PARENT_MODULE=individual_packages; INSTANCE=individual_packages ;;
+        *) PARENT_MODULE=$FAB_CMD ; INSTANCE=$FAB_CMD;;
     esac
 
     if [ $2 == "puppet" ]; then
-        MANIFEST=`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${FAB_CMD}.cfgtool.manifest"`
+        MANIFEST=`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.manifest"`
 cat > $README <<EOF
 ## Directory structure
 
@@ -202,14 +202,14 @@ environment.
 
 Please note:
   - _Use \`sudo\` with non-root accounts_
-  - \`librarian-puppet\` is only needed for managing the module dependencies. If you
+  - \`librarian-puppet\` is only needed for deploying the module dependencies. If you
     have installed them manually, ignore this step.
 
   `[ -n $VERIFICATION_REPO ] && echo Product version: $(get_product_version $VERIFICATION_REPO)`
 Jenkins build URL: $BUILD_URL
 EOF
     elif [ $2 == "ansible" ]; then
-        ROLE=`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${FAB_CMD}.cfgtool.role"`
+        ROLE=`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.role"`
         ROLE_BASENAME=`basename $ROLE`
         if [[ $ROLE = *"https"* ]]; then
 cat >> $README <<EOF
