@@ -142,6 +142,32 @@ get_product_version () {
     echo `sed '0,/\// s//-/' <<<$SUBSTR | tr '/' '.'`
 }
 
+get_cmt_module () {
+    # $1 - fab command, as it appears in `fab -l`
+    # $2 - config management tool: ansible, puppet
+
+    FAB_CMD=$1
+    TOOL=$2
+    PARENT_MODULE=
+    case $FAB_CMD in
+        bdii*) PARENT_MODULE=bdii ; INSTANCE=bdii_site ;;
+        cloud-info-provider*) PARENT_MODULE=cloud_info_provider ; INSTANCE=cloud_info_provider;;
+        clients-solo*) PARENT_MODULE=clients_solo ; INSTANCE=clients_solo ;;
+        frontier-squid*) PARENT_MODULE=frontier_squid; INSTANCE=frontier_squid ;;
+        keystone-voms*) PARENT_MODULE=keystone_voms; INSTANCE=keystone_voms ;;
+        individual-packages*) PARENT_MODULE=individual_packages; INSTANCE=individual_packages ;;
+        *) PARENT_MODULE=$FAB_CMD ; INSTANCE=$FAB_CMD;;
+    esac
+    
+    ATTR=
+    if [ $TOOL == "puppet" ]; then
+        ATTR="manifest"
+    elif [ $TOOL == "ansible" ]; then
+        ATTR="role"
+    fi
+
+    echo "`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.${ATTR}"`"
+}
 
 generate_readme () {
     # $1 - fab command, as it appears in `fab -l`
@@ -158,19 +184,11 @@ generate_readme () {
 
     ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
     README=${WORKSPACE_CONFIG_DIR}/README.md
-    PARENT_MODULE=
-    case $FAB_CMD in
-        bdii*) PARENT_MODULE=bdii ; INSTANCE=bdii_site ;;
-        cloud-info-provider*) PARENT_MODULE=cloud_info_provider ; INSTANCE=cloud_info_provider;;
-        clients-solo*) PARENT_MODULE=clients_solo ; INSTANCE=clients_solo ;;
-        frontier-squid*) PARENT_MODULE=frontier_squid; INSTANCE=frontier_squid ;;
-        keystone-voms*) PARENT_MODULE=keystone_voms; INSTANCE=keystone_voms ;;
-        individual-packages*) PARENT_MODULE=individual_packages; INSTANCE=individual_packages ;;
-        *) PARENT_MODULE=$FAB_CMD ; INSTANCE=$FAB_CMD;;
-    esac
+
+    MODULE=$(get_cmt_module $FAB_CMD $TOOL)
+    MODULE_BASENAME=`basename $MODULE`
 
     if [ $2 == "puppet" ]; then
-        MANIFEST=`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.manifest"`
 cat > $README <<EOF
 ## Directory structure
 
@@ -181,7 +199,7 @@ cat > $README <<EOF
             |-- umd.yaml
             |-- extra_vars.yaml
         |-- manifests
-            |-- $MANIFEST
+            |-- $MODULE
 
 ## Hiera variables
 
@@ -198,20 +216,18 @@ environment.
     $ cp puppet/hiera.yaml /etc/puppet/hiera.yaml
     $ cp -r puppet/hieradata /etc/puppet/hieradata
     
-    $ puppet apply --modulepath /etc/puppet/modules manifests/`basename $MANIFEST`
+    $ puppet apply --modulepath /etc/puppet/modules manifests/`basename $MODULE`
 
 Please note:
   - _Use \`sudo\` with non-root accounts_
   - \`librarian-puppet\` is only needed for deploying the module dependencies. If you
     have installed them manually, ignore this step.
 
-  `[ -n $VERIFICATION_REPO ] && echo Product version: $(get_product_version $VERIFICATION_REPO)`
+`[ -n "$VERIFICATION_REPO" ] && echo Product version: $(get_product_version $VERIFICATION_REPO)`
 Jenkins build URL: $BUILD_URL
 EOF
     elif [ $2 == "ansible" ]; then
-        ROLE=`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.role"`
-        ROLE_BASENAME=`basename $ROLE`
-        if [[ $ROLE = *"https"* ]]; then
+        if [[ $MODULE = *"https"* ]]; then
 cat >> $README <<EOF
 ## Directory structure
 
@@ -226,11 +242,11 @@ the right values that work for your environment.
 
 ## Deployment with \`ansible-pull\`
 
-    $ git clone $ROLE /tmp/$ROLE_BASENAME
+    $ git clone $MODULE /tmp/$MODULE_BASENAME
 
-    $ ansible-galaxy install -p /etc/ansible/roles -r /tmp/${ROLE_BASENAME}/requirements.yml
+    $ ansible-galaxy install -p /etc/ansible/roles -r /tmp/${MODULE_BASENAME}/requirements.yml
 
-    $ ansible-pull -vvv -C master -d /etc/ansible/roles/${ROLE_BASENAME} -i /etc/ansible/roles/${ROLE_BASENAME}/hosts -U $ROLE --extra-vars '@vars/umd.yaml' --extra-vars '@vars/extra_vars.yaml' --tags 'all'
+    $ ansible-pull -vvv -C master -d /etc/ansible/roles/${MODULE_BASENAME} -i /etc/ansible/roles/${MODULE_BASENAME}/hosts -U $MODULE --extra-vars '@vars/umd.yaml' --extra-vars '@vars/extra_vars.yaml' --tags 'all'
 
 Please note:
   - _Use \`sudo\` with non-root accounts_
@@ -253,15 +269,18 @@ archive_artifacts_in_workspace() {
     # $4 - Jenkins build URL
     # $5 - Verification repository (optional)
 
+    FAB_CMD=$1
+    TOOL=$2
+
     ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
     
     if [ $2 == "puppet" ]; then
-        MANIFEST=`python -c "from umd.products import $FAB_CMD ; print ${FAB_CMD}.${FAB_CMD}.cfgtool.manifest"`
+        MODULE=$(get_cmt_module $FAB_CMD $TOOL)
         cp /tmp/Puppetfile $WORKSPACE_CONFIG_DIR/
         mkdir $WORKSPACE_CONFIG_DIR/puppet
         cp -r /etc/puppet/hiera.yaml /etc/puppet/hieradata $WORKSPACE_CONFIG_DIR/puppet
 	mkdir $WORKSPACE_CONFIG_DIR/puppet/manifest 
-        cp etc/puppet/${MANIFEST} $WORKSPACE_CONFIG_DIR/puppet/manifest
+        cp etc/puppet/${MODULE} $WORKSPACE_CONFIG_DIR/puppet/manifest
     elif [ $2 == "ansible" ]; then
         mkdir $WORKSPACE_CONFIG_DIR/vars
         cp /tmp/*.yaml $WORKSPACE_CONFIG_DIR/vars/
