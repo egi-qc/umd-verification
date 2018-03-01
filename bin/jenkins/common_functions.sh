@@ -192,6 +192,8 @@ environment.
 
 Please note:
   - _Use \`sudo\` with non-root accounts_
+  - \`librarian-puppet\` is only needed for managing the module dependencies. If you
+    have installed them manually, ignore this step.
 
   `[ -n $VERIFICATION_REPO ] && echo Product version: $(get_product_version $VERIFICATION_REPO)`
 Jenkins build URL: $BUILD_URL
@@ -216,7 +218,7 @@ the right values that work for your environment.
 
     $ git clone $ROLE /tmp/$ROLE_BASENAME
 
-    $ ansible-galaxy install -r /tmp/${ROLE_BASENAME}/requirements.yml
+    $ ansible-galaxy install -p /etc/ansible/roles -r /tmp/${ROLE_BASENAME}/requirements.yml
 
     $ ansible-pull -vvv -C master -d /etc/ansible/roles/${ROLE_BASENAME} -i /etc/ansible/roles/${ROLE_BASENAME}/hosts -U $ROLE --extra-vars '@vars/umd.yaml' --extra-vars '@vars/extra_vars.yaml' --tags 'all'
 
