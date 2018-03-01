@@ -137,16 +137,24 @@ EOF
 }
 
 
+get_product_version () {
+    SUBSTR=`echo $URL | grep -Po '(?<=unverified\/).*\/\d'`
+    echo `sed '0,/\// s//-/' <<<$SUBSTR | tr '/' '.'`
+}
+
+
 generate_readme () {
     # $1 - fab command, as it appears in `fab -l`
     # $2 - config management tool: ansible, puppet
     # $3 - operating system
     # $4 - Jenkins build URL
+    # $5 - Verification repository
 
     FAB_CMD=$1
     TOOL=$2
     OS=$3
     BUILD_URL=$4
+    VERIFICATION_REPO=$5
 
     ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
     README=${WORKSPACE_CONFIG_DIR}/README.md
@@ -185,6 +193,7 @@ environment.
 Please note:
   - _Use \`sudo\` with non-root accounts_
 
+  `[ -n $VERIFICATION_REPO ] && echo Product version: $(get_product_version $VERIFICATION_REPO)`
 Jenkins build URL: $BUILD_URL
 EOF
     elif [ $2 == "ansible" ]; then
@@ -230,6 +239,7 @@ archive_artifacts_in_workspace() {
     # $2 - config management tool: ansible, puppet
     # $3 - operating system
     # $4 - Jenkins build URL
+    # $5 - Verification repository (optional)
 
     ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
     
