@@ -1,3 +1,15 @@
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
 import os.path
 import shutil
 
@@ -5,7 +17,6 @@ from umd import api
 from umd.base.configure import BaseConfig
 from umd.base.configure import common
 from umd import config
-from umd import system
 from umd import utils
 
 
@@ -106,7 +117,7 @@ class PuppetConfig(BaseConfig):
     def _install_modules(self):
         """Installs required Puppet modules through librarian-puppet."""
         if utils.runcmd("librarian-puppet",
-                         os.getcwd(),
+                        os.getcwd(),
                         envvars=[("PATH", "$PATH:/usr/local/bin")],
                         nosudo=True,
                         stop_on_error=False).failed:
@@ -134,8 +145,7 @@ class PuppetConfig(BaseConfig):
                          os.getcwd(),
                          log_to_file="qc_conf",
                          stop_on_error=False,
-                         nosudo=True
-	)
+                         nosudo=True)
         if r.return_code == 0:
             api.info("Puppet execution ended successfully.")
         elif r.return_code == 2:
