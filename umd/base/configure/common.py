@@ -1,3 +1,15 @@
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
 from umd import config
 from umd import utils as base_utils
 
@@ -18,7 +30,8 @@ def set_umd_params(template_file, output_file):
         "openstack_release": config.CFG.get("openstack_release", "False"),
         "igtf_repo": "False",
         "enable_testing_repo": config.CFG.get("enable_testing_repo", "False"),
-        "enable_untested_repo": config.CFG.get("enable_untested_repo", "False"),
+        "enable_untested_repo": config.CFG.get("enable_untested_repo",
+                                               "False"),
     }
     if config.CFG.get("need_cert", ""):
         _data["igtf_repo"] = "yes",

@@ -1,3 +1,15 @@
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
 import os.path
 
 from umd import api
@@ -5,10 +17,10 @@ from umd import base
 from umd.base.configure.puppet import PuppetConfig
 from umd.common import pki
 from umd import config
-from umd import utils
-from umd import system
 from umd.products import utils as product_utils
 from umd.products import voms
+from umd import system
+from umd import utils
 
 
 class KeystoneVOMSDeploy(base.Deploy):
@@ -42,8 +54,12 @@ class KeystoneVOMSDeploy(base.Deploy):
             utils.runcmd("systemctl restart httpd")
 
         # mysql - set current hostname
-        utils.runcmd("mysql -e 'UPDATE keystone.endpoint SET url=\"https://%s:5000/v2.0\" WHERE url like \"%%5000%%\";'" % system.fqdn) 
-        utils.runcmd("mysql -e 'UPDATE keystone.endpoint SET url=\"https://%s:35357/v2.0\" WHERE url like \"%%35357%%\";'" % system.fqdn) 
+        utils.runcmd(("mysql -e 'UPDATE keystone.endpoint SET "
+                      "url=\"https://%s:5000/v2.0\" WHERE url "
+                      "like \"%%5000%%\";'" % system.fqdn))
+        utils.runcmd(("mysql -e 'UPDATE keystone.endpoint SET "
+                      "url=\"https://%s:35357/v2.0\" WHERE url "
+                      "like \"%%35357%%\";'" % system.fqdn))
 
         # FIXME Create tenant VO:dteam
         utils.runcmd(("/bin/bash -c 'source /root/.nova/admin-novarc ; "
@@ -61,10 +77,10 @@ class KeystoneVOMSDeploy(base.Deploy):
         config.CFG["x509_user_proxy"] = product_utils.create_fake_proxy()
         # fake voms server - lsc
         product_utils.add_fake_lsc()
-        
+
         # If Ubuntu, token must be retrieved using curl calls
         if system.distro_version == "ubuntu16":
-            config.CFG["qc_specific_id"] = "keystone-voms-ubuntu"     
+            config.CFG["qc_specific_id"] = "keystone-voms-ubuntu"
 
 
 keystone_voms = KeystoneVOMSDeploy(
@@ -90,7 +106,8 @@ keystone_voms_full = KeystoneVOMSDeploy(
         hiera_data=["voms.yaml"],
         # NOTE(orviz) either we use a generic 'umd' branch
         # or if it is per OS release, it has to be set in pre_config() above
-        #module=[("git://github.com/egi-qc/puppet-keystone.git", "umd_stable_mitaka"), "lcgdm-voms"],
+        # module=[("git://github.com/egi-qc/puppet-keystone.git",
+        # "umd_stable_mitaka"), "lcgdm-voms"],
         module=["puppetlabs-inifile", "lcgdm-voms"],
     ),
     qc_specific_id="keystone-voms",

@@ -1,3 +1,15 @@
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
 import contextlib
 import inspect
 import os
@@ -53,8 +65,7 @@ def to_file(r, logfile):
             _msg = r
             l.append(_fname)
     if _fname and _msg:
-    	write_to_file(os.path.join(config.CFG["log_path"], _fname),
-    	              _msg)
+        write_to_file(os.path.join(config.CFG["log_path"], _fname), _msg)
     return l
 
 
@@ -831,7 +842,8 @@ def to_yaml(fname, lines, destroy=False):
         write_type = 'w'
     with open(fname, write_type) as f:
         for line in lines:
-            f.write(yaml.safe_dump(yaml.safe_load(line), default_flow_style=False))
+            f.write(yaml.safe_dump(yaml.safe_load(line),
+                                   default_flow_style=False))
     return fname
 
 

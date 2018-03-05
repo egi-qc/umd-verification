@@ -1,3 +1,15 @@
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
 import os.path
 import socket
 
@@ -142,9 +154,9 @@ def trust_ca(ca_location):
         ca_location_basename.split('.')[0], "crt"])
     utils.runcmd("cp %s %s" % (
         ca_location,
-        os.path.join(trust_dir, ca_location_basename_crt)), chdir=self.workspace)
+        os.path.join(trust_dir, ca_location_basename_crt)))
     utils.runcmd("echo '%s' >> /etc/ca-certificates.conf"
-                 % ca_location_basename_crt, chdir=self.workspace)
+                 % ca_location_basename_crt)
     r = utils.runcmd(trust_cmd)
     if r.failed:
         api.fail("Could not add CA '%s' to the system's trust DB"
@@ -190,7 +202,8 @@ class OwnCA(object):
                           "-out ca.pem -outform PEM -keyout ca.key -subj "
                           "'%s'" % subject), chdir=self.workspace)
             if trusted_ca_dir:
-                hash = utils.runcmd("openssl x509 -noout -hash -in ca.pem", chdir=self.workspace)
+                hash = utils.runcmd("openssl x509 -noout -hash -in ca.pem",
+                                    chdir=self.workspace)
                 # CA cert (.0)
                 ca_dest = os.path.join(trusted_ca_dir, '.'.join([hash, '0']))
                 utils.runcmd("cp ca.pem %s" % ca_dest, chdir=self.workspace)
@@ -203,7 +216,8 @@ class OwnCA(object):
                 utils.runcmd("echo \"01\" > crlnumber", chdir=self.workspace)
                 utils.runcmd("touch index.txt", chdir=self.workspace)
                 utils.runcmd(("openssl ca -config openssl.cnf -gencrl "
-                              "-keyfile ca.key -cert ca.pem -out crl.pem"), chdir=self.workspace)
+                              "-keyfile ca.key -cert ca.pem -out crl.pem"),
+                             chdir=self.workspace)
                 crl_dest = os.path.join(trusted_ca_dir, '.'.join([hash, 'r0']))
                 utils.runcmd("cp crl.pem %s" % crl_dest, chdir=self.workspace)
                 # signing_policy
@@ -239,7 +253,8 @@ class OwnCA(object):
                           % (hash, subject)), chdir=self.workspace)
             utils.runcmd(("openssl x509 -req -in cert.req -CA ca.pem -CAkey "
                           "ca.key -CAcreateserial -extensions v3_req -extfile "
-                          "openssl.cnf -out cert.crt -days 1"), chdir=self.workspace)
+                          "openssl.cnf -out cert.crt -days 1"),
+                         chdir=self.workspace)
 
             if key_prv:
                 utils.runcmd("chmod 600 cert.key", chdir=self.workspace)

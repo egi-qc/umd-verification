@@ -1,3 +1,17 @@
+# Copyright 2015 Spanish National Research Council
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
 from fabric import state
 
 from umd.products.arc import arc_ce                         	# NOQA
@@ -27,7 +41,7 @@ from umd.products.gridftp import gridftp                     	# NOQA
 from umd.products.im import im                  		# NOQA
 from umd.products.individual_packages import individual     	# NOQA
 from umd.products.keystone_voms import keystone_voms            # NOQA
-#from umd.products.keystone_voms import keystone_voms_full       # NOQA
+# from umd.products.keystone_voms import keystone_voms_full       # NOQA
 from umd.products.myproxy import myproxy                    	# NOQA
 from umd.products.ooi import ooi                    	        # NOQA
 from umd.products.rc import rc                              	# NOQA
