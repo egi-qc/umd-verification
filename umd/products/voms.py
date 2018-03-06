@@ -16,7 +16,8 @@ from umd import utils
 def client_install():
     utils.install([
         "voms-clients",
-        "myproxy"
+        "myproxy",
+        "voms-clients-cpp"
     ])
 
 # voms_server = base.Deploy(
