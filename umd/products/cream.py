@@ -14,11 +14,13 @@ from umd import base
 from umd.base.configure.puppet import PuppetConfig
 from umd import config
 from umd.products import utils as product_utils
+from umd.products import voms
 from umd import utils
 
 
 class CreamCEDeploy(base.Deploy):
     def pre_validate(self):
+        voms.client_install()
         utils.install("glite-ce-cream-cli")
         if not config.CFG.get("x509_user_proxy", None):
             # fake proxy
