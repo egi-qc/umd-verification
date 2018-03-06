@@ -24,7 +24,7 @@ class IndividualDeploy(base.Deploy):
         self.cfgtool.extra_vars = extra_vars
 
 
-individual = IndividualDeploy(
+individual_packages = IndividualDeploy(
     name="individual-packages",
     doc="Individual installation of packages using Ansible.",
     cfgtool=AnsibleConfig(
