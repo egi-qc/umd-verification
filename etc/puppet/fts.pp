@@ -38,7 +38,8 @@ class fts_mysql {
     exec {
         "create-db":
             command => "/usr/bin/mysql -e \"CREATE DATABASE IF NOT EXISTS ${db_name}\"",
-            notify  => Exec["import-db"]
+            notify  => Exec["import-db"],
+            require => Service[$srv]
     }
     exec {
         "import-db":
