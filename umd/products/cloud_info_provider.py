@@ -39,4 +39,5 @@ cloud_info_provider = CloudInfoProviderDeploy(
         role="https://github.com/egi-qc/ansible-role-cloud-info-provider",
         checkout="umd",
         tags=["untagged", "cmd"]),
-    qc_specific_id="cloud-info-provider")
+    #qc_specific_id="cloud-info-provider"
+)
