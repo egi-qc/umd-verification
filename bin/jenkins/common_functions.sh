@@ -156,6 +156,7 @@ get_cmt_module () {
         frontier-squid*) PARENT_MODULE=frontier_squid; INSTANCE=frontier_squid ;;
         keystone-voms*) PARENT_MODULE=keystone_voms; INSTANCE=keystone_voms ;;
         individual-packages*) PARENT_MODULE=individual_packages; INSTANCE=individual_packages ;;
+        release-candidate*) PARENT_MODULE=rc; INSTANCE=rc ;;
         *) PARENT_MODULE=$FAB_CMD ; INSTANCE=$FAB_CMD;;
     esac
     
