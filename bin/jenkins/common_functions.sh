@@ -210,7 +210,7 @@ environment.
 
 ## Deployment with \`puppet apply\`
 
-    $ git clone https://github.com/egi-qc/jenkins-builds && cd jenkins-builds/${FAB_CMD}/${OS}
+    $ git clone https://github.com/egi-qc/deployment-howtos && cd deployment-howtos/${FAB_CMD}/${OS}
     
     $ librarian-puppet install --clean --path=/etc/puppet/modules --verbose
     
