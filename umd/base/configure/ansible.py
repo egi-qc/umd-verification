@@ -61,7 +61,8 @@ class AnsibleConfig(BaseConfig):
 
         r = utils.runcmd(cmd,
                          log_to_file="qc_conf",
-                         stop_on_error=False)
+                         stop_on_error=False,
+                         nosudo=True)
         return r
 
     def config(self, logfile=None):
