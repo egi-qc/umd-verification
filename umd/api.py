@@ -10,8 +10,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from fabric import api as fabric_api
-from fabric import colors
+from fabric.api import abort
+from fabric.api import puts
+from fabric.colors import red
+from fabric.colors import yellow
 
 
 def _format_error_msg(logs, cmd=None):
@@ -38,30 +40,30 @@ def format(f):
 
 def info(msg):
     """Prints info/debug logs."""
-    fabric_api.puts("[INFO] %s" % msg)
+    puts("[INFO] %s" % msg)
 
 
 @format
 def fail(msg, stop_on_error=False):
     """Prints fail messages."""
-    msg = "[%s] %s" % (colors.red("FAIL"), msg)
+    msg = "[%s] %s" % (red("FAIL"), msg)
     if stop_on_error:
-        fabric_api.abort(fabric_api.puts(msg))
+        abort(puts(msg))
     else:
-        fabric_api.puts(msg)
+        puts(msg)
 
 
 def ok(msg):
     """Prints ok messages."""
-    fabric_api.puts("[OK] %s" % msg)
+    puts("[OK] %s" % msg)
 
 
 @format
 def warn(msg):
     """Prints warn messages."""
-    fabric_api.puts("[%s] %s" % (colors.yellow("WARN"), msg))
+    puts("[%s] %s" % (yellow("WARN"), msg))
 
 
 def na(msg):
     """Prints NA messages."""
-    fabric_api.puts("[%s] %s" % (colors.yellow("NA"), msg))
+    puts("[%s] %s" % (yellow("NA"), msg))

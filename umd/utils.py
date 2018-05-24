@@ -19,8 +19,12 @@ import shutil
 import tempfile
 
 import fabric
-from fabric import api as fabric_api
-from fabric import colors
+from fabric.api import local
+from fabric.api import settings
+from fabric.api import shell_env
+from fabric.colors import blue
+from fabric.colors import green
+from fabric.colors import white
 import jinja2
 import mock
 import yaml
@@ -118,11 +122,11 @@ def runcmd(cmd,
                  + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
                  + envvars)
     with contextlib.nested(fabric.context_managers.lcd(chdir),
-                           fabric_api.settings(warn_only=True),
-                           fabric_api.shell_env(**env_d)):
+                           settings(warn_only=True),
+                           shell_env(**env_d)):
         if not nosudo:
             cmd = "sudo -E " + cmd
-        r = fabric_api.local(cmd, capture=True)
+        r = local(cmd, capture=True)
     return r
 
 
@@ -613,60 +617,59 @@ def show_exec_banner_ascii():
     basic_repo = ["umd_release_pkg", "igtf_repo"]
 
     print(u'\n')
-    print(colors.green(u'UMD verification tool').center(120))
+    print(green(u'UMD verification tool').center(120))
     print(u'=====================\n'.center(111))
-    print((u'%s: %s' % (colors.white(u'Quality criteria'),
-                        colors.blue(u'http://egi-qc.github.io'))).center(120))
+    print((u'%s: %s' % (white(u'Quality criteria'),
+                        blue(u'http://egi-qc.github.io'))).center(120))
     print((u'%s: %s' % (
-        colors.white(u'Codebase'),
-        colors.blue(("https://github.com/egi-qc/"
-                     "umd-verification")))).center(120))
+        white(u'Codebase'),
+        blue(("https://github.com/egi-qc/umd-verification")))).center(120))
     print(u'')
-    print(u'\t%s' % colors.white(u'Path locations'))
-    print(u'\t %s' % colors.white('|'))
+    print(u'\t%s' % white(u'Path locations'))
+    print(u'\t %s' % white('|'))
     for k in ["log_path", "yaim_path", "puppet_path"]:
         v = cfg.pop(k)
         leftjust = len(max(basic_repo, key=len)) + 5
-        print(u'\t %s %s %s' % (colors.white('|'), k.ljust(leftjust), v))
+        print(u'\t %s %s %s' % (white('|'), k.ljust(leftjust), v))
     print(u'\t')
-    print(u'\t%s' % colors.white(u'Production repositories'))
-    print(u'\t %s' % colors.white('|'))
+    print(u'\t%s' % white(u'Production repositories'))
+    print(u'\t %s' % white('|'))
     for repo in basic_repo:
         try:
             v = cfg.pop(repo)
         except KeyError:
             v = None
         leftjust = len(max(basic_repo, key=len)) + 5
-        print(u'\t %s %s %s' % (colors.white('|'),
+        print(u'\t %s %s %s' % (white('|'),
                                 repo.ljust(leftjust),
-                                colors.blue(v)))
+                                blue(v)))
     print(u'\n\n')
 
     if "repository_url" in cfg.keys():
         api.info("Using the following UMD verification repositories")
         repos = to_list(cfg.pop("repository_url"))
         for repo in repos:
-            print(u'\t+ %s' % colors.blue(repo))
+            print(u'\t+ %s' % blue(repo))
 
     if "repository_file" in cfg.keys():
         api.info("Using the following repository files")
         repos = to_list(cfg.pop("repository_file"))
         for repo in repos:
-            print(u'\t+ %s' % colors.blue(repo))
+            print(u'\t+ %s' % blue(repo))
 
 
 def show_exec_banner():
     """Displays execution banner."""
     cfg = config.CFG.copy()
 
-    print(u'\n\u250C %s ' % colors.green(" UMD verification app")
+    print(u'\n\u250C %s ' % green(" UMD verification app")
           + u'\u2500' * 49 + u'\u2510')
     print(u'\u2502' + u' ' * 72 + u'\u2502')
     print(u'\u2502%s %s' % ("Quality criteria:".rjust(25),
-          colors.blue("http://egi-qc.github.io"))
+          blue("http://egi-qc.github.io"))
           + u' ' * 23 + u'\u2502')
     print(u'\u2502%s %s' % ("Codebase:".rjust(25),
-          colors.blue("https://github.com/egi-qc/umd-verification"))
+          blue("https://github.com/egi-qc/umd-verification"))
           + u' ' * 4 + u'\u2502')
     print(u'\u2502' + u' ' * 72 + u'\u2502')
     print(u'\u2502' + u' ' * 7 + u'\u2500' * 65 + u'\u2518')
@@ -676,13 +679,13 @@ def show_exec_banner():
         print(u'\u2502 Verification repositories used:')
         repos = to_list(cfg.pop("repository_url"))
         for repo in repos:
-            print(u'\u2502\t%s' % colors.blue(repo))
+            print(u'\u2502\t%s' % blue(repo))
 
     if "repository_file" in cfg.keys():
         print(u'\u2502 Verification repositories (files) used:')
         repos = to_list(cfg.pop("repository_file"))
         for repo in repos:
-            print(u'\u2502\t%s' % colors.blue(repo))
+            print(u'\u2502\t%s' % blue(repo))
 
     print(u'\u2502')
     print(u'\u2502 Repository basic configuration:')
@@ -690,7 +693,7 @@ def show_exec_banner():
     for k in basic_repo:
         v = cfg.pop(k)
         leftjust = len(max(basic_repo, key=len)) + 5
-        print(u'\u2502\t%s %s' % (k.ljust(leftjust), colors.blue(v)))
+        print(u'\u2502\t%s %s' % (k.ljust(leftjust), blue(v)))
 
     print(u'\u2502')
     print(u'\u2502 Path locations:')
