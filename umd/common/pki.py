@@ -14,7 +14,7 @@ import os.path
 import socket
 
 import fabric
-from fabric import operations as fabric_ops
+from fabric.operations import prompt
 
 from umd import api
 from umd import config
@@ -96,9 +96,9 @@ def certify():
     utils.runcmd("chmod 0755 /etc/grid-security")
     if os.path.isfile(cert_path) and os.path.isfile(key_path):
         if not config.CFG.get("dont_ask_cert_renewal", False):
-            r = fabric_ops.prompt(("Certificate already exists under "
-                                   "'/etc/grid-security'. Do you want to "
-                                   "overwrite them? (y/N)"))
+            r = prompt(("Certificate already exists under "
+                        "'/etc/grid-security'. Do you want to "
+                        "overwrite them? (y/N)"))
             if r.lower() == "y":
                 api.info("Overwriting already existant certificate")
             else:

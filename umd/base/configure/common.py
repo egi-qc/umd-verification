@@ -34,7 +34,7 @@ def set_umd_params(template_file, output_file):
                                                "False"),
     }
     if config.CFG.get("need_cert", ""):
-        _data["igtf_repo"] = "yes",
+        _data["igtf_repo"] = "True",
 
     base_utils.render_jinja(
         template_file,

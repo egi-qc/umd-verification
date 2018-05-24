@@ -12,7 +12,7 @@
 
 import functools
 
-from fabric import colors
+from fabric.colors import blue
 
 from umd import api
 from umd import config
@@ -40,8 +40,8 @@ def qcstep(id, description):
     def _qcstep(f):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            print("[[%s: %s]]" % (colors.blue(id),
-                                  colors.blue(description)))
+            print("[[%s: %s]]" % (blue(id),
+                                  blue(description)))
             return f(*args, **kwargs)
         return wrapper
     return _qcstep

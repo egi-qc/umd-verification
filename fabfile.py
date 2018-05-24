@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from fabric import state
+from fabric.state import output
 
 from umd.products.arc import arc_ce                         	    # NOQA
 from umd.products.argus import argus        	                    # NOQA
@@ -54,11 +54,11 @@ from umd.products.wn import wn                      		    # NOQA
 from umd.products.xrootd import xrootd                      	    # NOQA
 
 
-state.output.status = False
-state.output.stdout = False
-state.output.warnings = False
-state.output.running = True
-state.output.user = True
-state.output.stderr = False
-state.output.aborts = False
-state.output.debug = False
+output.status = False
+output.stdout = False
+output.warnings = False
+output.running = True
+output.user = True
+output.stderr = False
+output.aborts = False
+output.debug = False
