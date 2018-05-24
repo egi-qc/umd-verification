@@ -13,11 +13,11 @@ class fts_mysql {
 
     if $::operatingsystem in ["CentOS", "Scientific"] {
         $schema = "/usr/share/fts-mysql/fts-schema-3.0.0.sql"
-        if $::operatingsystem in ["CentOS"] {
+        if $::operatingsystemmajrelease == "7" {
             $pkg = ["mariadb-server", "mod_ssl"]
             $srv = "mariadb"
         }
-        elsif $::operatingsystem in ["Scientific"] {
+        elsif $::operatingsystemmajrelease == "6" {
             $pkg = ["mysql-server", "mod_ssl"]
             $srv = "mysqld"
         }
