@@ -6,6 +6,8 @@ edg-mkgridmap:
     - Apache 2.0
 frontier-squid:
     - Fermilab Fermitools license (BSD license)
+fts:
+    - Apache 2.0
 gfal2:
     - Apache 2.0
 globus-default-security:
