@@ -12,7 +12,7 @@ class fts_mysql {
     $db_pass = hiera("fts3_db_password")
 
     if $::operatingsystem in ["CentOS", "Scientific"] {
-        $schema = "/usr/share/fts-mysql/fts-schema-3.0.0.sql"
+        $schema = "/usr/share/fts-mysql/fts-schema-4.0.0.sql"
         if $::operatingsystemmajrelease == "7" {
             $pkg = ["mariadb-server", "mod_ssl"]
             $srv = "mariadb"
