@@ -23,6 +23,13 @@ class ArcCEAnsibleDeploy(base.Deploy):
             "arc_x509_user_cert: %s" % config.CFG["cert"].cert_path]
         self.cfgtool.extra_vars = extra_vars
 
+    def pre_validate(self):
+        if not config.CFG.get("x509_user_proxy", None):
+            # fake proxy
+            config.CFG["x509_user_proxy"] = product_utils.create_fake_proxy()
+            # fake voms server - lsc
+            product_utils.add_fake_lsc()
+
 arc_ce = ArcCEAnsibleDeploy(
     name="arc-ce",
     doc="ARC computing element server deployment.",
