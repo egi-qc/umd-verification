@@ -266,3 +266,20 @@ class OwnCA(object):
                 api.info("Public key stored in '%s'." % key_pub)
 
         return OwnCACert(subject, key_prv, key_pub)
+
+
+class ProxyCert(object):
+    """Common operations with proxy certificates."""
+    def __init__(self,
+                 proxy_file):
+        self.proxy_file = proxy_file
+
+    def _format_str(f):
+        def format(self):
+            r = f(self)
+            return r.split()[-1]
+        return format
+
+    @_format_str
+    def get_subject(self):
+        return utils.runcmd("openssl x509 -in %s -noout -subject" % self.proxy_file)

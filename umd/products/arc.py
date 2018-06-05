@@ -11,24 +11,31 @@
 # under the License.
 
 from umd import base
+from umd.common import pki
 from umd.base.configure.ansible import AnsibleConfig
 from umd import config
+from umd.products import utils as product_utils
+from umd.products import voms
 
 
 class ArcCEAnsibleDeploy(base.Deploy):
     def pre_config(self):
-        # extra vars
-        extra_vars = [
-            "arc_x509_user_key: %s" % config.CFG["cert"].key_path,
-            "arc_x509_user_cert: %s" % config.CFG["cert"].cert_path]
-        self.cfgtool.extra_vars = extra_vars
-
-    def pre_validate(self):
+        # fake proxy
+        voms.client_install()
         if not config.CFG.get("x509_user_proxy", None):
             # fake proxy
             config.CFG["x509_user_proxy"] = product_utils.create_fake_proxy()
             # fake voms server - lsc
             product_utils.add_fake_lsc()
+        # extra vars
+        user_dn = pki.ProxyCert(
+                      config.CFG["x509_user_proxy"]).get_subject()
+        extra_vars = [
+            "arc_x509_user_key: %s" % config.CFG["cert"].key_path,
+            "arc_x509_user_cert: %s" % config.CFG["cert"].cert_path,
+            "user_dn: %s" % user_dn]
+        self.cfgtool.extra_vars = extra_vars
+
 
 arc_ce = ArcCEAnsibleDeploy(
     name="arc-ce",
