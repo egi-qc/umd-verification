@@ -112,7 +112,7 @@ def certify():
         if hostkey and hostcert:
             api.info("Using provided host certificates")
             utils.runcmd("cp %s %s" % (hostkey, key_path))
-            utils.runcmd("chmod 600 %s" % key_path)
+            utils.runcmd("chmod 400 %s" % key_path)
             utils.runcmd("cp %s %s" % (hostcert, cert_path))
             cert_for_subject = hostcert
         else:
@@ -257,29 +257,12 @@ class OwnCA(object):
                          chdir=self.workspace)
 
             if key_prv:
-                utils.runcmd("chmod 600 cert.key", chdir=self.workspace)
+                utils.runcmd("chmod 400 cert.key", chdir=self.workspace)
                 utils.runcmd("cp cert.key %s" % key_prv, chdir=self.workspace)
-                api.info("Private key stored in '%s' (with 600 perms)."
+                api.info("Private key stored in '%s' (with 400 perms)."
                          % key_prv)
             if key_pub:
                 utils.runcmd("cp cert.crt %s" % key_pub, chdir=self.workspace)
                 api.info("Public key stored in '%s'." % key_pub)
 
         return OwnCACert(subject, key_prv, key_pub)
-
-
-class ProxyCert(object):
-    """Common operations with proxy certificates."""
-    def __init__(self,
-                 proxy_file):
-        self.proxy_file = proxy_file
-
-    def _format_str(f):
-        def format(self):
-            r = f(self)
-            return r.split()[-1]
-        return format
-
-    @_format_str
-    def get_subject(self):
-        return utils.runcmd("openssl x509 -in %s -noout -subject" % self.proxy_file)

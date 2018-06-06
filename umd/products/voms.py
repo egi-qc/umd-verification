@@ -20,9 +20,15 @@ def client_install():
         "voms-clients-cpp"
     ])
 
-# voms_server = base.Deploy(
-#     name="voms-mysql",
-#     doc="MySQL VOMS server deployment.",
-#     metapkg="emi-voms-mysql",
-#     need_cert=True,
-#     has_infomodel=True)
+class VomsProxyInfo(object):
+    def __init__(self, proxy_file):
+        self.proxy_file = proxy_file
+
+    def _info(self, *args):
+        cmd = "voms-proxy-info -file %s" % self.proxy_file
+        if args:
+            cmd = ' '.join((cmd,)+args)
+        return utils.runcmd(cmd)
+
+    def get_identity(self):
+        return self._info("-identity")
