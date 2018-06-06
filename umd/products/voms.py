@@ -19,16 +19,3 @@ def client_install():
         "myproxy",
         "voms-clients-cpp"
     ])
-
-class VomsProxyInfo(object):
-    def __init__(self, proxy_file):
-        self.proxy_file = proxy_file
-
-    def _info(self, *args):
-        cmd = "voms-proxy-info -file %s" % self.proxy_file
-        if args:
-            cmd = ' '.join((cmd,)+args)
-        return utils.runcmd(cmd)
-
-    def get_identity(self):
-        return self._info("-identity")

@@ -1,6 +1,12 @@
 repo_url: &REPO_URL !!python/object/apply:umd.config.cfg_item [repository_url]
 x509_proxy: &X509_PROXY !!python/object/apply:umd.config.cfg_item [x509_user_proxy]
 
+arc:
+    qc_func_1:
+        - test: "ansible-playbook"
+          description: "Test job submission through Ansible."
+          args: "/etc/ansible/roles/ansible-arc-test/test/main.yml --tags testing --extra-vars 'enable_testing=true' --extra-vars 'proxy_file=*X509_PROXY'"
+
 argus:
     qc_func_1:
         - test: "bin/certs/check-cert"
@@ -137,16 +143,6 @@ myproxy-client:
     qc_func_1: 
         - test: "bin/myproxy/client-test.sh"
           description: "myproxy client commands testing."
-          user: "umd"
-
-arc:
-    qc_func_1:
-        - test: "bin/myproxy/client-test.sh"
-          description: "Retrieve myproxy for ops.vo.ibergrid.eu VO."
-          user: "umd"
-          args: "retrieve"
-        - test: "bin/arc/client-test.sh"
-          description: "Check job submission."
           user: "umd"
 
 dpm:
