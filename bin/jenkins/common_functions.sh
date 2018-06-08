@@ -150,7 +150,7 @@ get_cmt_module () {
     TOOL=$2
     PARENT_MODULE=
     case $FAB_CMD in
-        arc-ce*) PARENT_MODULE=arc ; INSTANCE=arc ;;
+        arc-ce*) PARENT_MODULE=arc ; INSTANCE=arc_ce ;;
         bdii*) PARENT_MODULE=bdii ; INSTANCE=bdii_site ;;
         cloud-info-provider*) PARENT_MODULE=cloud_info_provider ; INSTANCE=cloud_info_provider;;
         clients-solo*) PARENT_MODULE=clients_solo ; INSTANCE=clients_solo ;;
