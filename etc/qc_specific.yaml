@@ -3,9 +3,9 @@ x509_proxy: &X509_PROXY !!python/object/apply:umd.config.cfg_item [x509_user_pro
 
 arc:
     qc_func_1:
-        - test: "ansible-playbook"
+        - test: "bin/arc/ansible-test.sh"
           description: "Test job submission through Ansible."
-          args: "/etc/ansible/roles/ansible-arc-test/test/main.yml --tags testing --extra-vars 'enable_testing=true' --extra-vars 'proxy_file=*X509_PROXY'"
+          args: *X509_PROXY
 
 argus:
     qc_func_1:
@@ -181,12 +181,6 @@ gridftp:
     qc_func_1: 
         - test: "bin/gridftp/client-test.sh"
           description: "GridFTP transfer check using globus-url-copy."
-          args: "/tmp/umd_proxy"
-
-arc:
-    qc_func_1:
-        - test: "bin/arc/client-test.sh"
-          description: "Check job submission."
           args: "/tmp/umd_proxy"
 
 keystone-voms:
