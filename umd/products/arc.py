@@ -44,5 +44,5 @@ arc_ce = ArcCEAnsibleDeploy(
     need_cert=True,
     has_infomodel=True,
     cfgtool=AnsibleConfig(
-        role="https://github.com/egi-qc/ansible-arc-test"),
+        role="https://github.com/egi-qc/ansible-arc"),
     qc_specific_id="arc")
