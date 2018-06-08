@@ -29,7 +29,6 @@ class ArcCEAnsibleDeploy(base.Deploy):
         self.cfgtool.extra_vars = extra_vars
 
     def pre_validate(self):
-        utils.install("nordugrid-arc-client")
         # fake proxy
         voms.client_install()
         if not config.CFG.get("x509_user_proxy", None):
