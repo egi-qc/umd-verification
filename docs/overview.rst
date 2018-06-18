@@ -7,7 +7,7 @@ Getting Started
 ``umd-verification`` tool uses Python's `Fabric <http://www.fabfile.org/>`_
 library.
 
-There is no need to build or install the application, just download the
+There is no need to build the application, just download the
 source code and interact with the tool through `fab` commands.
 
 Note that in order to execute `fab` commands, your current path has to be the
