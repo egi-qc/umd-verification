@@ -1,8 +1,8 @@
 pipeline {
   agent {
     node {
+      label 'python'
     }
-    
   }
   stages {
     stage('Test') {
