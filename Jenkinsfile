@@ -1,6 +1,6 @@
 pipeline {
   agent {
-    node {
+    //node {
       //label 'python'
       //docker.withServer('tcp://172.16.39.13:2375', '') {
       //docker.image('indigodatacloud/ci-images:python') {
@@ -8,7 +8,7 @@ pipeline {
       //}
       docker { image 'indigodatacloud/ci-images:python' }
       //}
-    }
+    //}
   }
   stages {
     stage('Test') {
