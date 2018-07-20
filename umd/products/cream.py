@@ -37,6 +37,7 @@ cream = CreamCEDeploy(
         manifest="cream.pp",
         hiera_data="cream.yaml",
         module=["git://github.com/egi-qc/puppet-slurm.git",
-                "infnpd-creamce",
+                #"infnpd-creamce",
+                "git://github.com/egi-qc/puppet-creamce.git",
                 "puppetlabs-firewall"]),
     qc_specific_id="cream")
