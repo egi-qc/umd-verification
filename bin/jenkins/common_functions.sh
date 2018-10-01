@@ -184,8 +184,8 @@ generate_readme () {
     BUILD_URL=$4
     VERIFICATION_REPO=$5
 
-    ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
-    README=${WORKSPACE_CONFIG_DIR}/README.md
+    ! [ -d "$WORKSPACE_CONFIG_DIR" ] && mkdir "$WORKSPACE_CONFIG_DIR"
+    README="${WORKSPACE_CONFIG_DIR}/README.md"
 
     MODULE=$(get_cmt_module $FAB_CMD $TOOL)
     MODULE_BASENAME=`basename $MODULE`
@@ -274,18 +274,18 @@ archive_artifacts_in_workspace() {
     FAB_CMD=$1
     TOOL=$2
 
-    ! [ -d $WORKSPACE_CONFIG_DIR ] && mkdir $WORKSPACE_CONFIG_DIR
+    ! [ -d "$WORKSPACE_CONFIG_DIR" ] && mkdir "$WORKSPACE_CONFIG_DIR"
     
     if [ $2 == "puppet" ]; then
         MODULE=$(get_cmt_module $FAB_CMD $TOOL)
-        cp /tmp/Puppetfile $WORKSPACE_CONFIG_DIR/
-        mkdir $WORKSPACE_CONFIG_DIR/puppet
-        cp -r /etc/puppet/hiera.yaml /etc/puppet/hieradata $WORKSPACE_CONFIG_DIR/puppet
-	mkdir $WORKSPACE_CONFIG_DIR/puppet/manifest 
-        cp etc/puppet/${MODULE} $WORKSPACE_CONFIG_DIR/puppet/manifest
+        cp /tmp/Puppetfile "$WORKSPACE_CONFIG_DIR/"
+        mkdir "$WORKSPACE_CONFIG_DIR/puppet"
+        cp -r /etc/puppet/hiera.yaml /etc/puppet/hieradata "$WORKSPACE_CONFIG_DIR/puppet"
+	mkdir "$WORKSPACE_CONFIG_DIR/puppet/manifest"
+        cp etc/puppet/${MODULE} "$WORKSPACE_CONFIG_DIR/puppet/manifest"
     elif [ $2 == "ansible" ]; then
-        mkdir $WORKSPACE_CONFIG_DIR/vars
-        cp /tmp/*.yaml $WORKSPACE_CONFIG_DIR/vars/
+        mkdir "$WORKSPACE_CONFIG_DIR/vars"
+        cp /tmp/*.yaml "$WORKSPACE_CONFIG_DIR/vars/"
     fi
 
     generate_readme $@
@@ -310,7 +310,7 @@ publish_howtos () {
     git clone https://github.com/egi-qc/deployment-howtos /tmp/deployment-howtos && cd /tmp/deployment-howtos
     git remote set-url origin git@github.com:egi-qc/deployment-howtos.git
     ! [ -d ${FAB_CMD}/${OS} ] && mkdir -p ${FAB_CMD}/${OS}
-    cp -r ${WORKSPACE_CONFIG_DIR}/* ${FAB_CMD}/${OS}/
+    cp -r "${WORKSPACE_CONFIG_DIR}/*" ${FAB_CMD}/${OS}/
     git add ${FAB_CMD}/${OS}/
     git commit -a -m "${FAB_CMD}/${OS}/ deployment how-to (build $BUILD_URL)"
     git push origin master
