@@ -185,13 +185,13 @@ generate_readme () {
     VERIFICATION_REPO=$5
 
     ! [ -d "$WORKSPACE_CONFIG_DIR" ] && mkdir "$WORKSPACE_CONFIG_DIR"
-    README="${WORKSPACE_CONFIG_DIR}/README.md"
+    README=${WORKSPACE_CONFIG_DIR}/README.md
 
     MODULE=$(get_cmt_module $FAB_CMD $TOOL)
     MODULE_BASENAME=`basename $MODULE`
 
     if [ $2 == "puppet" ]; then
-cat > $README <<EOF
+cat > "$README" <<EOF
 ## Directory structure
 
     |-- Puppetfile
