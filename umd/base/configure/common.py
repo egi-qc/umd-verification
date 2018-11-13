@@ -33,9 +33,8 @@ def set_umd_params(template_file, output_file):
         "enable_untested_repo": config.CFG.get("enable_untested_repo",
                                                "False"),
     }
-    if config.CFG.get("need_cert", ""):
-        _data["igtf_repo"] = "True",
-
+    # if config.CFG.get("need_cert", ""):
+    #     _data["igtf_repo"] = "True"
     base_utils.render_jinja(
         template_file,
         _data,
