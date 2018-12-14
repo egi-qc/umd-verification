@@ -11,10 +11,8 @@
 # under the License.
 
 from umd import base
-from umd.common import pki
 from umd.base.configure.ansible import AnsibleConfig
 from umd import config
-from umd import utils
 from umd.products import utils as product_utils
 from umd.products import voms
 
