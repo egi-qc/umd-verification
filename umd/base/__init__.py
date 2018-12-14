@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from fabric.tasks import Task
+from fabric import tasks
 
 from umd import api
 from umd.base.infomodel import InfoModel
@@ -22,7 +22,7 @@ from umd import config
 from umd import utils
 
 
-class Deploy(Task):
+class Deploy(tasks.Task):
     """Base class for UMD deployments."""
     def __init__(self,
                  name,
