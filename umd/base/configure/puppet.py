@@ -134,6 +134,11 @@ class PuppetConfig(BaseConfig):
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "qc_conf.stderr")
+        module_path = utils.runcmd("puppet config print modulepath",
+                                   nosudo=True,
+                                   stop_on_error=False)
+        if module_path:
+            self.module_path = ':'.join([self.module_path, module_path])
 
         cmd = ("puppet apply --verbose --debug --modulepath %s %s "
                "--detail-exitcodes") % (self.module_path, self.manifest)
@@ -156,19 +161,11 @@ class PuppetConfig(BaseConfig):
         return r
 
     def config(self):
+        # XXX Remove this conditional when moved to PC1
+        if config.CFG["puppet_release"].find("puppetlabs-release-pc1") != -1:
+            self.module_path = "/opt/puppetlabs/puppet/modules"
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
         
-        module_path = utils.runcmd("puppet config print modulepath",
-                                   nosudo=True,
-                                   stop_on_error=False)
-        if module_path:
-            # FIXME Remove conditional when completely migrated to 
-            # puppetlabs-pc1
-            if os.path.isabs(module_path):
-                self.module_path = module_path
-            else:
-                self.module_path = ':'.join([self.module_path, module_path])
-
         # Deploy modules
         self._install_modules()
 
