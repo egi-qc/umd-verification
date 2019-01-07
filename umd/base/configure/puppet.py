@@ -41,6 +41,7 @@ class PuppetConfig(BaseConfig):
         self.hiera_data = utils.to_list(hiera_data)
         self.hiera_data_dir = "/etc/puppet/hieradata"
         self.module_path = "/etc/puppet/modules"
+        self.puppet_bin = "puppet"
         self.puppetfile = "etc/puppet/Puppetfile"
         self.params_files = []
         self.extra_vars = extra_vars
@@ -140,8 +141,10 @@ class PuppetConfig(BaseConfig):
         if module_path:
             self.module_path = ':'.join([self.module_path, module_path])
 
-        cmd = ("puppet apply --verbose --debug --modulepath %s %s "
-               "--detail-exitcodes") % (self.module_path, self.manifest)
+        cmd = ("%s apply --verbose --debug --modulepath %s %s "
+               "--detail-exitcodes") % (self.puppet_bin,
+                                        self.module_path,
+                                        self.manifest)
         r = utils.runcmd(cmd,
                          os.getcwd(),
                          log_to_file="qc_conf",
@@ -164,6 +167,7 @@ class PuppetConfig(BaseConfig):
         # XXX Remove this conditional when moved to PC1
         if config.CFG["puppet_release"].find("puppetlabs-release-pc1") != -1:
             self.module_path = "/opt/puppetlabs/puppet/modules"
+            self.puppet_bin = "/opt/puppetlabs/bin/puppet"
         self.manifest = os.path.join(config.CFG["puppet_path"], self.manifest)
         
         # Deploy modules
