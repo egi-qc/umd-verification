@@ -55,7 +55,7 @@ class PuppetConfig(BaseConfig):
             api.fail("Puppet installation failed", stop_on_error=True)
         # Set hiera environment - required before pre_config() method
         if not os.path.exists(self.hiera_data_dir):
-            utils.runcmd("mkdir %s" % self.hiera_data_dir)
+            utils.runcmd("mkdir -p %s" % self.hiera_data_dir)
 
     def _add_hiera_param_file(self, fname):
         self.params_files.append(fname.split('.')[0])
