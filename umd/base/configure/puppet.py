@@ -47,7 +47,8 @@ class PuppetConfig(BaseConfig):
 
     def _deploy(self):
         # Install release package
-        if not utils.is_pkg_installed("puppetlabs-release*"):
+        if not (utils.is_pkg_installed("puppetlabs-release") or
+                utils.is_pkg_installed("puppetlabs-release-pc1")):
             utils.install_remote(config.CFG["puppet_release"])
         # Install puppet client
         r = utils.install("puppet")
