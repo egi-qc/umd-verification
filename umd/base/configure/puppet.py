@@ -131,13 +131,16 @@ class PuppetConfig(BaseConfig):
             "librarian-puppet install --clean --path=%s --verbose"
             % self.module_path,
             os.path.dirname(puppetfile),
-            envvars=[("PATH", "$PATH:/usr/local/bin")],
+            envvars=[("PATH", "$PATH:/usr/local/bin:/opt/puppetlabs/bin")],
             log_to_file="qc_conf",
             nosudo=True)
 
     def _run(self):
         logfile = os.path.join(config.CFG["log_path"], "qc_conf.stderr")
         module_path = utils.runcmd("puppet config print modulepath",
+                                   envvars=[(
+                                       "PATH",
+                                       "$PATH:/opt/puppetlabs/bin")],
                                    nosudo=True,
                                    stop_on_error=False)
         if module_path:
