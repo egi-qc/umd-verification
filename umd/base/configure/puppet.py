@@ -120,7 +120,9 @@ class PuppetConfig(BaseConfig):
         """Installs required Puppet modules through librarian-puppet."""
         if utils.runcmd("librarian-puppet",
                         os.getcwd(),
-                        envvars=[("PATH", "$PATH:/usr/local/bin")],
+                        envvars=[(
+                            "PATH",
+                            "$PATH:/usr/local/bin:/opt/puppetlabs/bin")],
                         nosudo=True,
                         stop_on_error=False).failed:
             utils.runcmd("gem install librarian-puppet")
