@@ -137,7 +137,12 @@ class PuppetConfig(BaseConfig):
                                    nosudo=True,
                                    stop_on_error=False)
         if module_path:
-            self.module_path = ':'.join([self.module_path, module_path])
+            # FIXME Remove conditional when completely migrated to 
+            # puppetlabs-pc1
+            if os.path.isabs(module_path):
+                self.module_path = module_path
+            else:
+                self.module_path = ':'.join([self.module_path, module_path])
 
         cmd = ("puppet apply --verbose --debug --modulepath %s %s "
                "--detail-exitcodes") % (self.module_path, self.manifest)
