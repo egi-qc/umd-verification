@@ -20,7 +20,6 @@ gridsite = base.Deploy(
     name="gridsite",
     doc="Gridsite deployment.",
     need_cert=True,
-    has_infomodel=True,
     cfgtool=AnsibleConfig(
         role="https://github.com/egi-qc/ansible-role-gridsite"),
     qc_specific_id="gridsite")
