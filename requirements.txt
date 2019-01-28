@@ -3,6 +3,5 @@ fabric
 PyYAML
 requests
 #python-ldap
-mock
 pbr
 jinja2
