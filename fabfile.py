@@ -37,7 +37,7 @@ from umd.products.fts import fts                            	    # NOQA
 # from umd.products.glexec import glexec_wn                   	    # NOQA
 from umd.products.gridftp import gridftp                     	    # NOQA
 # from umd.products.gram5 import gram5                        	    # NOQA
-# from umd.products.gridsite import gridsite                  	    # NOQA
+from umd.products.gridsite import gridsite                  	    # NOQA
 from umd.products.im import im                  		    # NOQA
 from umd.products.individual_packages import individual_packages    # NOQA
 from umd.products.keystone_voms import keystone_voms                # NOQA
