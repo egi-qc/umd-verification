@@ -76,7 +76,7 @@ deploy_config_management () {
             module_url=$3
             module_name="`basename $3`"
             module_path=/tmp/$module_name
-            $sudocmd pip install ansible==2.4
+            $sudocmd pip install ansible==2.4.1
             $sudocmd rm -rf $module_path
             git clone $module_url $module_path
             $sudocmd ansible-galaxy install -r ${module_path}/requirements.yml
