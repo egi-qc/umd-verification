@@ -287,8 +287,6 @@ archive_artifacts_in_workspace() {
         mkdir ${WORKSPACE_CONFIG_DIR}/vars
         cp /tmp/*.yaml "${WORKSPACE_CONFIG_DIR}/vars/"
     fi
-
-    generate_readme $@
 }
 
 publish_howtos () {
