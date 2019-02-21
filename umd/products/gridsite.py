@@ -12,11 +12,15 @@
 
 from umd import base
 from umd.base.configure.ansible import AnsibleConfig
-from umd import system
 from umd import utils
 
 
-gridsite = base.Deploy(
+class GridSiteDeploy(base.Deploy):
+    def pre_validate(self):
+        utils.install("curl")
+
+
+gridsite = GridSiteDeploy(
     name="gridsite",
     doc="Gridsite deployment.",
     need_cert=True,
