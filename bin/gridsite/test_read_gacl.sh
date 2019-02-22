@@ -14,3 +14,4 @@ cat >/var/www/html/.gacl <<EOF
 EOF
 
 curl -k --cert .x509up_u7036 --key .x509up_u7036 --capath /etc/grid-security/certificates https://localhost/test.html
+[ $? -ne 0 ] && curl -k http://localhost/test.html
