@@ -309,7 +309,7 @@ publish_howtos () {
     git remote set-url origin git@github.com:egi-qc/deployment-howtos.git
     ! [ -d ${FAB_CMD}/${OS} ] && mkdir -p ${FAB_CMD}/${OS}
     cp -r ${WORKSPACE_CONFIG_DIR}/* ${FAB_CMD}/${OS}/
-    if [ -n "`git status --porcelain=v1|grep -v '??'`" ] ; then
+    if [ -n "`git status --porcelain|grep -v '??'`" ] ; then
     	git add ${FAB_CMD}/${OS}/
     	git commit -a -m "${FAB_CMD}/${OS}/ deployment how-to (build $BUILD_URL)"
     	git push origin master
