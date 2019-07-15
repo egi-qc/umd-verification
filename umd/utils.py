@@ -350,6 +350,9 @@ class Yum(object):
         return not runcmd("rpm --quiet -q %s" % pkg,
                           stop_on_error=False).failed
 
+    def list_pkg_all(self, log_to_file):
+        runcmd("rpm -qa", log_to_file=log_to_file)
+
 
 class Apt(object):
     def __init__(self):
@@ -499,6 +502,9 @@ class Apt(object):
     def disable_repo(self):
         raise NotImplementedError
 
+    def list_pkg_all(self, log_to_file):
+        runcmd("dpkg -l", log_to_file=log_to_file)
+
 
 class PkgTool(object):
     def __init__(self):
@@ -609,6 +615,10 @@ class PkgTool(object):
     def is_pkg_installed(self, pkg):
         """Checks if the package (name) is installed."""
         return self.client.is_pkg_installed(pkg)
+
+    def list_pkg_all(self, log_to_file):
+        """Checks if the package (name) is installed."""
+        return self.client.list_pkg_all(log_to_file)
 
 
 def show_exec_banner_ascii():

@@ -82,6 +82,9 @@ class Deploy(tasks.Task):
             if not self.cfgtool.has_run:
                 api.info("Running configuration")
                 self.cfgtool.run()
+                # Report all installed packages in the system
+                pkgtool = utils.PkgTool()
+                pkgtool.list_pkg_all(log_to_file="qc_conf")
 
     def _security(self, **kwargs):
         Security().run(**kwargs)
