@@ -58,19 +58,20 @@ def to_file(r, logfile):
         if r.stdout:
             _fname = '.'.join([logfile, "stdout"])
             _msg = r.stdout
-            l.append(_fname)
+            l.append((_fname, _msg))
         if r.stderr:
             _fname = '.'.join([logfile, "stderr"])
             _msg = r.stderr
-            l.append(_fname)
+            l.append((_fname, _msg))
     except AttributeError:
         if isinstance(r, str):
             _fname = '.'.join([logfile, "stdout"])
             _msg = r
-            l.append(_fname)
-    if _fname and _msg:
+            l.append((_fname, _msg))
+    for _f in l:
+        _fname, _msg = _f
         write_to_file(os.path.join(config.CFG["log_path"], _fname), _msg)
-    return l
+    return [_f[0] for _f in l]
 
 
 def create_workspace():
