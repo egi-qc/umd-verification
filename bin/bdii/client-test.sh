@@ -53,8 +53,22 @@ case $1 in
         ;;
     ldapsearch-site-bdii-cloud)
         cmd="ldapsearch -x -H ldap://localhost:2170 -b o=glue"
-        $cmd 2>&1 > /dev/null
-        [ $? -eq 0 ] && exit 0 || exit -1
+
+        # 1. Sleep BDII_BREATHE_TIME seconds
+        breathe_time=`. /etc/bdii/bdii.conf && echo $BDII_BREATHE_TIME`
+        echo "Waiting $breathe_time seconds to check BDII health.."
+        sleep $breathe_time
+
+        # 2. 5 attempts to connect to bdii service
+        for i in `seq 1 5` ; do 
+            set +e
+            $cmd 2>&1 > /dev/null
+            [ $? -eq 0 ] && exit 0
+            echo "ldap not started..waiting for 2 seconds.." && sleep 2
+        done
+
+	# Exit -1 otherwise
+        exit -1
         ;;
     *)
         echo "No options or option not known"
