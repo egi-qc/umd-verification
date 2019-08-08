@@ -1,14 +1,14 @@
 ---
 distribution: {{ distribution }}
 {% if distribution == "cmd" %}cmd_distribution: cmd-os{% elif distribution == "cmd-one" %}cmd_distribution: cmd-one{% endif %}
-release: {{ release }}
+{% if distribution == "cmd" %}cmd_release: {{ release }}{% endif %}
 {% if enable_testing_repo %}
 enable_testing_repo: {{ enable_testing_repo }}
 {% endif %}
 {% if enable_untested_repo %}
 enable_untested_repo: {{ enable_untested_repo }}
 {% endif %}
-{% if distribution == "cmd" %}openstack_release: {{ openstack_release }}{% endif %}
+{% if distribution == "cmd" %}cmd_openstack_release: {{ openstack_release }}{% endif %}
 igtf_repo: {{ igtf_repo }}
 {% if repository_file %}
 verification_repofile:
