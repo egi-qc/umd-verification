@@ -52,19 +52,37 @@ case $1 in
         done
         ;;
     ldapsearch-site-bdii-cloud)
-        cmd="ldapsearch -x -H ldap://localhost:2170 -b o=glue"
 
-        # 1. Sleep BDII_BREATHE_TIME seconds
+
+	#sudo cat /etc/hosts
+	#sudo sed  -i '/^127\.0\.0\.1/s/$/ localhost/' /etc/hosts
+	#sudo cat /etc/hosts
+	#sudo sed -i 's/BDII_LOG_LEVEL=ERROR/BDII_LOG_LEVEL=DEBUG/g' /etc/bdii/bdii.conf
+        #sudo bash -c 'echo "SLAPD_HOST=127.0.0.1" >> /etc/bdii/bdii.conf'
+        #sudo /etc/init.d/bdii stop
+        #sudo pkill -9 -f slapd
+	##sudo /usr/sbin/slapd -f /etc/bdii/bdii-slapd.conf -h ldap://127.0.0.1:2170 -u ldap -d any
+        #sudo /etc/init.d/bdii start
+
+        cmd="ldapsearch -x -H ldap://127.0.0.1:2170 -b o=glue"
+
+        ## 1. Sleep BDII_BREATHE_TIME seconds
         breathe_time=`. /etc/bdii/bdii.conf && echo $BDII_BREATHE_TIME`
         echo "Waiting $breathe_time seconds to check BDII health.."
         sleep $breathe_time
 
-        # 2. 5 attempts to connect to bdii service
+        ## 2. 5 attempts to connect to bdii service
+	ps axu | grep [b]dii
+        cat /etc/bdii/bdii.conf
+        netstat -lnp 
         for i in `seq 1 5` ; do 
             set +e
             $cmd 2>&1 > /dev/null
             [ $? -eq 0 ] && exit 0
-            echo "ldap not started..waiting for 2 seconds.." && sleep 2
+            echo "ldap not started..waiting for 2 seconds.." && sleep 5
+            tail -100 /var/log/bdii/bdii-update.log
+            cat /var/lib/bdii/old.ldif
+            cat /var/lib/bdii/old.err
         done
 
 	# Exit -1 otherwise
