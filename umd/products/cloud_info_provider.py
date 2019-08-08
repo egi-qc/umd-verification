@@ -19,8 +19,6 @@ class CloudInfoProviderDeploy(base.Deploy):
     def pre_config(self):
         # extra vars
         extra_vars = [
-            "cloud_info_provider_os_username: demo ",
-            "cloud_info_provider_os_password: secret ",
             "cloud_info_provider_os_release: %s "
             % config.CFG["openstack_release"],
             "cloud_info_provider_middleware: openstack ",
