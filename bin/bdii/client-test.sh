@@ -30,8 +30,8 @@ case $1 in
         # 2. 5 attempts to connect to bdii service
         for i in `seq 1 5` ; do 
             set +e
-            $cmd 2>&1 > /dev/null
-            [ $? -eq 0 ] && exit 0
+            out=`$cmd 2>&1`
+            [ $? -eq 0 ] && >&2 echo $out ; exit 0
             echo "ldap not started..waiting for 2 seconds.." && sleep 2
         done
         ;;
@@ -62,11 +62,10 @@ case $1 in
         # 2. 5 attempts to connect to bdii service
         for i in `seq 1 5` ; do 
             set +e
-            $cmd 2>&1 > /dev/null
-            [ $? -eq 0 ] && exit 0
+            out=`$cmd 2>&1`
+            [ $? -eq 0 ] && >&2 echo $out ; exit 0
             echo "ldap not started..waiting for 2 seconds.." && sleep 2
         done
-
 	# Exit -1 otherwise
         exit -1
         ;;
