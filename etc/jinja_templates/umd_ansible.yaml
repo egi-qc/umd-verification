@@ -2,6 +2,7 @@
 distribution: {{ distribution }}
 {% if distribution == "cmd" %}cmd_distribution: cmd-os{% elif distribution == "cmd-one" %}cmd_distribution: cmd-one{% endif %}
 {% if distribution == "cmd" %}cmd_release: {{ release }}{% endif %}
+release: {{ release }}
 {% if enable_testing_repo %}
 enable_testing_repo: {{ enable_testing_repo }}
 {% endif %}
