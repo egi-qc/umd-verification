@@ -1,6 +1,7 @@
 ---
 distribution: {{ distribution }}
 {% if distribution == "cmd" %}cmd_distribution: cmd-os{% elif distribution == "cmd-one" %}cmd_distribution: cmd-one{% endif %}
+{% if distribution == "cmd" %}cmd_release: {{ release }}{% endif %}
 release: {{ release }}
 {% if enable_testing_repo %}
 enable_testing_repo: {{ enable_testing_repo }}
@@ -15,4 +16,4 @@ verification_repofile:
   - {{ repo }}
 {% endfor %}
 {% endif %}
-{% if openstack_release is defined %}openstack_release: {{ openstack_release }}{% endif %}
+{% if openstack_release is defined %}cmd_openstack_release: {{ openstack_release }}{% endif %}

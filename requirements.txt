@@ -1,7 +1,7 @@
 argparse
 fabric
 PyYAML
-requests
+#requests
 #python-ldap
 pbr
 jinja2

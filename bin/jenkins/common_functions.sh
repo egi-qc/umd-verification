@@ -102,7 +102,8 @@ add_hostname_as_localhost () {
     [[ "`hostname -f`" != *"$MY_DOMAIN" ]] && $1 hostname "`hostname`.${MY_DOMAIN}"
     # Append it to /etc/hosts
     #$1 sed -i "/^127\.0\.0\.1/ s/$/ `hostname`/" /etc/hosts
-    $1 sed -i "/^127\.0\.0\.1/ s/ localhost/ `hostname`/" /etc/hosts
+    #$1 sed -i "/^127\.0\.0\.1/ s/ localhost/ `hostname`/" /etc/hosts
+    $1 sed -i "/^127\.0\.0\.1/ s/ localhost/ `hostname` localhost/" /etc/hosts
 }
 
 
@@ -309,8 +310,10 @@ publish_howtos () {
     git remote set-url origin git@github.com:egi-qc/deployment-howtos.git
     ! [ -d ${FAB_CMD}/${OS} ] && mkdir -p ${FAB_CMD}/${OS}
     cp -r ${WORKSPACE_CONFIG_DIR}/* ${FAB_CMD}/${OS}/
-    git add ${FAB_CMD}/${OS}/
-    git commit -a -m "${FAB_CMD}/${OS}/ deployment how-to (build $BUILD_URL)"
-    git push origin master
+    if [ -n "`git status --porcelain|grep -v '??'`" ] ; then
+    	git add ${FAB_CMD}/${OS}/
+    	git commit -a -m "${FAB_CMD}/${OS}/ deployment how-to (build $BUILD_URL)"
+    	git push origin master
+    fi
     cd "${workspace}"
 }
