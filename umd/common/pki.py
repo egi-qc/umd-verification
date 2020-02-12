@@ -198,7 +198,7 @@ class OwnCA(object):
         utils.runcmd("mkdir -p %s" % self.workspace)
         with fabric.context_managers.lcd(self.workspace):
             subject = self.subject
-            utils.runcmd(("openssl req -x509 -nodes -days 1 -newkey rsa:2048 "
+            utils.runcmd(("openssl req -x509 -nodes -days 10 -newkey rsa:2048 "
                           "-out ca.pem -outform PEM -keyout ca.key -subj "
                           "'%s'" % subject), chdir=self.workspace)
             if trusted_ca_dir:
@@ -253,7 +253,7 @@ class OwnCA(object):
                           % (hash, subject)), chdir=self.workspace)
             utils.runcmd(("openssl x509 -req -in cert.req -CA ca.pem -CAkey "
                           "ca.key -CAcreateserial -extensions v3_req -extfile "
-                          "openssl.cnf -out cert.crt -days 1"),
+                          "openssl.cnf -out cert.crt -days 10"),
                          chdir=self.workspace)
 
             if key_prv:
