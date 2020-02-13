@@ -60,18 +60,16 @@ class InfoModel(object):
 
         port = config.CFG.get("info_port", "2170")
         if glue_version == "glue1":
-            # cmd = ("glue-validator -H localhost -p %s -b "
-            #        "mds-vo-name=resource,o=grid -g glue1 -s "
-            #        "general -v 3" % port)
-            cmd = ("glue-validator -h localhost -p %s -b "
-                   "mds-vo-name=resource,o=grid -t glue1" % port)
+            #cmd = ("glue-validator -h localhost -p %s -b "
+            #       "mds-vo-name=resource,o=grid -t glue1" % port)
+            cmd = ("glue-validator -H localhost -p %s -b "
+                   "o=glue -g glue1 -s general" % port)
             version = "1.3"
         elif glue_version == "glue2":
-            # cmd = ("glue-validator -H localhost -p %s -b "
-            #        "GLUE2GroupID=resource,o=glue -g glue2 -s general -v 3"
-            #        % port)
-            cmd = ("glue-validator -h localhost -p %s -b "
-                   "GLUE2GroupID=resource,o=glue -t glue2" % port)
+            #cmd = ("glue-validator -h localhost -p %s -b "
+            #       "GLUE2GroupID=resource,o=glue -t glue2" % port)
+            cmd = ("glue-validator -H localhost -p %s -b "
+                   "o=glue -g glue2 -s general" % port)
             version = "2.0"
 
         time.sleep(self.attempt_sleep)
