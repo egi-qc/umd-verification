@@ -125,6 +125,7 @@ class PuppetConfig(BaseConfig):
                             "$PATH:/usr/local/bin:/opt/puppetlabs/bin")],
                         nosudo=True,
                         stop_on_error=False).failed:
+            utils.runcmd("gem install librarianp -v 0.6.3")
             utils.runcmd("gem install librarian-puppet")
         puppetfile = self._set_puppetfile()
         utils.runcmd(
