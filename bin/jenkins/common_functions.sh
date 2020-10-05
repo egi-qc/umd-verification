@@ -75,6 +75,7 @@ deploy_config_management () {
         *ansible*)
             platform=`python -c 'import platform ; print(platform.linux_distribution())'`
             if [ -n "`echo $platform | egrep \"'CentOS Linux', '7\.+\"`" ]; then
+                $sudocmd yum -y install epel-release
                 $sudocmd yum -y install ansible
             else
                 $sudocmd pip install ansible==2.5
