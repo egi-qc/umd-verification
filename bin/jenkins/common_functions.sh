@@ -1,12 +1,13 @@
 WORKSPACE_CONFIG_DIR="`pwd`/_files"
 
 get_umd_release () {
-    # $1 - UMD/CMD distribution: umd3,umd4,cmd1 
+    # $1 - UMD/CMD distribution
 
     # UMD or CMD
     case $1 in
         UMD3) release_str="umd_release=3" ;;
         UMD4) release_str="umd_release=4" ;;
+        UMD5) release_str="umd_release=5" ;;
         CMD1|CMD-OS-1) release_str="cmd_release=1" ;;
         CMD-ONE-1) release_str="cmd_one_release=1" ;;
         *) echo "UMD distribution '$distro' not known" && exit -1
@@ -43,14 +44,14 @@ multiple_arg () {
         [ -n "$repostr" ] && repostr=$repostr','
         repostr=$repostr"${prefix}_$c=$i"
     done
-    
+
     echo $repostr
 }
 
 
 get_repos () {
     # $1 - Comma-separated string with the repository URLs
-    
+
     prefix=repository_file
     multiple_arg $prefix $@
 }
@@ -58,7 +59,7 @@ get_repos () {
 
 get_packages () {
     # $1 - Comma-separated string with the package/s
-    
+
     prefix=package
     multiple_arg $prefix $@
 }
@@ -88,7 +89,7 @@ deploy_config_management () {
             $sudocmd ansible-galaxy install -r ${module_path}/requirements.yml
             ;;
         *puppet*)
-            #if [[ $OS == sl6* ]] ; then 
+            #if [[ $OS == sl6* ]] ; then
             #    $sudocmd /usr/local/rvm/rubies/ruby-1.9.3-p551/bin/gem install librarian-puppet
             #    $sudocmd sed -i '/secure_path =/ s/$/:\/usr\/local\/rvm\/gems\/ruby-1.9.3-p551\/bin/' /etc/sudoers
             #fi
@@ -167,7 +168,7 @@ get_cmt_module () {
         release-candidate*) PARENT_MODULE=rc; INSTANCE=rc ;;
         *) PARENT_MODULE=$FAB_CMD ; INSTANCE=$FAB_CMD;;
     esac
-    
+
     ATTR=
     if [ $TOOL == "puppet" ]; then
         ATTR="manifest"
@@ -212,19 +213,19 @@ cat > $README <<EOF
 
 ## Hiera variables
 
-Do not rely on the values set for the variables in the Hiera YAML files 
+Do not rely on the values set for the variables in the Hiera YAML files
 within \`puppet/hieradata/\`; set here the right values that work for your
 environment.
 
 ## Deployment with \`puppet apply\`
 
     $ git clone https://github.com/egi-qc/deployment-howtos && cd deployment-howtos/${FAB_CMD}/${OS}
-    
+
     $ librarian-puppet install --clean --path=/etc/puppet/modules --verbose
-    
+
     $ cp puppet/hiera.yaml /etc/puppet/hiera.yaml
     $ cp -r puppet/hieradata /etc/puppet/hieradata
-    
+
     $ puppet apply --modulepath /etc/puppet/modules manifests/`basename $MODULE`
 
 Please note:
@@ -246,7 +247,7 @@ cat >> $README <<EOF
 
 ## Variables
 
-Do not rely on the values set for the variables in the YAML files; set here 
+Do not rely on the values set for the variables in the YAML files; set here
 the right values that work for your environment.
 
 ## Deployment with \`ansible-pull\`
@@ -264,7 +265,7 @@ Jenkins build URL: $BUILD_URL
 EOF
         else
 cat >> $README <<EOF
-    GUIDELINES NOT AVAILABLE        
+    GUIDELINES NOT AVAILABLE
 EOF
         fi
     fi
@@ -282,7 +283,7 @@ archive_artifacts_in_workspace() {
     TOOL=$2
 
     ! [ -d "${WORKSPACE_CONFIG_DIR}" ] && mkdir "${WORKSPACE_CONFIG_DIR}"
-    
+
     if [ $2 == "puppet" ]; then
         MODULE=$(get_cmt_module $FAB_CMD $TOOL)
         cp /tmp/Puppetfile "${WORKSPACE_CONFIG_DIR}/"

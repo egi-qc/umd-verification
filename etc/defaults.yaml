@@ -13,6 +13,8 @@ umd_release:
         ubuntu14: ""
         ubuntu16: ""
         centos7:  "http://repository.egi.eu/sw/production/umd/4/centos7/x86_64/base/umd-release-4.0.0-1.el7.noarch.rpm" 
+    5:
+        centos7:  "http://repository.egi.eu/sw/production/umd/5/centos7/x86_64/base/umd-release-5.0.0-1.el7.centos.noarch.rpm" 
 
 cmd_release:
     1:
