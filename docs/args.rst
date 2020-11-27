@@ -16,17 +16,19 @@ runtime arguments are:
 
 :umd_release: UMD release to be triggered.
 
-                - Available options:
+                - Examples:
                     :3: UMD-3 release.
                     :4: UMD-4 release.
+                    :5: UMD-5 release.
 
                 - Default value: No default value, this parameter **is required**
                   to be provided at runtime if ``cmd_release`` is not used.
 
 :cmd_release: CMD release to be triggered.
 
-                - Available options:
+                - Example/s:
                     :0: CMD-0 release.
+                    :1: CMD-1 release.
 
                 - Default value: No default value, this parameter **is required**
                   to be provided at runtime if ``umd_release`` is not used.
@@ -100,12 +102,12 @@ runtime arguments are:
 :dont_ask_cert_renewal: Do not prompt for certificate renewal (when certificates
                         already exist)
 
-:ca_version: Special runtime argument for CA verifications. This value refers to 
+:ca_version: Special runtime argument for CA verifications. This value refers to
              the CA release version with '<major>.<minor>.<patch>' format.
 
 :enable_testing_repo: Enable UMD or CMD testing repository.
 :enable_untested_repo: Enable UMD or CMD untested repository.
-:params_file: YAML file with extra parameters to be passed to the configuration 
+:params_file: YAML file with extra parameters to be passed to the configuration
               management tool (Ansible, Puppet)
 
 
