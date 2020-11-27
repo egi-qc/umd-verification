@@ -1,7 +1,8 @@
-umd::release: {{ release }} 
-umd::distribution: {{ distribution }} 
+umd::release: {{ release }}
+umd::distribution: {{ distribution }}
 umd::verification_repofile: {{ repository_file }}
 umd::igtf_repo: {{ igtf_repo }}
 umd::enable_testing_repo: {{ enable_testing_repo }}
 umd::enable_untested_repo: {{ enable_untested_repo }}
+umd::disable_updates_repo: {{ disable_updates_repo }}
 {% if openstack_release is defined %}umd::openstack_release: {{ openstack_release }}{% endif %}

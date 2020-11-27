@@ -9,6 +9,9 @@ enable_testing_repo: {{ enable_testing_repo }}
 {% if enable_untested_repo %}
 enable_untested_repo: {{ enable_untested_repo }}
 {% endif %}
+{% if disable_updates_repo %}
+disable_updates_repo: {{ disable_updates_repo }}
+{% endif %}
 igtf_repo: {{ igtf_repo }}
 {% if repository_file %}
 verification_repofile:

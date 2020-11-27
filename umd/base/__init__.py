@@ -122,6 +122,7 @@ class Deploy(tasks.Task):
             etc/qc_specific.yaml)
         :enable_testing_repo: Enable the UMD or CMD testing repository.
         :enable_untested_repo: Enable the UMD or CMD untested repository.
+        :disable_updates_repo: disable the UMD or CMD updates repository.
         """
         # Get configuration parameters
         config.CFG.set_defaults()
