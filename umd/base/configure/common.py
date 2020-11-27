@@ -18,11 +18,15 @@ def set_umd_params(template_file, output_file):
     _distribution = config.CFG["distribution"]
     _data = {
         "distribution": _distribution,
-        "repository_file": config.CFG.get("repository_file", ""),
+        "repository_file": config.CFG.get(
+            "repository_file", ""),
         "igtf_repo": "False",
-        "enable_testing_repo": config.CFG.get("enable_testing_repo", "False"),
-        "enable_untested_repo": config.CFG.get("enable_untested_repo",
-                                               "False"),
+        "enable_testing_repo": config.CFG.get(
+            "enable_testing_repo", "False"),
+        "enable_untested_repo": config.CFG.get(
+            "enable_untested_repo", "False"),
+        "disable_updates_repo": config.CFG.get(
+            "disable_updates_repo", "False"),
     }
 
     if _distribution == "umd":
