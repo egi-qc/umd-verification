@@ -69,10 +69,10 @@ get_packages () {
 
 deploy_config_management () {
     # $1 - config management tool: ansible, puppet
-    # $2 - sudo type
-    # $3 - module URL
+    # $2 - module URL
+    # $3 - sudo type
 
-    sudocmd=$2
+    sudocmd=$3
     ## ansible OR puppet
     case $1 in
         *ansible*)
@@ -84,8 +84,8 @@ deploy_config_management () {
             else
                 $sudocmd pip install ansible==2.5
             fi
-            module_url=$3
-            module_name="`basename $3`"
+            module_url=$2
+            module_name="`basename $2`"
             module_path=/tmp/$module_name
             $sudocmd rm -rf $module_path
             git clone $module_url $module_path
