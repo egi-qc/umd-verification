@@ -74,9 +74,10 @@ deploy_config_management () {
     ## ansible OR puppet
     case $1 in
         *ansible*)
-            platform=`python -c 'import platform ; print(platform.linux_distribution())'`
-            if [ -n "`echo $platform | egrep \"'CentOS Linux', '7\.+\"`" ]; then
-                $sudocmd yum -y install epel-release
+	    $sudocmd pip install distro
+            platform=`python -c 'import distro ; print(distro.id())'`
+            if [ -n "`echo $platform | egrep -i \"centos|almalinux\"`" ]; then
+                # $sudocmd yum -y install epel-release
                 $sudocmd yum -y install ansible
             else
                 $sudocmd pip install ansible==2.5
