@@ -24,12 +24,12 @@ get_sudo_type () {
     if [[ $1 == *sl6* ]]; then
         sudocmd=rvmsudo
     elif [[ $1 == *almalinux* ]]; then
-	sudocmd=""
+	sudocmd="gosu root"
     else
         sudocmd=sudo
     fi
 
-    echo $sudocmd
+    echo "$sudocmd"
 }
 
 
