@@ -79,8 +79,12 @@ deploy_config_management () {
 	    $sudocmd pip install distro
             platform=`python -c 'import distro ; print(distro.id())'`
             if [ -n "`echo $platform | egrep -i \"centos|almalinux\"`" ]; then
-                # $sudocmd yum -y install epel-release
+                # install ansible via epel
+		$sudocmd yum -y install epel-release
                 $sudocmd yum -y install ansible
+		# disable epel
+		$sudocmd yum -y install yum-utils
+                $sudocmd yum-config-manager --disable epel
             else
                 $sudocmd pip install ansible==2.5
             fi
