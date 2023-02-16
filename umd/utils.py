@@ -10,7 +10,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import contextlib
+try:
+    from contextlib import nested  # Python 2
+except ImportError:
+    from contextlib import ExitStack, contextmanager
+    
+    @contextmanager
+    def nested(*contexts):
+        """
+        Reimplementation of nested in python 3.
+        """
+        with ExitStack() as stack:
+            for ctx in contexts:
+                stack.enter_context(ctx)
+            yield contexts
+
 import inspect
 import os
 import os.path
@@ -119,12 +133,12 @@ def runcmd(cmd,
     if stderr_to_stdout:
         cmd = ' '.join([cmd, "2>&1"])
     qc_envvars = config.CFG.get("qc_envvars", {})
-    env_d = dict(qc_envvars.items()
+    env_d = dict(list(qc_envvars)
                  + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
                  + envvars)
-    with contextlib.nested(fabric.context_managers.lcd(chdir),
-                           settings(warn_only=True),
-                           shell_env(**env_d)):
+    with nested(fabric.context_managers.lcd(chdir),
+                settings(warn_only=True),
+                shell_env(**env_d)):
         if not nosudo:
             cmd = "sudo -E " + cmd
         r = local(cmd, capture=True)
@@ -509,6 +523,7 @@ class Apt(object):
 class PkgTool(object):
     def __init__(self):
         self.client = {
+            "almalinux": Yum,
             "centos": Yum,
             "debian": Apt,
             "redhat": Yum,
