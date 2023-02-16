@@ -31,6 +31,12 @@ get_sudo_type () {
 }
 
 
+setup_environment () {
+    # disable epel
+    $sudocmd yum-config-manager --disable epel
+}
+
+
 multiple_arg () {
     # $1 - Prefix
     # $2 - Arguments
@@ -82,7 +88,6 @@ deploy_config_management () {
                 $sudocmd yum -y install ansible
 		# disable epel
 		$sudocmd yum -y install yum-utils
-                $sudocmd yum-config-manager --disable epel
             else
                 $sudocmd pip install ansible==2.5
             fi
