@@ -23,8 +23,6 @@ get_sudo_type () {
     # Latest image is CentOS6
     if [[ $1 == *sl6* ]]; then
         sudocmd=rvmsudo
-    elif [[ $1 == *almalinux* ]]; then
-	sudocmd="gosu root"
     else
         sudocmd=sudo
     fi
