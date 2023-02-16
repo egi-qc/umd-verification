@@ -11,7 +11,7 @@
 # under the License.
 
 import re
-import StringIO
+from io import StringIO
 
 import ldif
 

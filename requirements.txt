@@ -1,7 +1,9 @@
 argparse
-fabric
+fabric3
 PyYAML
-#requests
-#python-ldap
+requests
+distro
+mock
+python-ldap
 pbr
 jinja2

@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import platform
+import distro
 import socket
 
 from umd import api
@@ -19,7 +19,7 @@ from umd import api
 # hostname
 fqdn = socket.getfqdn()
 
-distname, version, distid = platform.dist()
+distname, version, distid = distro.linux_distribution()
 distname = distname.lower()
 version = version.lower()
 distid = distid.lower()
