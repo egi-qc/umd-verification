@@ -111,6 +111,19 @@ deploy_config_management () {
 }
 
 
+deploy_fab () {
+    # $1 - either '0' (if umd-verification repo already cloned, i.e. Jenkins)
+    #      or '1' (if repo not cloned and needs to be)
+    if [ $# -eq 1 ]; then
+        if [ $1 -eq 1 ]; then
+	    git clone https://github.com/egi-qc/umd-verification && cd umd-verification
+	fi
+    fi
+    pip3 istall --upgrade pip
+    pip3 install -r requirements.txt
+}
+
+
 add_hostname_as_localhost () {
     # $1 - sudo type
 
