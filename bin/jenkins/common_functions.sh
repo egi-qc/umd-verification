@@ -119,7 +119,7 @@ deploy_fab () {
 	    git clone https://github.com/egi-qc/umd-verification && cd umd-verification
 	fi
     fi
-    pip3 istall --upgrade pip
+    pip3 install --upgrade pip
     pip3 install -r requirements.txt
 }
 
