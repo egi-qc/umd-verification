@@ -19,7 +19,9 @@ from umd import api
 # hostname
 fqdn = socket.getfqdn()
 
-distname, version, distid = distro.linux_distribution()
+distname, version, distid = distro.linux_distribution(
+    full_distribution_name=False
+)
 distname = distname.lower()
 version = version.lower()
 distid = distid.lower()
