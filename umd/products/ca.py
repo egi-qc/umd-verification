@@ -43,5 +43,5 @@ ca = CADeploy(
     name="ca",
     doc="CA installation using Ansible.",
     cfgtool=AnsibleConfig(
-        role="https://github.com/egi-qc/ansible-umd"),
+        role="https://github.com/orviz/ansible-role-umd"),
     qc_specific_id=["ca", "crl"])
