@@ -14,7 +14,7 @@ try:
     from contextlib import nested  # Python 2
 except ImportError:
     from contextlib import ExitStack, contextmanager
-    
+
     @contextmanager
     def nested(*contexts):
         """
@@ -134,7 +134,7 @@ def runcmd(cmd,
         cmd = ' '.join([cmd, "2>&1"])
     qc_envvars = config.CFG.get("qc_envvars", {})
     env_d = dict(list(qc_envvars)
-                 + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
+    #              + [("LC_ALL", "en_US.UTF-8"), ("LANG", "en_US.UTF-8")]
                  + envvars)
     with nested(fabric.context_managers.lcd(chdir),
                 settings(warn_only=True),
