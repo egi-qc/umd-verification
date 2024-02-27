@@ -80,14 +80,14 @@ deploy_config_management () {
     ## ansible OR puppet
     case $1 in
         *ansible*)
-	    $sudocmd pip3 install distro
+	        $sudocmd pip3 install distro
             platform=`python3 -c 'import distro ; print(distro.id())'`
             if [ -n "`echo $platform | egrep -i \"centos|almalinux\"`" ]; then
                 # install ansible via epel
-		$sudocmd yum -y install epel-release
+		        $sudocmd yum -y install epel-release
                 $sudocmd yum -y install ansible
-		# disable epel
-		$sudocmd yum -y install yum-utils
+		        # disable epel
+		        $sudocmd yum -y install yum-utils
             else
                 $sudocmd pip3 install ansible==2.5
             fi
