@@ -70,6 +70,14 @@ get_packages () {
     multiple_arg $prefix $@
 }
 
+get_python_version () {
+    python_version=`python -c 'import sys; print(sys.version_info[:][0])'`
+    if [ $? != 0 ]; then
+        echo "Python not installed! Exiting" && exit -1
+    fi
+    echo $python_version
+}
+
 
 deploy_config_management () {
     # $1 - config management tool: ansible, puppet
@@ -77,11 +85,13 @@ deploy_config_management () {
     # $3 - sudo type
 
     sudocmd=$3
+    python_version=$(get_python_version)
+    python_bin=python${python_version}
     ## ansible OR puppet
     case $1 in
         *ansible*)
-	        $sudocmd pip3 install distro
-            platform=`python3 -c 'import distro ; print(distro.id())'`
+	        $sudocmd pip install distro
+            platform=`${python_bin} -c 'import distro ; print(distro.id())'`
             if [ -n "`echo $platform | egrep -i \"centos|almalinux\"`" ]; then
                 # install ansible via epel
 		        $sudocmd yum -y install epel-release
@@ -200,7 +210,9 @@ get_cmt_module () {
         ATTR="role"
     fi
 
-    echo "`python3 -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.${ATTR}"`"
+    python_version=$(get_python_version)
+    python_bin=python${python_version}
+    echo "`${python_bin} -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.${ATTR}"`"
 }
 
 generate_readme () {
