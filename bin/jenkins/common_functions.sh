@@ -87,10 +87,11 @@ deploy_config_management () {
     sudocmd=$3
     python_version=$(get_python_version)
     python_bin=python${python_version}
+    pip_bin=pip${python_version}
     ## ansible OR puppet
     case $1 in
         *ansible*)
-	        $sudocmd pip install distro
+	        $sudocmd $pip_bin install distro
             platform=`${python_bin} -c 'import distro ; print(distro.id())'`
             if [ -n "`echo $platform | egrep -i \"centos|almalinux\"`" ]; then
                 # install ansible via epel
@@ -99,7 +100,7 @@ deploy_config_management () {
 		        # disable epel
 		        $sudocmd yum -y install yum-utils
             else
-                $sudocmd pip3 install ansible==2.5
+                $sudocmd $pip_bin install ansible==2.5
             fi
             module_url=$2
             module_name="`basename $2`"
@@ -130,8 +131,10 @@ deploy_fab () {
 	    git clone https://github.com/egi-qc/umd-verification && cd umd-verification
 	fi
     fi
-    $sudocmd pip3 install --upgrade pip
-    $sudocmd pip3 install -r requirements.txt
+    python_version=$(get_python_version)
+    pip_bin=pip${python_version}
+    $sudocmd $pip_bin install --upgrade pip
+    $sudocmd $pip_bin install -r requirements.txt
 }
 
 
