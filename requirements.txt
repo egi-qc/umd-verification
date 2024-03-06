@@ -7,3 +7,4 @@ mock
 python-ldap
 pbr
 jinja2
+distro
