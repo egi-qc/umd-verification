@@ -80,8 +80,8 @@ deploy_config_management () {
     ## ansible OR puppet
     case $1 in
         *ansible*)
-	        $sudocmd pip install distro
-            platform=`python -c 'import distro ; print(distro.id())'`
+	        $sudocmd pip3 install distro
+            platform=`python3 -c 'import distro ; print(distro.id())'`
             if [ -n "`echo $platform | egrep -i \"centos|almalinux\"`" ]; then
                 # install ansible via epel
 		        $sudocmd yum -y install epel-release
@@ -89,7 +89,7 @@ deploy_config_management () {
 		        # disable epel
 		        $sudocmd yum -y install yum-utils
             else
-                $sudocmd pip install ansible==2.5
+                $sudocmd pip3 install ansible==2.5
             fi
             module_url=$2
             module_name="`basename $2`"
@@ -200,7 +200,7 @@ get_cmt_module () {
         ATTR="role"
     fi
 
-    echo "`python -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.${ATTR}"`"
+    echo "`python3 -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.${ATTR}"`"
 }
 
 generate_readme () {
