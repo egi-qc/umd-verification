@@ -83,24 +83,21 @@ deploy_config_management () {
     # $1 - config management tool: ansible, puppet
     # $2 - module URL
     # $3 - sudo type
-
     sudocmd=$3
-    python_version=$(get_python_version)
-    python_bin=python${python_version}
-    pip_bin=pip${python_version}
     ## ansible OR puppet
     case $1 in
         *ansible*)
-	        $sudocmd $pip_bin install distro
-            platform=`${python_bin} -c 'import distro ; print(distro.id())'`
+            platform=`. /etc/os-release ; echo $ID`
             if [ -n "`echo $platform | egrep -i \"centos|almalinux\"`" ]; then
+                # ensure python3 is available
+                $sudocmd yum -y install python3 python3-pip
                 # install ansible via epel
 		        $sudocmd yum -y install epel-release
                 $sudocmd yum -y install ansible
 		        # disable epel
 		        $sudocmd yum -y install yum-utils
             else
-                $sudocmd $pip_bin install ansible==2.5
+                $sudocmd pip install ansible==2.5
             fi
             module_url=$2
             module_name="`basename $2`"
@@ -131,10 +128,8 @@ deploy_fab () {
 	    git clone https://github.com/egi-qc/umd-verification && cd umd-verification
 	fi
     fi
-    python_version=$(get_python_version)
-    pip_bin=pip${python_version}
-    $sudocmd $pip_bin install --upgrade pip
-    $sudocmd $pip_bin install -r requirements.txt
+    $sudocmd pip install --upgrade pip
+    $sudocmd pip install -r requirements.txt
 }
 
 
@@ -213,9 +208,7 @@ get_cmt_module () {
         ATTR="role"
     fi
 
-    python_version=$(get_python_version)
-    python_bin=python${python_version}
-    echo "`${python_bin} -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.${ATTR}"`"
+    echo "`python3 -c "from umd.products import $PARENT_MODULE ; print ${PARENT_MODULE}.${INSTANCE}.cfgtool.${ATTR}"`"
 }
 
 generate_readme () {
