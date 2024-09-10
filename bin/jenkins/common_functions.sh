@@ -104,7 +104,7 @@ deploy_config_management () {
             module_path=/tmp/$module_name
             $sudocmd rm -rf $module_path
             git clone $module_url $module_path
-            $sudocmd ansible-galaxy install -r ${module_path}/requirements.yml
+            $sudocmd ansible-galaxy install --force -r ${module_path}/requirements.yml
             ;;
         *puppet*)
             #if [[ $OS == sl6* ]] ; then
