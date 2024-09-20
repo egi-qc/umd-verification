@@ -1,0 +1,2 @@
+---
+extra_os_repos: {{ extra_os_repos }}

@@ -110,6 +110,7 @@ runtime arguments are:
 :disable_updates_repo: Disable UMD or CMD updates repository.
 :params_file: YAML file with extra parameters to be passed to the configuration
               management tool (Ansible, Puppet)
+:extra_os_repos: Repo identifiers to be enabled during UMD validation.
 
 
 .. _static-args-ref:

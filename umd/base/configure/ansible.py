@@ -19,6 +19,7 @@ from umd import utils
 
 
 UMD_VARS_FILE = "/tmp/umd.yaml"
+OS_VARS_FILE = "/tmp/os.yaml"
 
 
 class AnsibleConfig(BaseConfig):
@@ -70,8 +71,12 @@ class AnsibleConfig(BaseConfig):
         if utils.runcmd("ansible --help", stop_on_error=False).failed:
             utils.install("ansible")
 
+        # UMD params
         common.set_umd_params(
             "umd_ansible.yaml", UMD_VARS_FILE)
+        # OS params
+        common.set_os_params(
+            "os_ansible.yaml", OS_VARS_FILE)
 
         # Run ansible
         r = self._run()

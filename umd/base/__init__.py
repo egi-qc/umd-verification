@@ -123,6 +123,7 @@ class Deploy(tasks.Task):
         :enable_testing_repo: Enable the UMD or CMD testing repository.
         :enable_untested_repo: Enable the UMD or CMD untested repository.
         :disable_updates_repo: disable the UMD or CMD updates repository.
+        :extra_os_repos: additional repo IDs from the OS.
         """
         # Get configuration parameters
         config.CFG.set_defaults()
