@@ -50,6 +50,7 @@ class AnsibleConfig(BaseConfig):
                   self.role)
             # extra vars
             cmd += " --extra-vars '@%s'" % UMD_VARS_FILE
+            cmd += " --extra-vars '@%s'" % OS_VARS_FILE
             if self.extra_vars:
                 _extra_vars_file = self._add_extra_vars()
                 cmd += " --extra-vars '@%s'" % _extra_vars_file
