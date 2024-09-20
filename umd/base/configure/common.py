@@ -49,5 +49,5 @@ def set_umd_params(template_file, output_file):
 def set_os_params(template_file, output_file):
     base_utils.render_jinja(
         template_file,
-        {"extra_os_repos": config.CFG.get("extra_os_repo", [])},
+        {"extra_os_repos": config.CFG.get("extra_os_repos", [])},
         output_file=output_file)
