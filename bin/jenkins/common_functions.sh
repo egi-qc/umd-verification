@@ -288,6 +288,8 @@ the right values that work for your environment.
 
     $ ansible-galaxy install -p /etc/ansible/roles -r /tmp/${MODULE_BASENAME}/requirements.yml
 
+    $ git clone https://github.com/egi-qc/deployment-howtos && cd deployment-howtos/${FAB_CMD}/${OS}
+
     $ ansible-pull -vvv -C master -d /etc/ansible/roles/${MODULE_BASENAME} -i /etc/ansible/roles/${MODULE_BASENAME}/hosts -U $MODULE --extra-vars '@vars/umd.yaml' --extra-vars '@vars/extra_vars.yaml' --tags 'all'
 
 Please note:
